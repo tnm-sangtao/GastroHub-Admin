@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", "Inter", sans-serif;
+  --font-display: "Poppins", sans-serif;
+  --font-poppins: "Poppins", sans-serif;
+  
+  /* Brand colors */
+  --color-primary: #7553FF;
+  --color-primary-hover: #623EE2;
+  --color-primary-soft: #F0ECFF;
+  --color-primary-pressed: #4E25C4;
+  
+  /* Semantic colors */
+  --color-success: #15803D;
+  --color-info: #1D4ED8;
+  --color-warning: #B45309;
+  --color-danger: #B91C1C;
+  --color-secondary-brand: #A8AAAE;
+
+  /* Theme Surfaces (Light Mode) */
+  --color-canvas: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-surface-soft: #FAF9F7;
+  --color-surface-muted: #F4F0EB;
+  
+  /* Theme Borders (Light Mode) */
+  --color-border-main: #E2E8F0;
+  --color-border-soft: #E2E8F0;
+  
+  /* Theme Text (Light Mode) */
+  --color-text-primary: #1C1814;
+  --color-text-secondary: #5C534C;
+  --color-text-muted: #7C7267;
+  --color-icon-main: #5C534C;
+  
+  /* Theme Surfaces (Dark Mode) */
+  --color-dark-canvas: #25293C;
+  --color-dark-surface: #2F3349;
+  --color-dark-surface-soft: #34384F;
+  --color-dark-surface-muted: #3B4057;
+  
+  /* Theme Borders (Dark Mode) */
+  --color-dark-border: #434968;
+  --color-dark-border-soft: #3C415C;
+  
+  /* Theme Text (Dark Mode) */
+  --color-dark-text-primary: #D0D4F1;
+  --color-dark-text-secondary: #B6BEE3;
+  --color-dark-text-muted: #7C84A8;
+  
+  /* Radius definitions matching DESIGN.md - reduced to [4px - 8px] range for a squarer, professional look */
+  --radius-xs: 4px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 8px;
+  --radius-3xl: 8px;
+  --radius-pill: 999px;
+  
+  /* Shadow definitions disabled completely */
+  --shadow-3xs: none;
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-3xl: none;
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-dropdown: none;
+  --shadow-focus: none;
+
+  /* Force minimum font-sizes in Tailwind theme to be 14px (0.875rem) */
+  --text-xs: 0.875rem;
+  --text-sm: 0.875rem;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(28, 24, 20, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(28, 24, 20, 0.2);
+}
+
+/* Global Poppins Font Enforce, Font Weight Clamp to Bold, & Flat Design Box-Shadow Reset */
+*, *::before, *::after {
+  font-family: "Poppins", sans-serif !important;
+  box-shadow: none !important;
+}
+
+/* Enforce maximum font-weight is Bold (700) across all selector variants */
+.font-black,
+.font-extrabold,
+.font-[800],
+.font-[900],
+.font-[950],
+[class*="font-black"],
+[class*="font-extrabold"] {
+  font-weight: 700 !important;
+}
+
+/* Force all buttons, button text, and button components to use Medium weight (500) */
+button,
+button *,
+.btn,
+.btn *,
+[role="button"],
+[role="button"] * {
+  font-weight: 500 !important;
+}
+
+/* Force all form field labels, title elements, and headings to use Medium weight (500) and site primary dark color */
+label,
+label *,
+.label,
+.label *,
+.form-label,
+.form-label *,
+.field-title,
+.field-title *,
+h1, h1 *, h2, h2 *, h3, h3 *, h4, h4 *, h5, h5 *, h6, h6 *,
+th, th *,
+.title,
+.title * {
+  font-weight: 500 !important;
+  color: #1C1814 !important;
+}
+
+/* Visually merge Restaurant Profile and Theme Config cards into a single integrated form card, and hide their h3 titles */
+div.space-y-6.font-sans > div.bg-white > h3 {
+  display: none !important;
+}
+
+div.space-y-6.font-sans > div.bg-white:first-of-type {
+  margin-bottom: -1.5rem !important;
+  border-bottom: none !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  padding-bottom: 1rem !important;
+}
+
+div.space-y-6.font-sans > div.bg-white:last-of-type {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
+  padding-top: 1rem !important;
+}
+
+body {
+  font-family: "Poppins", sans-serif !important;
+  background-color: #FAFAFA;
+  color: #1C1814;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+th, td {
+  font-family: "Poppins", sans-serif !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Poppins", sans-serif !important;
+}
+
+/* Make content fill container out to the whole screen for the entire system */
+main > div > div,
+main div.h-full > div {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* System-Wide Slate-200 (#E2E8F0) Border Modernization Override Rules */
+[class*="border-[#1C1814]"],
+[class*="border-[#EAE4DC]"],
+[class*="divide-[#1C1814]"],
+[class*="divide-[#EAE4DC]"],
+[class*="border-slate-100"],
+[class*="border-slate-200"],
+[class*="divider"] {
+  border-color: #E2E8F0 !important;
+}
+
+/* Apply directly to children of any divide containers */
+[class*="divide-[#1C1814]"] > *,
+[class*="divide-[#EAE4DC]"] > *,
+.divide-y > * + *,
+.divide-x > * + * {
+  border-color: #E2E8F0 !important;
+}
+
+/* Perfect form element border, background & states alignment (Inputs, Select dropdowns, textareas, buttons, options) */
+input, select, textarea, [role="combobox"] {
+  border-color: #E2E8F0 !important;
+  background-color: #ffffff !important; /* Active / Normal states must have pure white background */
+}
+
+/* For disabled or locked/unused states, switch background to premium soft gray automatically */
+input:disabled,
+select:disabled,
+textarea:disabled,
+input[readonly],
+textarea[readonly],
+[disabled] {
+  background-color: #F8FAFC !important; /* Premium soft gray bg-slate-50 equivalent */
+  opacity: 0.8 !important;
+}
+
+/* Ensure focus and hover on inputs remain premium without overriding key custom colored states */
+input:focus, select:focus, textarea:focus {
+  border-color: #7553FF !important;
+}
+
+/* Fine-tune table spacing and borders to match the new crisp slate horizontal/vertical standard */
+table, th, td, tr {
+  border-color: #E2E8F0 !important;
+}
+
+/* Disable drop shadows on all components and elements as per Flat/Light standard */
+*, ::before, ::after {
+  --tw-shadow: 0 0 #0000 !important;
+  --tw-shadow-colored: 0 0 #0000 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* Force white text color for active day circle inside table headers, overriding global th style */
+th .active-day-circle,
+.active-day-circle {
+  color: #FFFFFF !important;
+}
+
+/* Force dark text color for inactive day circle inside table headers, overriding global th style */
+th .inactive-day-circle,
+.inactive-day-circle {
+  color: #1C1814 !important;
+}
+
+/* Guarantee absolute minimum font-size of 14px across any element with utility classes/styles smaller than 14px */
+[class*="text-[10px]"],
+[class*="text-[11px]"],
+[class*="text-[12px]"],
+[class*="text-[13px]"],
+[class*="text-3xs"],
+[class*="text-xs"],
+.text-xs,
+.text-3xs,
+.text-\[10px\],
+.text-\[11px\],
+.text-\[12px\],
+.text-\[13px\] {
+  font-size: 14px !important;
+}
+
+
+
+
