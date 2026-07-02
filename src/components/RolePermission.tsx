@@ -15,7 +15,8 @@ import {
   X, 
   AlertCircle,
   Eye,
-  Edit2
+  Edit2,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -24,6 +25,50 @@ const getInitials = (name: string) => {
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+export const getRoleBadgeStyles = (roleName: string) => {
+  const r = roleName.toLowerCase();
+  if (r.includes('owner')) {
+    return {
+      classes: 'bg-rose-50 text-rose-700 border-rose-200/60',
+      dotColor: 'bg-rose-500'
+    };
+  }
+  if (r.includes('manager')) {
+    return {
+      classes: 'bg-indigo-50 text-indigo-700 border-indigo-200/60',
+      dotColor: 'bg-indigo-500'
+    };
+  }
+  if (r.includes('accountant') || r.includes('finance')) {
+    return {
+      classes: 'bg-emerald-50 text-emerald-700 border-emerald-200/60',
+      dotColor: 'bg-emerald-500'
+    };
+  }
+  if (r.includes('kitchen') || r.includes('bar') || r.includes('crew') || r.includes('chef') || r.includes('cook')) {
+    return {
+      classes: 'bg-amber-50 text-amber-700 border-amber-200/60',
+      dotColor: 'bg-amber-500'
+    };
+  }
+  if (r.includes('service') || r.includes('waiter') || r.includes('server') || r.includes('host')) {
+    return {
+      classes: 'bg-sky-50 text-sky-700 border-sky-200/60',
+      dotColor: 'bg-sky-500'
+    };
+  }
+  if (r.includes('hr') || r.includes('recruiter')) {
+    return {
+      classes: 'bg-purple-50 text-purple-700 border-purple-200/60',
+      dotColor: 'bg-purple-500'
+    };
+  }
+  return {
+    classes: 'bg-slate-50 text-slate-700 border-slate-200/60',
+    dotColor: 'bg-slate-400'
+  };
 };
 
 interface PermissionItem {
@@ -47,6 +92,7 @@ interface RoleData {
   memberCount: number;
   isSystem: boolean;
   permissionGroups: PermissionGroup[];
+  dataScope?: 'Brand-wide' | 'Assigned Stores';
 }
 
 const INITIAL_ROLES: RoleData[] = [
@@ -59,38 +105,41 @@ const INITIAL_ROLES: RoleData[] = [
     isSystem: true,
     permissionGroups: [
       {
-        category: 'HR & Operations',
+        category: 'Operations',
         icon: Users,
         permissions: [
-          { id: 'hr_shift_read', name: 'View Shift Planner', description: 'Can view weekly and daily calendars, shift assignments', enabled: true },
-          { id: 'hr_shift_write', name: 'Publish & Override Shifts', description: 'Can schedule, modify, assign and delete crew work hours', enabled: true },
-          { id: 'hr_payroll_write', name: 'Calculate Audits & Base Salaries', description: 'Can process and edit payroll files, tips, flex ratios', enabled: true },
-          { id: 'hr_leave_write', name: 'Approve Floating Leave & Excuses', description: 'Can accept or decline sick calls and holiday requests', enabled: true }
+          { id: 'hr_shift_write', name: 'Shift scheduling', description: 'Can schedule, modify, assign, and publish crew work hours', enabled: true },
+          { id: 'hr_shift_read', name: 'Attendance tracking', description: 'Can view and track week/day attendance and calendars', enabled: true },
+          { id: 'hr_payroll_write', name: 'Payroll overrides', description: 'Can process base salaries, modify parameters, and input payroll overrides', enabled: true },
+          { id: 'hr_leave_write', name: 'Leave approvals', description: 'Can review, approve, or reject sick calls, holiday, and compensatory requests', enabled: true }
         ]
       },
       {
-        category: 'Smart Menu Solutions',
+        category: 'Menu',
         icon: Languages,
         permissions: [
-          { id: 'menu_translate', name: 'AI Menu Translation', description: 'Can generate multilingual menus using translation dictionaries', enabled: true },
-          { id: 'menu_price_update', name: 'Batch Price Adjuster', description: 'Can change pricing data and export sheets to main branch databases', enabled: true },
-          { id: 'menu_allergen', name: 'Allergen Intelligence Core', description: 'Can tag safety items, edit ingredient descriptions and override lists', enabled: true }
+          { id: 'menu_dictionary', name: 'Culinary dictionary updates', description: 'Can update culinary dictionaries and food translations', enabled: true },
+          { id: 'menu_translate', name: 'AI translations', description: 'Can execute AI-powered automatic menu translations', enabled: true },
+          { id: 'menu_allergen', name: 'Allergen tags', description: 'Can manage and tag allergen details and menu warning items', enabled: true },
+          { id: 'menu_price_update', name: 'Batch price adjustments', description: 'Can execute batch pricing overrides and sync lists', enabled: true }
         ]
       },
       {
-        category: 'Marketing & Brand Growth',
+        category: 'Marketing',
         icon: Share2,
         permissions: [
-          { id: 'mktg_social_auto', name: 'Social Auto-Post Publisher', description: 'Can sync credentials and schedule visual feed updates', enabled: true },
-          { id: 'mktg_responder', name: 'AI Google Review Responder', description: 'Can post automated answers and feedback summaries to reviews', enabled: true }
+          { id: 'mktg_campaign', name: 'Campaign setups', description: 'Can configure and schedule marketing campaigns', enabled: true },
+          { id: 'mktg_social_auto', name: 'Automated social posting', description: 'Can manage auto-post publishers and schedule social feed updates', enabled: true },
+          { id: 'mktg_responder', name: 'Coupon/voucher configuration', description: 'Can manage promotional campaigns, coupons, and vouchers', enabled: true }
         ]
       },
       {
-        category: 'System Configuration',
+        category: 'System',
         icon: SettingsIcon,
         permissions: [
-          { id: 'sys_brand_edit', name: 'Branch Identity & Global Rules', description: 'Can update hotline, physical coordinate parameters, and logo configurations', enabled: true },
-          { id: 'sys_billing_edit', name: 'Plan Subscriptions & Billing Accounts', description: 'Can view invoice trails and upgrade membership tiers', enabled: true }
+          { id: 'sys_brand_edit', name: 'Core workspace configurations', description: 'Can update physical coordinates, global rules, and hotline parameters', enabled: true },
+          { id: 'sys_brand_assets', name: 'Brand assets', description: 'Can manage branch logo files, cover images, and style guidelines', enabled: true },
+          { id: 'sys_billing_edit', name: 'Workforce directory modification', description: 'Can view and modify workforce directory roster profiles and licenses', enabled: true }
         ]
       }
     ]
@@ -104,38 +153,41 @@ const INITIAL_ROLES: RoleData[] = [
     isSystem: true,
     permissionGroups: [
       {
-        category: 'HR & Operations',
+        category: 'Operations',
         icon: Users,
         permissions: [
-          { id: 'hr_shift_read', name: 'View Shift Planner', description: 'Can view weekly and daily calendars, shift assignments', enabled: true },
-          { id: 'hr_shift_write', name: 'Publish & Override Shifts', description: 'Can schedule, modify, assign and delete crew work hours', enabled: true },
-          { id: 'hr_payroll_write', name: 'Calculate Audits & Base Salaries', description: 'Can process and edit payroll files, tips, flex ratios', enabled: false },
-          { id: 'hr_leave_write', name: 'Approve Floating Leave & Excuses', description: 'Can accept or decline sick calls and holiday requests', enabled: true }
+          { id: 'hr_shift_write', name: 'Shift scheduling', description: 'Can schedule, modify, assign, and publish crew work hours', enabled: true },
+          { id: 'hr_shift_read', name: 'Attendance tracking', description: 'Can view and track week/day attendance and calendars', enabled: true },
+          { id: 'hr_payroll_write', name: 'Payroll overrides', description: 'Can process base salaries, modify parameters, and input payroll overrides', enabled: false },
+          { id: 'hr_leave_write', name: 'Leave approvals', description: 'Can review, approve, or reject sick calls, holiday, and compensatory requests', enabled: true }
         ]
       },
       {
-        category: 'Smart Menu Solutions',
+        category: 'Menu',
         icon: Languages,
         permissions: [
-          { id: 'menu_translate', name: 'AI Menu Translation', description: 'Can generate multilingual menus using translation dictionaries', enabled: true },
-          { id: 'menu_price_update', name: 'Batch Price Adjuster', description: 'Can change pricing data and export sheets to main branch databases', enabled: true },
-          { id: 'menu_allergen', name: 'Allergen Intelligence Core', description: 'Can tag safety items, edit ingredient descriptions and override lists', enabled: true }
+          { id: 'menu_dictionary', name: 'Culinary dictionary updates', description: 'Can update culinary dictionaries and food translations', enabled: true },
+          { id: 'menu_translate', name: 'AI translations', description: 'Can execute AI-powered automatic menu translations', enabled: true },
+          { id: 'menu_allergen', name: 'Allergen tags', description: 'Can manage and tag allergen details and menu warning items', enabled: true },
+          { id: 'menu_price_update', name: 'Batch price adjustments', description: 'Can execute batch pricing overrides and sync lists', enabled: true }
         ]
       },
       {
-        category: 'Marketing & Brand Growth',
+        category: 'Marketing',
         icon: Share2,
         permissions: [
-          { id: 'mktg_social_auto', name: 'Social Auto-Post Publisher', description: 'Can sync credentials and schedule visual feed updates', enabled: true },
-          { id: 'mktg_responder', name: 'AI Google Review Responder', description: 'Can post automated answers and feedback summaries to reviews', enabled: true }
+          { id: 'mktg_campaign', name: 'Campaign setups', description: 'Can configure and schedule marketing campaigns', enabled: true },
+          { id: 'mktg_social_auto', name: 'Automated social posting', description: 'Can manage auto-post publishers and schedule social feed updates', enabled: true },
+          { id: 'mktg_responder', name: 'Coupon/voucher configuration', description: 'Can manage promotional campaigns, coupons, and vouchers', enabled: true }
         ]
       },
       {
-        category: 'System Configuration',
+        category: 'System',
         icon: SettingsIcon,
         permissions: [
-          { id: 'sys_brand_edit', name: 'Branch Identity & Global Rules', description: 'Can update hotline, physical coordinate parameters, and logo configurations', enabled: false },
-          { id: 'sys_billing_edit', name: 'Plan Subscriptions & Billing Accounts', description: 'Can view invoice trails and upgrade membership tiers', enabled: false }
+          { id: 'sys_brand_edit', name: 'Core workspace configurations', description: 'Can update physical coordinates, global rules, and hotline parameters', enabled: false },
+          { id: 'sys_brand_assets', name: 'Brand assets', description: 'Can manage branch logo files, cover images, and style guidelines', enabled: false },
+          { id: 'sys_billing_edit', name: 'Workforce directory modification', description: 'Can view and modify workforce directory roster profiles and licenses', enabled: false }
         ]
       }
     ]
@@ -149,38 +201,41 @@ const INITIAL_ROLES: RoleData[] = [
     isSystem: true,
     permissionGroups: [
       {
-        category: 'HR & Operations',
+        category: 'Operations',
         icon: Users,
         permissions: [
-          { id: 'hr_shift_read', name: 'View Shift Planner', description: 'Can view weekly and daily calendars, shift assignments', enabled: true },
-          { id: 'hr_shift_write', name: 'Publish & Override Shifts', description: 'Can schedule, modify, assign and delete crew work hours', enabled: false },
-          { id: 'hr_payroll_write', name: 'Calculate Audits & Base Salaries', description: 'Can process and edit payroll files, tips, flex ratios', enabled: true },
-          { id: 'hr_leave_write', name: 'Approve Floating Leave & Excuses', description: 'Can accept or decline sick calls and holiday requests', enabled: false }
+          { id: 'hr_shift_write', name: 'Shift scheduling', description: 'Can schedule, modify, assign, and publish crew work hours', enabled: false },
+          { id: 'hr_shift_read', name: 'Attendance tracking', description: 'Can view and track week/day attendance and calendars', enabled: true },
+          { id: 'hr_payroll_write', name: 'Payroll overrides', description: 'Can process base salaries, modify parameters, and input payroll overrides', enabled: true },
+          { id: 'hr_leave_write', name: 'Leave approvals', description: 'Can review, approve, or reject sick calls, holiday, and compensatory requests', enabled: false }
         ]
       },
       {
-        category: 'Smart Menu Solutions',
+        category: 'Menu',
         icon: Languages,
         permissions: [
-          { id: 'menu_translate', name: 'AI Menu Translation', description: 'Can generate multilingual menus using translation dictionaries', enabled: false },
-          { id: 'menu_price_update', name: 'Batch Price Adjuster', description: 'Can change pricing data and export sheets to main branch databases', enabled: false },
-          { id: 'menu_allergen', name: 'Allergen Intelligence Core', description: 'Can tag safety items, edit ingredient descriptions and override lists', enabled: false }
+          { id: 'menu_dictionary', name: 'Culinary dictionary updates', description: 'Can update culinary dictionaries and food translations', enabled: false },
+          { id: 'menu_translate', name: 'AI translations', description: 'Can execute AI-powered automatic menu translations', enabled: false },
+          { id: 'menu_allergen', name: 'Allergen tags', description: 'Can manage and tag allergen details and menu warning items', enabled: false },
+          { id: 'menu_price_update', name: 'Batch price adjustments', description: 'Can execute batch pricing overrides and sync lists', enabled: false }
         ]
       },
       {
-        category: 'Marketing & Brand Growth',
+        category: 'Marketing',
         icon: Share2,
         permissions: [
-          { id: 'mktg_social_auto', name: 'Social Auto-Post Publisher', description: 'Can sync credentials and schedule visual feed updates', enabled: false },
-          { id: 'mktg_responder', name: 'AI Google Review Responder', description: 'Can post automated answers and feedback summaries to reviews', enabled: false }
+          { id: 'mktg_campaign', name: 'Campaign setups', description: 'Can configure and schedule marketing campaigns', enabled: false },
+          { id: 'mktg_social_auto', name: 'Automated social posting', description: 'Can manage auto-post publishers and schedule social feed updates', enabled: false },
+          { id: 'mktg_responder', name: 'Coupon/voucher configuration', description: 'Can manage promotional campaigns, coupons, and vouchers', enabled: false }
         ]
       },
       {
-        category: 'System Configuration',
+        category: 'System',
         icon: SettingsIcon,
         permissions: [
-          { id: 'sys_brand_edit', name: 'Branch Identity & Global Rules', description: 'Can update hotline, physical coordinate parameters, and logo configurations', enabled: false },
-          { id: 'sys_billing_edit', name: 'Plan Subscriptions & Billing Accounts', description: 'Can view invoice trails and upgrade membership tiers', enabled: true }
+          { id: 'sys_brand_edit', name: 'Core workspace configurations', description: 'Can update physical coordinates, global rules, and hotline parameters', enabled: false },
+          { id: 'sys_brand_assets', name: 'Brand assets', description: 'Can manage branch logo files, cover images, and style guidelines', enabled: false },
+          { id: 'sys_billing_edit', name: 'Workforce directory modification', description: 'Can view and modify workforce directory roster profiles and licenses', enabled: true }
         ]
       }
     ]
@@ -194,38 +249,41 @@ const INITIAL_ROLES: RoleData[] = [
     isSystem: true,
     permissionGroups: [
       {
-        category: 'HR & Operations',
+        category: 'Operations',
         icon: Users,
         permissions: [
-          { id: 'hr_shift_read', name: 'View Shift Planner', description: 'Can view weekly and daily calendars, shift assignments', enabled: true },
-          { id: 'hr_shift_write', name: 'Publish & Override Shifts', description: 'Can schedule, modify, assign and delete crew work hours', enabled: false },
-          { id: 'hr_payroll_write', name: 'Calculate Audits & Base Salaries', description: 'Can process and edit payroll files, tips, flex ratios', enabled: false },
-          { id: 'hr_leave_write', name: 'Approve Floating Leave & Excuses', description: 'Can accept or decline sick calls and holiday requests', enabled: false }
+          { id: 'hr_shift_write', name: 'Shift scheduling', description: 'Can schedule, modify, assign, and publish crew work hours', enabled: false },
+          { id: 'hr_shift_read', name: 'Attendance tracking', description: 'Can view and track week/day attendance and calendars', enabled: true },
+          { id: 'hr_payroll_write', name: 'Payroll overrides', description: 'Can process base salaries, modify parameters, and input payroll overrides', enabled: false },
+          { id: 'hr_leave_write', name: 'Leave approvals', description: 'Can review, approve, or reject sick calls, holiday, and compensatory requests', enabled: false }
         ]
       },
       {
-        category: 'Smart Menu Solutions',
+        category: 'Menu',
         icon: Languages,
         permissions: [
-          { id: 'menu_translate', name: 'AI Menu Translation', description: 'Can generate multilingual menus using translation dictionaries', enabled: false },
-          { id: 'menu_price_update', name: 'Batch Price Adjuster', description: 'Can change pricing data and export sheets to main branch databases', enabled: false },
-          { id: 'menu_allergen', name: 'Allergen Intelligence Core', description: 'Can tag safety items, edit ingredient descriptions and override lists', enabled: true }
+          { id: 'menu_dictionary', name: 'Culinary dictionary updates', description: 'Can update culinary dictionaries and food translations', enabled: false },
+          { id: 'menu_translate', name: 'AI translations', description: 'Can execute AI-powered automatic menu translations', enabled: false },
+          { id: 'menu_allergen', name: 'Allergen tags', description: 'Can manage and tag allergen details and menu warning items', enabled: true },
+          { id: 'menu_price_update', name: 'Batch price adjustments', description: 'Can execute batch pricing overrides and sync lists', enabled: false }
         ]
       },
       {
-        category: 'Marketing & Brand Growth',
+        category: 'Marketing',
         icon: Share2,
         permissions: [
-          { id: 'mktg_social_auto', name: 'Social Auto-Post Publisher', description: 'Can sync credentials and schedule visual feed updates', enabled: false },
-          { id: 'mktg_responder', name: 'AI Google Review Responder', description: 'Can post automated answers and feedback summaries to reviews', enabled: false }
+          { id: 'mktg_campaign', name: 'Campaign setups', description: 'Can configure and schedule marketing campaigns', enabled: false },
+          { id: 'mktg_social_auto', name: 'Automated social posting', description: 'Can manage auto-post publishers and schedule social feed updates', enabled: false },
+          { id: 'mktg_responder', name: 'Coupon/voucher configuration', description: 'Can manage promotional campaigns, coupons, and vouchers', enabled: false }
         ]
       },
       {
-        category: 'System Configuration',
+        category: 'System',
         icon: SettingsIcon,
         permissions: [
-          { id: 'sys_brand_edit', name: 'Branch Identity & Global Rules', description: 'Can update hotline, physical coordinate parameters, and logo configurations', enabled: false },
-          { id: 'sys_billing_edit', name: 'Plan Subscriptions & Billing Accounts', description: 'Can view invoice trails and upgrade membership tiers', enabled: false }
+          { id: 'sys_brand_edit', name: 'Core workspace configurations', description: 'Can update physical coordinates, global rules, and hotline parameters', enabled: false },
+          { id: 'sys_brand_assets', name: 'Brand assets', description: 'Can manage branch logo files, cover images, and style guidelines', enabled: false },
+          { id: 'sys_billing_edit', name: 'Workforce directory modification', description: 'Can view and modify workforce directory roster profiles and licenses', enabled: false }
         ]
       }
     ]
@@ -245,13 +303,13 @@ const INITIAL_MEMBERS = [
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
-    case 'HR & Operations':
+    case 'Operations':
       return Users;
-    case 'Smart Menu Solutions':
+    case 'Menu':
       return Languages;
-    case 'Marketing & Brand Growth':
+    case 'Marketing':
       return Share2;
-    case 'System Configuration':
+    case 'System':
       return SettingsIcon;
     default:
       return Shield;
@@ -289,6 +347,8 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
   const [searchMemberQuery, setSearchMemberQuery] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [newRoleDataScope, setNewRoleDataScope] = useState<'Brand-wide' | 'Assigned Stores'>('Brand-wide');
+  const [editingRoleDataScope, setEditingRoleDataScope] = useState<'Brand-wide' | 'Assigned Stores'>('Brand-wide');
 
   useEffect(() => {
     localStorage.setItem('gastro_custom_roles', JSON.stringify(roles));
@@ -323,6 +383,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
 
   const handleOpenPermissionsModal = (role: RoleData) => {
     setEditingRole(role);
+    setEditingRoleDataScope(role.dataScope || 'Brand-wide');
     setDraftGroups(role.permissionGroups.map(group => ({
       ...group,
       permissions: group.permissions.map(p => ({ ...p, enabled: p.enabled }))
@@ -353,7 +414,8 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
       if (r.id !== editingRole.id) return r;
       return {
         ...r,
-        permissionGroups: draftGroups
+        permissionGroups: draftGroups,
+        dataScope: editingRoleDataScope
       };
     }));
     
@@ -375,7 +437,8 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
       description: newRoleDesc || `Custom clearance level formulated for customized staff credentials.`,
       memberCount: 0,
       isSystem: false,
-      permissionGroups: newRolePermissionGroups
+      permissionGroups: newRolePermissionGroups,
+      dataScope: newRoleDataScope
     };
 
     setRoles([...roles, newRole]);
@@ -383,6 +446,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
     setNewRoleName('');
     setNewRoleDesc('');
     setNewRoleTemplate('manager');
+    setNewRoleDataScope('Brand-wide');
     
     setSaveSuccess(true);
     setTimeout(() => {
@@ -507,15 +571,20 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                       </p>
                     </td>
                     <td className="py-4 px-5 font-sans text-[14px] font-normal text-slate-700">
-                      {r.isSystem ? (
-                        <span className="inline-flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[13px] font-normal uppercase tracking-wider">
-                          System Core
+                      <div className="flex flex-col gap-1">
+                        {r.isSystem ? (
+                          <span className="inline-flex items-center w-fit px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[11px] font-normal uppercase tracking-wider">
+                            System Core
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center w-fit px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-[2px] text-[11px] font-normal uppercase tracking-wider">
+                            Bespoke License
+                          </span>
+                        )}
+                        <span className="text-[12px] text-slate-700 font-medium whitespace-nowrap">
+                          Scope: <span className="text-indigo-600 font-semibold">{r.dataScope || 'Brand-wide'}</span>
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-[2px] text-[13px] font-normal uppercase tracking-wider">
-                          Bespoke License
-                        </span>
-                      )}
+                      </div>
                     </td>
                     <td className="py-4 px-5 font-sans text-[14px] font-normal text-slate-700">
                       <div className="flex items-center gap-2">
@@ -619,10 +688,15 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
               <div className="leading-tight text-left overflow-hidden flex-1">
                 <p className="text-[14px] font-normal text-[#1C1814] truncate">{m.name}</p>
                 <p className="text-[13px] text-slate-700 font-normal truncate mt-0.5">{m.email}</p>
-                <div className="mt-2">
-                  <span className="inline-flex items-center px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded-[2px] text-[12px] font-normal uppercase tracking-wider scale-[0.9] origin-left whitespace-nowrap">
-                    {m.role}
-                  </span>
+                <div className="mt-2 flex">
+                  {(() => {
+                    const styles = getRoleBadgeStyles(m.role);
+                    return (
+                      <span className={`inline-flex items-center px-2 py-0.5 border rounded-[3px] text-[11px] font-medium uppercase tracking-wider font-mono ${styles.classes}`}>
+                        {m.role}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -687,6 +761,69 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                     </div>
                   </div>
                 )}
+
+                {/* Data Scope Config Section */}
+                <div className="bg-white border border-[#1C1814]/5 rounded-xl p-5 shadow-xs text-left space-y-3.5">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-[16px] h-[16px] text-[#7553FF]" />
+                    <h4 className="text-xs font-bold text-slate-800 tracking-wider">
+                      Data Scope
+                    </h4>
+                  </div>
+                  
+                  {editingRole.key === 'owner' ? (
+                    <div className="text-[14px] font-medium text-slate-800 bg-slate-50 border border-slate-100 p-3 rounded-lg flex items-center justify-between">
+                      <span>Brand-wide</span>
+                      <span className="text-[11px] font-mono text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded-sm">LOCKED</span>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <label className={`p-4 border rounded-xl flex items-start gap-3 cursor-pointer transition-all ${
+                          editingRoleDataScope === 'Brand-wide' 
+                            ? 'border-[#7553FF] bg-[#7553FF]/[0.02] ring-2 ring-[#7553FF]/10' 
+                            : 'border-slate-200 hover:border-[#7553FF]/30 hover:bg-slate-50/50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="editDataScope"
+                            value="Brand-wide"
+                            checked={editingRoleDataScope === 'Brand-wide'}
+                            onChange={() => setEditingRoleDataScope('Brand-wide')}
+                            className="mt-1 accent-[#7553FF]"
+                          />
+                          <div>
+                            <span className="text-sm font-bold text-slate-800 block">Brand-wide</span>
+                            <span className="text-xs font-normal text-slate-500 leading-normal block mt-0.5">
+                              Allows viewing and manipulating data from all branches under the brand.
+                            </span>
+                          </div>
+                        </label>
+
+                        <label className={`p-4 border rounded-xl flex items-start gap-3 cursor-pointer transition-all ${
+                          editingRoleDataScope === 'Assigned Stores' 
+                            ? 'border-[#7553FF] bg-[#7553FF]/[0.02] ring-2 ring-[#7553FF]/10' 
+                            : 'border-slate-200 hover:border-[#7553FF]/30 hover:bg-slate-50/50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="editDataScope"
+                            value="Assigned Stores"
+                            checked={editingRoleDataScope === 'Assigned Stores'}
+                            onChange={() => setEditingRoleDataScope('Assigned Stores')}
+                            className="mt-1 accent-[#7553FF]"
+                          />
+                          <div>
+                            <span className="text-sm font-bold text-slate-800 block">Assigned Stores</span>
+                            <span className="text-xs font-light text-slate-500 leading-normal block mt-0.5">
+                              Only allow viewing and manipulating data from the branches to which that employee is assigned.
+                            </span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="space-y-6">
                   {draftGroups.map((group, groupIdx) => {
@@ -837,13 +974,13 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                 <div className="flex-1 overflow-y-auto flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-[#EAE4DC]">
                   {/* LEFT COLUMN: Role Info */}
                   <div className="w-full md:w-80 shrink-0 p-6 space-y-5 bg-white text-left">
-                    <h4 className="text-[12px] font-bold text-[#1C1814] uppercase tracking-wider border-b border-[#EAE4DC] pb-1.5">
+                    <h4 className="text-[12px] font-bold text-[#1C1814] tracking-wider border-b border-[#EAE4DC] pb-1.5">
                       Role Specifications
                     </h4>
 
                     {/* Role Name */}
                     <div className="space-y-1.5">
-                      <label className="text-[13px] font-bold text-[#1C1814] uppercase tracking-wider block">
+                      <label className="text-[13px] font-bold text-[#1C1814] tracking-wider block">
                         Role Name <span className="text-rose-500 font-serif">*</span>
                       </label>
                       <input 
@@ -858,7 +995,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
 
                     {/* Description */}
                     <div className="space-y-1.5">
-                      <label className="text-[13px] font-bold text-[#1C1814] uppercase tracking-wider block">
+                      <label className="text-[13px] font-bold text-[#1C1814] tracking-wider block">
                         Description / Purpose
                       </label>
                       <textarea 
@@ -871,7 +1008,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
 
                     {/* Base Template */}
                     <div className="space-y-1.5">
-                      <label className="text-[13px] font-bold text-[#1C1814] uppercase tracking-wider block">
+                      <label className="text-[13px] font-bold text-[#1C1814] tracking-wider block">
                         Base Privileges Template <span className="text-rose-500 font-serif">*</span>
                       </label>
                       <div className="relative">
@@ -892,6 +1029,24 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                       </div>
                       <span className="text-[12px] text-slate-700 leading-normal block pt-1">
                         Changing template pre-populates the permission toggles on the right.
+                      </span>
+                    </div>
+
+                    {/* Data Scope */}
+                    <div className="space-y-1.5 pt-3 border-t border-[#EAE4DC]">
+                      <label className="text-[13px] font-bold text-[#1C1814] tracking-wider block">
+                        Data Scope <span className="text-rose-500 font-serif">*</span>
+                      </label>
+                      <select
+                        value={newRoleDataScope}
+                        onChange={(e) => setNewRoleDataScope(e.target.value as any)}
+                        className="w-full h-11 px-4 bg-white border border-[#C8BFB5]/50 hover:border-[#7553FF]/50 focus:border-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden cursor-pointer transition-all focus:ring-4 focus:ring-[#7553FF]/10 font-sans shadow-xs"
+                      >
+                        <option value="Brand-wide">Brand-wide</option>
+                        <option value="Assigned Stores">Assigned Stores</option>
+                      </select>
+                      <span className="text-[11px] text-slate-750 leading-normal block pt-1">
+                        Determines if the role accesses all branches or only assigned locations.
                       </span>
                     </div>
                   </div>
@@ -1042,7 +1197,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
 
                 {hasStaff && (
                   <div className="space-y-2">
-                    <label className="text-[12px] font-bold text-[#1C1814] uppercase tracking-wider block">
+                    <label className="text-[12px] font-bold text-[#1C1814] tracking-wider block">
                       Associated Active Staff ({activeStaffForDeletedRole.length})
                     </label>
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 space-y-2 max-h-[140px] overflow-y-auto font-sans">

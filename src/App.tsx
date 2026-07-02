@@ -60,8 +60,8 @@ import ProfileSettingsModal from './components/ProfileSettingsModal';
 
 // Imported modular views matching the new menu table architecture
 import CheckinView from './components/Checkin';
+import LeaveCalculatorView from './components/LeaveCalculatorView';
 import {
-  LeaveCalculatorView,
   BookTableView,
   ChatbotView,
   AiFoodImagesView,
@@ -261,33 +261,36 @@ export default function App() {
         key: 'owner',
         permissionGroups: [
           {
-            category: 'HR & Operations',
+            category: 'Operations',
             permissions: [
-              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_shift_write', enabled: true },
+              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_payroll_write', enabled: true },
               { id: 'hr_leave_write', enabled: true }
             ]
           },
           {
-            category: 'Smart Menu Solutions',
+            category: 'Menu',
             permissions: [
+              { id: 'menu_dictionary', enabled: true },
               { id: 'menu_translate', enabled: true },
-              { id: 'menu_price_update', enabled: true },
-              { id: 'menu_allergen', enabled: true }
+              { id: 'menu_allergen', enabled: true },
+              { id: 'menu_price_update', enabled: true }
             ]
           },
           {
-            category: 'Marketing & Brand Growth',
+            category: 'Marketing',
             permissions: [
+              { id: 'mktg_campaign', enabled: true },
               { id: 'mktg_social_auto', enabled: true },
               { id: 'mktg_responder', enabled: true }
             ]
           },
           {
-            category: 'System Configuration',
+            category: 'System',
             permissions: [
               { id: 'sys_brand_edit', enabled: true },
+              { id: 'sys_brand_assets', enabled: true },
               { id: 'sys_billing_edit', enabled: true }
             ]
           }
@@ -298,33 +301,36 @@ export default function App() {
         key: 'manager',
         permissionGroups: [
           {
-            category: 'HR & Operations',
+            category: 'Operations',
             permissions: [
-              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_shift_write', enabled: true },
+              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_payroll_write', enabled: false },
               { id: 'hr_leave_write', enabled: true }
             ]
           },
           {
-            category: 'Smart Menu Solutions',
+            category: 'Menu',
             permissions: [
+              { id: 'menu_dictionary', enabled: true },
               { id: 'menu_translate', enabled: true },
-              { id: 'menu_price_update', enabled: true },
-              { id: 'menu_allergen', enabled: true }
+              { id: 'menu_allergen', enabled: true },
+              { id: 'menu_price_update', enabled: true }
             ]
           },
           {
-            category: 'Marketing & Brand Growth',
+            category: 'Marketing',
             permissions: [
+              { id: 'mktg_campaign', enabled: true },
               { id: 'mktg_social_auto', enabled: true },
               { id: 'mktg_responder', enabled: true }
             ]
           },
           {
-            category: 'System Configuration',
+            category: 'System',
             permissions: [
               { id: 'sys_brand_edit', enabled: false },
+              { id: 'sys_brand_assets', enabled: false },
               { id: 'sys_billing_edit', enabled: false }
             ]
           }
@@ -335,33 +341,36 @@ export default function App() {
         key: 'accountant',
         permissionGroups: [
           {
-            category: 'HR & Operations',
+            category: 'Operations',
             permissions: [
-              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_shift_write', enabled: false },
+              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_payroll_write', enabled: true },
               { id: 'hr_leave_write', enabled: false }
             ]
           },
           {
-            category: 'Smart Menu Solutions',
+            category: 'Menu',
             permissions: [
+              { id: 'menu_dictionary', enabled: false },
               { id: 'menu_translate', enabled: false },
-              { id: 'menu_price_update', enabled: false },
-              { id: 'menu_allergen', enabled: false }
+              { id: 'menu_allergen', enabled: false },
+              { id: 'menu_price_update', enabled: false }
             ]
           },
           {
-            category: 'Marketing & Brand Growth',
+            category: 'Marketing',
             permissions: [
+              { id: 'mktg_campaign', enabled: false },
               { id: 'mktg_social_auto', enabled: false },
               { id: 'mktg_responder', enabled: false }
             ]
           },
           {
-            category: 'System Configuration',
+            category: 'System',
             permissions: [
               { id: 'sys_brand_edit', enabled: false },
+              { id: 'sys_brand_assets', enabled: false },
               { id: 'sys_billing_edit', enabled: true }
             ]
           }
@@ -372,33 +381,36 @@ export default function App() {
         key: 'kitchen_crew',
         permissionGroups: [
           {
-            category: 'HR & Operations',
+            category: 'Operations',
             permissions: [
-              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_shift_write', enabled: false },
+              { id: 'hr_shift_read', enabled: true },
               { id: 'hr_payroll_write', enabled: false },
               { id: 'hr_leave_write', enabled: false }
             ]
           },
           {
-            category: 'Smart Menu Solutions',
+            category: 'Menu',
             permissions: [
+              { id: 'menu_dictionary', enabled: false },
               { id: 'menu_translate', enabled: false },
-              { id: 'menu_price_update', enabled: false },
-              { id: 'menu_allergen', enabled: true }
+              { id: 'menu_allergen', enabled: true },
+              { id: 'menu_price_update', enabled: false }
             ]
           },
           {
-            category: 'Marketing & Brand Growth',
+            category: 'Marketing',
             permissions: [
+              { id: 'mktg_campaign', enabled: false },
               { id: 'mktg_social_auto', enabled: false },
               { id: 'mktg_responder', enabled: false }
             ]
           },
           {
-            category: 'System Configuration',
+            category: 'System',
             permissions: [
               { id: 'sys_brand_edit', enabled: false },
+              { id: 'sys_brand_assets', enabled: false },
               { id: 'sys_billing_edit', enabled: false }
             ]
           }
@@ -1109,7 +1121,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* RIGHT MAIN VIEW CONTENT PANEL */}
-      <main className="flex-1 min-w-0 overflow-y-auto h-screen p-3 md:p-6 lg:p-8 relative">
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen p-6 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -1172,8 +1184,14 @@ export default function App() {
                       simulatedUser={activeSimulatedUser} 
                     />
                   )}
-                  {activeTab === 'checkin' && <CheckinView />}
-                  {activeTab === 'leave-calculator' && <LeaveCalculatorView />}
+                  {activeTab === 'checkin' && <CheckinView simulatedUser={activeSimulatedUser} />}
+                  {activeTab === 'leave-calculator' && (
+                    <LeaveCalculatorView 
+                      staff={staff} 
+                      setStaff={setStaff}
+                      simulatedUser={activeSimulatedUser} 
+                    />
+                  )}
                   {activeTab === 'payroll' && (
                     <Payroll 
                       staff={staff} 

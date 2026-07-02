@@ -1,9 +1,4 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FileDown,
   Calendar,
@@ -14,1249 +9,2101 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Plus,
   Search,
   SlidersHorizontal,
-  MoreVertical,
   Users,
   Clock,
   TrendingUp,
   FileText,
   HelpCircle,
-  Check,
-  AlertTriangle
+  AlertTriangle,
+  Lock,
+  Unlock,
+  RefreshCw,
+  FileSpreadsheet,
+  CheckCircle2,
+  Plus,
+  Coins,
+  ShieldCheck,
+  UserCheck,
+  AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
-interface StaffPayroll {
+// --- Types ---
+export interface PayrollEmployee {
   id: string;
   name: string;
   role: string;
-  department: string;
-  location: string;
-  hours: number;
-  hasOT: boolean;
-  otHours: number;
-  rateType: 'Hourly' | 'Salary';
-  rate: number;
-  rateText: string;
-  grossPay: number;
-  deductions: number;
-  netPay: number;
+  department: string; // 'Service' | 'Kitchen' | 'Bar' | 'Office'
+  branch: string; // 'HCM 1' | 'HCM 2' | 'HN 1' | 'HQ'
+  avatar?: string;
+  contractType: 'Hourly' | 'Monthly' | 'Minijob';
+  baseRate: number; // base hourly rate or hourly equivalent
+  monthlyContractSalary?: number; // fixed monthly salary
+  actualHours: number; // actual hours worked in current period
+  standardHours: number; // contractual hours
+  fwhaBalance: number; // FWHA balance in hours
+  unpaidLeaves: number; // days of unpaid leaves
+  sickLeavesWithCert: number; // sick leaves with certificate
+  taxClass: string;
+  healthProvider: string;
+  socialSecurityNo: string;
+  taxId: string;
+  dependentAllowance: number;
+  eveningHours: number;
+  nightHours: number;
+  sundayHours: number;
+  holidayHours: number;
+  tips: number;
+  tipsLocked: boolean;
+  foodDeduction: number;
+  adjustment: number;
+  adjustmentNote: string;
+  taxesAndInsuranceRate: number;
 }
 
-export default function Payroll() {
-  // 8 staff items in the mockup
-  const [staffData, setStaffData] = useState<StaffPayroll[]>([
-    {
-      id: "staff-1",
-      name: "Le Chi",
-      role: "Sales",
-      department: "Service",
-      location: "HQ",
-      hours: 40.00,
-      hasOT: false,
-      otHours: 0,
-      rateType: "Hourly",
-      rate: 22.00,
-      rateText: "$22.00",
-      grossPay: 880.00,
-      deductions: 66.00,
-      netPay: 814.00,
-    },
-    {
-      id: "staff-2",
-      name: "Tran Binh",
-      role: "HR",
-      department: "Management",
-      location: "HQ",
-      hours: 38.50,
-      hasOT: false,
-      otHours: 0,
-      rateType: "Hourly",
-      rate: 25.00,
-      rateText: "$25.00",
-      grossPay: 962.50,
-      deductions: 72.19,
-      netPay: 890.31,
-    },
-    {
-      id: "staff-3",
-      name: "Pham Dung",
-      role: "Operation",
-      department: "Kitchen",
-      location: "HQ",
-      hours: 45.25,
-      hasOT: true,
-      otHours: 5.25,
-      rateType: "Hourly",
-      rate: 20.00,
-      rateText: "$20.00",
-      grossPay: 1005.00,
-      deductions: 75.38,
-      netPay: 929.62,
-    },
-    {
-      id: "staff-4",
-      name: "Hoang Em",
-      role: "Kitchen",
-      department: "Kitchen",
-      location: "Kitchen Area",
-      hours: 40.00,
-      hasOT: false,
-      otHours: 0,
-      rateType: "Hourly",
-      rate: 18.00,
-      rateText: "$18.00",
-      grossPay: 720.00,
-      deductions: 54.00,
-      netPay: 666.00,
-    },
-    {
-      id: "staff-5",
-      name: "Vu Giang",
-      role: "Bar",
-      department: "Bar",
-      location: "HQ",
-      hours: 42.00,
-      hasOT: true,
-      otHours: 2.00,
-      rateType: "Hourly",
-      rate: 19.00,
-      rateText: "$19.00",
-      grossPay: 835.00,
-      deductions: 62.63,
-      netPay: 772.37,
-    },
-    {
-      id: "staff-6",
-      name: "Phan Linh",
-      role: "Service",
-      department: "Service",
-      location: "Front Desk",
-      hours: 38.00,
-      hasOT: false,
-      otHours: 0,
-      rateType: "Hourly",
-      rate: 18.50,
-      rateText: "$18.50",
-      grossPay: 703.00,
-      deductions: 52.73,
-      netPay: 650.27,
-    },
-    {
-      id: "staff-7",
-      name: "Dang Khoa",
-      role: "Operation",
-      department: "Kitchen",
-      location: "Kitchen Area",
-      hours: 44.50,
-      hasOT: true,
-      otHours: 4.50,
-      rateType: "Hourly",
-      rate: 20.00,
-      rateText: "$20.00",
-      grossPay: 980.00,
-      deductions: 73.50,
-      netPay: 906.50,
-    },
-    {
-      id: "staff-8",
-      name: "Bui Thuy",
-      role: "HR",
-      department: "Management",
-      location: "HQ",
-      hours: 36.00,
-      hasOT: false,
-      otHours: 0,
-      rateType: "Salary",
-      rate: 900.00,
-      rateText: "$900.00 /week",
-      grossPay: 900.00,
-      deductions: 67.50,
-      netPay: 832.50,
-    },
-  ]);
+interface PayrollProps {
+  staff?: any[];
+  setStaff?: (staff: any[]) => void;
+  simulatedUser?: any;
+}
 
-  // Filters State
-  const [selectedPeriod, setSelectedPeriod] = useState("May 12 – May 18, 2024");
-  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
-  const [selectedLocation, setSelectedLocation] = useState("All Locations");
-  const [selectedEmploymentType, setSelectedEmploymentType] = useState("All Employment Types");
-  const [searchQuery, setSearchQuery] = useState("");
+// --- Pre-seeded Example Data from PRD-005 ---
+const defaultPayrollEmployees: PayrollEmployee[] = [
+  {
+    id: 'staff-10',
+    name: 'Hoang Phat Nguyen',
+    role: 'Service',
+    department: 'Service',
+    branch: 'HCM 1',
+    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&q=80',
+    contractType: 'Hourly',
+    baseRate: 22.27,
+    actualHours: 168.0,
+    standardHours: 168.0,
+    fwhaBalance: 0.0,
+    unpaidLeaves: 0,
+    sickLeavesWithCert: 0,
+    taxClass: 'Class 1',
+    healthProvider: 'Techniker Krankenkasse (TK)',
+    socialSecurityNo: '12 150895 N 042',
+    taxId: '92 847 150 293',
+    dependentAllowance: 0.0,
+    eveningHours: 18.0,
+    nightHours: 4.0,
+    sundayHours: 16.0,
+    holidayHours: 8.0,
+    tips: 580.14,
+    tipsLocked: true, // Preset to match PRD exact table
+    foodDeduction: 123.39,
+    adjustment: 0.0,
+    adjustmentNote: '',
+    taxesAndInsuranceRate: 0.259, // ~25.9% estimated tax + insurance
+  },
+  {
+    id: 'staff-9',
+    name: 'Xuan Binh Tran',
+    role: 'Chef',
+    department: 'Kitchen',
+    branch: 'HCM 1',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
+    contractType: 'Monthly',
+    baseRate: 15.00,
+    monthlyContractSalary: 2152.00,
+    actualHours: 180.0,
+    standardHours: 160.0,
+    fwhaBalance: 10.0, // Existing old balance
+    unpaidLeaves: 0,
+    sickLeavesWithCert: 0,
+    taxClass: 'Class 3',
+    healthProvider: 'AOK Bayern',
+    socialSecurityNo: '15 240590 T 102',
+    taxId: '45 291 302 918',
+    dependentAllowance: 1.0,
+    eveningHours: 10.0,
+    nightHours: 8.0,
+    sundayHours: 12.0,
+    holidayHours: 0.0,
+    tips: 340.0,
+    tipsLocked: true,
+    foodDeduction: 100.00,
+    adjustment: 0.0,
+    adjustmentNote: '',
+    taxesAndInsuranceRate: 0.20,
+  },
+  {
+    id: 'staff-12',
+    name: 'Mai Anh Tran Thi',
+    role: 'Office',
+    department: 'Office',
+    branch: 'HCM 1',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&q=80',
+    contractType: 'Minijob',
+    baseRate: 15.00,
+    actualHours: 48.0,
+    standardHours: 40.20,
+    fwhaBalance: 0.0,
+    unpaidLeaves: 0,
+    sickLeavesWithCert: 0,
+    taxClass: 'Minijob',
+    healthProvider: 'Knappschaft-Bahn-See',
+    socialSecurityNo: '22 181102 M 203',
+    taxId: '81 304 291 039',
+    dependentAllowance: 0.0,
+    eveningHours: 0.0,
+    nightHours: 0.0,
+    sundayHours: 0.0,
+    holidayHours: 0.0,
+    tips: 80.0,
+    tipsLocked: true,
+    foodDeduction: 0.0,
+    adjustment: 0.0,
+    adjustmentNote: '',
+    taxesAndInsuranceRate: 0.0,
+  },
+  {
+    id: 'staff-1',
+    name: 'Nguyen An',
+    role: 'Operation',
+    department: 'Service',
+    branch: 'HCM 1',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
+    contractType: 'Hourly',
+    baseRate: 35.00,
+    actualHours: 140.0,
+    standardHours: 160.0,
+    fwhaBalance: 5.0,
+    unpaidLeaves: 1,
+    sickLeavesWithCert: 2,
+    taxClass: 'Class 1',
+    healthProvider: 'Techniker Krankenkasse (TK)',
+    socialSecurityNo: '11 120395 A 031',
+    taxId: '12 345 678 901',
+    dependentAllowance: 0.0,
+    eveningHours: 8.0,
+    nightHours: 0.0,
+    sundayHours: 4.0,
+    holidayHours: 0.0,
+    tips: 150.0,
+    tipsLocked: false,
+    foodDeduction: 80.0,
+    adjustment: 0.0,
+    adjustmentNote: '',
+    taxesAndInsuranceRate: 0.25,
+  },
+  {
+    id: 'staff-3',
+    name: 'Le Chi',
+    role: 'Sales',
+    department: 'Service',
+    branch: 'HN 1',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
+    contractType: 'Hourly',
+    baseRate: 25.00,
+    actualHours: 150.0,
+    standardHours: 160.0,
+    fwhaBalance: 0.0,
+    unpaidLeaves: 0,
+    sickLeavesWithCert: 0,
+    taxClass: 'Class 2',
+    healthProvider: 'Barmer',
+    socialSecurityNo: '14 021198 C 045',
+    taxId: '98 765 432 109',
+    dependentAllowance: 1.0,
+    eveningHours: 15.0,
+    nightHours: 4.0,
+    sundayHours: 8.0,
+    holidayHours: 0.0,
+    tips: 210.0,
+    tipsLocked: false,
+    foodDeduction: 60.0,
+    adjustment: 0.0,
+    adjustmentNote: '',
+    taxesAndInsuranceRate: 0.22,
+  },
+  {
+    id: 'staff-6',
+    name: 'Vu Giang',
+    role: 'Bar',
+    department: 'Bar',
+    branch: 'HCM 2',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80',
+    contractType: 'Hourly',
+    baseRate: 16.00,
+    actualHours: 120.0,
+    standardHours: 120.0,
+    fwhaBalance: -4.0,
+    unpaidLeaves: 0,
+    sickLeavesWithCert: 0,
+    taxClass: 'Class 1',
+    healthProvider: 'AOK Hessen',
+    socialSecurityNo: '23 051202 G 115',
+    taxId: '54 203 104 928',
+    dependentAllowance: 0.0,
+    eveningHours: 14.0,
+    nightHours: 12.0,
+    sundayHours: 0.0,
+    holidayHours: 4.0,
+    tips: 110.0,
+    tipsLocked: false,
+    foodDeduction: 40.0,
+    adjustment: 20.0,
+    adjustmentNote: 'Travel expense support',
+    taxesAndInsuranceRate: 0.15,
+  }
+];
 
-  const [activeTab, setActiveTab] = useState<"summary" | "payments" | "history">("summary");
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
-  const [activeActionMenuId, setActiveActionMenuId] = useState<string | null>(null);
-  
-  // Interactive UI elements
-  const [activeEmployee, setActiveEmployee] = useState<StaffPayroll | null>(null);
-  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingStaff, setEditingStaff] = useState<StaffPayroll | null>(null);
-  const [payrollStatus, setPayrollStatus] = useState<"Draft" | "Processed">("Draft");
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Pre-seed beautiful photos for Avatars to match the mockup exactly
-  const avatars: Record<string, string> = {
-    "Le Chi": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&crop=face",
-    "Tran Binh": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    "Pham Dung": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-    "Hoang Em": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&crop=face",
-    "Vu Giang": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=face",
-    "Phan Linh": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
-    "Dang Khoa": "https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=100&h=100&fit=crop&crop=face",
-    "Bui Thuy": "https://images.unsplash.com/photo-1534751516642-a131ffd1037f?w=100&h=100&fit=crop&crop=face",
-  };
-
-  const nameColors: Record<string, string> = {
-    "Le Chi": "bg-rose-100 text-rose-700",
-    "Tran Binh": "bg-blue-100 text-blue-700",
-    "Pham Dung": "bg-amber-100 text-amber-700",
-    "Hoang Em": "bg-purple-100 text-purple-700",
-    "Vu Giang": "bg-indigo-100 text-indigo-700",
-    "Phan Linh": "bg-emerald-100 text-emerald-700",
-    "Dang Khoa": "bg-cyan-100 text-cyan-700",
-    "Bui Thuy": "bg-teal-100 text-teal-700",
-  };
-
-  // Filter Data
-  const filteredStaff = staffData.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.role.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDept = selectedDepartment === "All Departments" || item.department === selectedDepartment;
-    const matchesLoc = selectedLocation === "All Locations" || item.location === selectedLocation;
-    const matchesType = selectedEmploymentType === "All Employment Types" || item.rateType === selectedEmploymentType;
-    return matchesSearch && matchesDept && matchesLoc && matchesType;
+export default function Payroll({ staff = [], setStaff, simulatedUser }: PayrollProps) {
+  // Config parameters from localStorage
+  const [lowIncomeThreshold] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_low_income_threshold') || '603.00');
+  });
+  const [eveningShiftPremiumEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('gastro_evening_shift_premium_enabled') !== 'false';
+  });
+  const [eveningShiftPremiumRate] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_evening_shift_premium_rate') || '10') / 100;
+  });
+  const [nightShiftPremiumRate] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_night_shift_premium_rate') || '25') / 100;
+  });
+  const [sundayPremiumRate] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_sunday_premium_rate') || '50') / 100;
+  });
+  const [holidayPremiumRate] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_holiday_premium_rate') || '125') / 100;
   });
 
-  // KPI calculations based on current table data
-  const totalPayrollCost = filteredStaff.reduce((sum, item) => sum + item.netPay, 0);
-  const totalEmployees = filteredStaff.length;
-  const totalHours = filteredStaff.reduce((sum, item) => sum + item.hours, 0);
-  const avgHourlyRate = totalEmployees === 0 ? 0 : filteredStaff.reduce((sum, item) => {
-    if (item.rateType === "Salary") return sum + 25.00; // estimated fallback for salary avg
-    return sum + item.rate;
-  }, 0) / totalEmployees;
+  const [tipWeightKitchen] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_tip_weight_kitchen') || '0.8');
+  });
+  const [tipWeightService] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_tip_weight_service') || '1.0');
+  });
+  const [tipWeightBar] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_tip_weight_bar') || '0.9');
+  });
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedRows(filteredStaff.map((item) => item.id));
-    } else {
-      setSelectedRows([]);
+  // Wage accounting codes
+  const [codeBaseSalary] = useState<string>(() => {
+    return localStorage.getItem('gastro_code_base_salary') || '1000';
+  });
+  const [codeEveningPremium] = useState<string>(() => {
+    return localStorage.getItem('gastro_code_evening_premium') || '2400';
+  });
+  const [codeNightPremium] = useState<string>(() => {
+    return localStorage.getItem('gastro_code_night_premium') || '2500';
+  });
+  const [codeSundayPremium] = useState<string>(() => {
+    return localStorage.getItem('gastro_code_sunday_premium') || '2600';
+  });
+  const [codeHolidayPremium] = useState<string>(() => {
+    return localStorage.getItem('gastro_code_holiday_premium') || '2700';
+  });
+  const [codeTipsDistribution] = useState<string>(() => {
+    return localStorage.getItem('gastro_code_tips_distribution') || '5000';
+  });
+  const [codeOvertimePayout] = useState<string>(() => {
+    return localStorage.getItem('gastro_code_overtime_payout') || '2800';
+  });
+
+  const maxFwhaHours = 40.0;
+  const minFwhaHours = -20.0;
+
+  // State Management
+  const [employees, setEmployees] = useState<PayrollEmployee[]>(() => {
+    const cached = localStorage.getItem('gastro_payroll_employees_v2');
+    if (cached) {
+      try { return JSON.parse(cached); } catch (e) { /* ignore */ }
     }
-  };
+    return defaultPayrollEmployees;
+  });
 
-  const handleToggleRow = (id: string, checked: boolean) => {
-    if (checked) {
-      setSelectedRows((prev) => [...prev, id]);
-    } else {
-      setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
+  const [ledger, setLedger] = useState<'internal' | 'tax'>('internal');
+  const [payrollState, setPayrollState] = useState<'Draft' | 'TaxVersionCreated' | 'TaxVersionAdjusted' | 'Approved' | 'Paid'>(() => {
+    return (localStorage.getItem('gastro_payroll_state') as any) || 'Draft';
+  });
+
+  const [totalTipPool, setTotalTipPool] = useState<number>(1000.14); // Matches remaining tip pools nicely
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBranch, setSelectedBranch] = useState('All Branches');
+  const [selectedContract, setSelectedContract] = useState('All Contracts');
+  
+  // Modals & Panels
+  const [activeEmployee, setActiveEmployee] = useState<PayrollEmployee | null>(null);
+  const [editingEmployee, setEditingEmployee] = useState<PayrollEmployee | null>(null);
+  const [compensatoryLeaveEmp, setCompensatoryLeaveEmp] = useState<PayrollEmployee | null>(null);
+  const [compensatoryHours, setCompensatoryHours] = useState<number>(8);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportTemplate, setExportTemplate] = useState<'DATEV' | 'BMD' | 'CSV'>('DATEV');
+  const [showStateResetWarning, setShowStateResetWarning] = useState<string | null>(null);
+
+  // Audit Log State
+  const [auditLogs, setAuditLogs] = useState<Array<{ id: string; time: string; user: string; action: string; note: string }>>(() => {
+    const cached = localStorage.getItem('gastro_payroll_audit');
+    if (cached) {
+      try { return JSON.parse(cached); } catch (e) { }
     }
-  };
+    return [
+      { id: '1', time: '2026-06-01 09:00', user: 'System', action: 'Initialize', note: 'Payroll period June 2026 initialized as Draft.' }
+    ];
+  });
 
-  const handleDeleteStaff = (id: string) => {
-    setStaffData((prev) => prev.filter((item) => item.id !== id));
-    setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
-    setActiveActionMenuId(null);
-  };
+  // Keep state synced to localStorage
+  useEffect(() => {
+    localStorage.setItem('gastro_payroll_employees_v2', JSON.stringify(employees));
+  }, [employees]);
 
-  const handleEditStaffClick = (staff: StaffPayroll) => {
-    setEditingStaff({ ...staff });
-    setIsEditModalOpen(true);
-    setActiveActionMenuId(null);
-  };
+  useEffect(() => {
+    localStorage.setItem('gastro_payroll_state', payrollState);
+  }, [payrollState]);
 
-  const handleSaveEdit = () => {
-    if (editingStaff) {
-      setStaffData((prev) =>
-        prev.map((item) => {
-          if (item.id === editingStaff.id) {
-            // calculate gross and net
-            let gross = editingStaff.hours * editingStaff.rate;
-            if (editingStaff.rateType === "Salary") {
-              gross = editingStaff.rate;
-            }
-            const deductions = gross * 0.075; // dynamic deduction rate 7.5%
-            const net = gross - deductions;
-            return {
-              ...editingStaff,
-              grossPay: parseFloat(gross.toFixed(2)),
-              deductions: parseFloat(deductions.toFixed(2)),
-              netPay: parseFloat(net.toFixed(2)),
-            };
+  useEffect(() => {
+    localStorage.setItem('gastro_payroll_audit', JSON.stringify(auditLogs));
+  }, [auditLogs]);
+
+  // Syncing with shared staff state from props
+  useEffect(() => {
+    if (staff && staff.length > 0) {
+      // Find active staff who are included in payroll but not in our list yet
+      const activePayrollStaff = staff.filter(s => s.isActive && s.includeInPayroll);
+      const updatedList = [...employees];
+      let mutated = false;
+
+      activePayrollStaff.forEach(s => {
+        const exists = updatedList.some(e => e.id === s.id || e.name.toLowerCase() === s.name.toLowerCase());
+        if (!exists) {
+          updatedList.push({
+            id: s.id || `staff-${Math.random().toString(36).substr(2, 9)}`,
+            name: s.name,
+            role: s.role || 'Staff',
+            department: s.department || 'Service',
+            branch: s.branch || 'HCM 1',
+            contractType: s.status === 'Part-time' ? 'Minijob' : (s.salaryType === 'Monthly' ? 'Monthly' : 'Hourly'),
+            baseRate: s.hourlyRate || 15.00,
+            monthlyContractSalary: s.salaryType === 'Monthly' ? (s.hourlyRate * 160 || 2400) : undefined,
+            actualHours: 120.0,
+            standardHours: 160.0,
+            fwhaBalance: 0.0,
+            unpaidLeaves: 0,
+            sickLeavesWithCert: 0,
+            taxClass: 'Class 1',
+            healthProvider: 'AOK',
+            socialSecurityNo: '12 345678 S 098',
+            taxId: '45 123 987 564',
+            dependentAllowance: 0,
+            eveningHours: 0,
+            nightHours: 0,
+            sundayHours: 0,
+            holidayHours: 0,
+            tips: 0,
+            tipsLocked: false,
+            foodDeduction: 0,
+            adjustment: 0,
+            adjustmentNote: '',
+            taxesAndInsuranceRate: 0.20,
+          });
+          mutated = true;
+        }
+      });
+
+      if (mutated) {
+        setEmployees(updatedList);
+      }
+    }
+  }, [staff]);
+
+  // Access check
+  const userAccessType = (() => {
+    if (!simulatedUser) return 'Staff';
+    const roleName = simulatedUser.role || 'Staff';
+    if (roleName.toLowerCase() === 'owner' || simulatedUser.systemAccessLevel === 'Admin') {
+      return 'Admin';
+    }
+    // Check custom roles dataScope
+    try {
+      const customRolesStr = localStorage.getItem('gastro_custom_roles');
+      if (customRolesStr) {
+        const customRoles = JSON.parse(customRolesStr);
+        const matched = customRoles.find((r: any) => r.name.toLowerCase() === roleName.toLowerCase());
+        if (matched) {
+          if (matched.dataScope === 'Brand-wide') {
+            return 'Admin';
+          } else {
+            return 'Manager';
           }
-          return item;
-        })
-      );
-      setIsEditModalOpen(false);
-      setEditingStaff(null);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (roleName.toLowerCase() === 'manager') {
+      return 'Manager';
+    }
+    return 'Staff';
+  })();
+
+  const allowedBranches = simulatedUser?.assignedStores || (simulatedUser?.branch ? [simulatedUser.branch] : ['HCM 1']);
+  const isAdmin = userAccessType === 'Admin';
+  const userBranch = allowedBranches[0] || 'HCM 1';
+  const displayLedger = isAdmin ? ledger : 'tax'; // Force tax ledger for employee
+
+  // Add audit log helper
+  const addLog = (action: string, note: string) => {
+    const newLog = {
+      id: Math.random().toString(),
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      user: simulatedUser?.name || 'Admin',
+      action,
+      note
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+  };
+
+  // --- Calculations Engine ---
+  const departmentWeights: Record<string, number> = {
+    'Service': tipWeightService,
+    'Kitchen': tipWeightKitchen,
+    'Bar': tipWeightBar,
+    'Office': 0.5,
+    'Management': 0.5,
+  };
+
+  const getWeight = (dept: string) => departmentWeights[dept] || 1.0;
+
+  // Calculate dynamic tips
+  const recalculateTips = (targetPool: number) => {
+    // 1. Gather all employees that are visible/included
+    const lockedSum = employees
+      .filter(e => e.tipsLocked)
+      .reduce((sum, e) => sum + e.tips, 0);
+
+    const unlockedEmps = employees.filter(e => !e.tipsLocked);
+    const totalUnlockedWeightedHours = unlockedEmps.reduce(
+      (sum, e) => sum + (e.actualHours * getWeight(e.department)),
+      0
+    );
+
+    const remainingPool = Math.max(0, targetPool - lockedSum);
+
+    const updated = employees.map(e => {
+      if (e.tipsLocked) return e;
+      if (totalUnlockedWeightedHours === 0) {
+        return { ...e, tips: 0 };
+      }
+      const myWeightedHours = e.actualHours * getWeight(e.department);
+      const calculatedTips = parseFloat(((myWeightedHours / totalUnlockedWeightedHours) * remainingPool).toFixed(2));
+      return { ...e, tips: calculatedTips };
+    });
+
+    setEmployees(updated);
+    addLog('Recalculate Tips', `Recalculated tip pool (€${targetPool.toFixed(2)}) across employees. Locked tips: €${lockedSum.toFixed(2)}.`);
+  };
+
+  // Handle single employee calculation
+  const getEmployeeCalculatedDetails = (emp: PayrollEmployee, activeLedger: 'internal' | 'tax') => {
+    // Hourly rates & basic pay
+    let baseSalary = 0;
+    let actualHoursToReport = emp.actualHours;
+    let fwhaAdded = 0;
+    let fwhaPayout = 0;
+    let currentFwhaBalance = emp.fwhaBalance;
+
+    if (emp.contractType === 'Monthly') {
+      baseSalary = emp.monthlyContractSalary || (emp.baseRate * emp.standardHours);
+      // FWHA calculation
+      const fwhaDiff = emp.actualHours - emp.standardHours;
+      fwhaAdded = fwhaDiff;
+      currentFwhaBalance = emp.fwhaBalance + fwhaDiff;
+      
+      // Auto cash-out if over max threshold (+40h)
+      if (currentFwhaBalance > maxFwhaHours) {
+        const excess = currentFwhaBalance - maxFwhaHours;
+        fwhaPayout = excess * emp.baseRate;
+        currentFwhaBalance = maxFwhaHours;
+      }
+      actualHoursToReport = emp.standardHours; // reported standard contract hours
+    } else {
+      baseSalary = emp.actualHours * emp.baseRate;
+    }
+
+    // Special Premiums (night, sunday, holiday, evening)
+    const eveningPremium = eveningShiftPremiumEnabled ? (emp.eveningHours * emp.baseRate * eveningShiftPremiumRate) : 0;
+    const nightPremium = emp.nightHours * emp.baseRate * nightShiftPremiumRate;
+    const sundayPremium = emp.sundayHours * emp.baseRate * sundayPremiumRate;
+    const holidayPremium = emp.holidayHours * emp.baseRate * holidayPremiumRate;
+    const totalPremiums = eveningPremium + nightPremium + sundayPremium + holidayPremium;
+
+    // Gross and tips
+    let totalTips = emp.tips;
+    let deductionUnpaid = emp.unpaidLeaves * (baseSalary / 30); // simplistic daily deduction
+    let totalActualIncome = baseSalary + totalPremiums + totalTips + emp.adjustment - deductionUnpaid + fwhaPayout;
+
+    // Dual ledger caps (Minijob)
+    let isMinijobCapped = false;
+    let minijobCashPay = 0;
+    let reportedBaseSalary = baseSalary;
+    let reportedPremiums = totalPremiums;
+    let reportedTips = totalTips;
+    let reportedGross = totalActualIncome;
+    let taxesAndInsurance = 0;
+
+    if (emp.contractType === 'Minijob') {
+      if (totalActualIncome > lowIncomeThreshold) {
+        isMinijobCapped = true;
+        minijobCashPay = totalActualIncome - lowIncomeThreshold;
+        
+        // Under Official / Tax ledger, we report exactly the lowIncomeThreshold
+        reportedBaseSalary = lowIncomeThreshold;
+        reportedPremiums = 0;
+        reportedTips = 0;
+        reportedGross = lowIncomeThreshold;
+        actualHoursToReport = parseFloat((lowIncomeThreshold / emp.baseRate).toFixed(2));
+      } else {
+        reportedGross = totalActualIncome;
+      }
+      taxesAndInsurance = 0; // minijobs exempt under threshold
+    } else {
+      // Tax estimation
+      reportedGross = baseSalary + totalPremiums + totalTips + emp.adjustment - deductionUnpaid;
+      taxesAndInsurance = reportedGross * emp.taxesAndInsuranceRate;
+    }
+
+    // Food allowance deduction (Sachbezug)
+    const activeFoodDeduction = emp.foodDeduction;
+
+    // Net Payouts
+    let internalNetTransfer = totalActualIncome - activeFoodDeduction - minijobCashPay; // what's wired officially in internal mode
+    let officialNetPayout = reportedGross - activeFoodDeduction - taxesAndInsurance; // Auszahlung official
+
+    if (activeLedger === 'internal') {
+      return {
+        baseSalary,
+        eveningPremium,
+        nightPremium,
+        sundayPremium,
+        holidayPremium,
+        totalPremiums,
+        tips: totalTips,
+        deductionUnpaid,
+        fwhaAdded,
+        fwhaPayout,
+        finalFwhaBalance: currentFwhaBalance,
+        totalActualIncome,
+        foodDeduction: activeFoodDeduction,
+        cashPay: minijobCashPay + fwhaPayout,
+        taxesAndInsurance: totalActualIncome * emp.taxesAndInsuranceRate,
+        netTransfer: internalNetTransfer,
+        reportedHours: emp.actualHours,
+        isCapped: isMinijobCapped
+      };
+    } else {
+      // Tax Ledger
+      return {
+        baseSalary: reportedBaseSalary,
+        eveningPremium: emp.contractType === 'Minijob' && isMinijobCapped ? 0 : eveningPremium,
+        nightPremium: emp.contractType === 'Minijob' && isMinijobCapped ? 0 : nightPremium,
+        sundayPremium: emp.contractType === 'Minijob' && isMinijobCapped ? 0 : sundayPremium,
+        holidayPremium: emp.contractType === 'Minijob' && isMinijobCapped ? 0 : holidayPremium,
+        totalPremiums: reportedPremiums,
+        tips: reportedTips,
+        deductionUnpaid,
+        fwhaAdded,
+        fwhaPayout: 0,
+        finalFwhaBalance: currentFwhaBalance,
+        totalActualIncome: reportedGross,
+        foodDeduction: activeFoodDeduction,
+        cashPay: 0,
+        taxesAndInsurance,
+        netTransfer: officialNetPayout,
+        reportedHours: actualHoursToReport,
+        isCapped: isMinijobCapped
+      };
     }
   };
 
-  const handleRunPayrollSubmit = () => {
-    setPayrollStatus("Processed");
-    setIsSubmitModalOpen(false);
-    setIsSuccessModalOpen(true);
+  // --- Trigger State Machine Reset ---
+  const handleDataModification = (empId: string, updatedFields: Partial<PayrollEmployee>) => {
+    const executeUpdate = () => {
+      setEmployees(prev => prev.map(e => {
+        if (e.id === empId) {
+          const merged = { ...e, ...updatedFields };
+          return merged;
+        }
+        return e;
+      }));
+
+      // Reset state if Approved or Paid
+      if (payrollState === 'Approved' || payrollState === 'Paid') {
+        setPayrollState('Draft');
+        addLog('State Reverted', `Data modified for employee ID ${empId}. Payroll period reset from ${payrollState} to Draft.`);
+      } else if (payrollState === 'TaxVersionCreated') {
+        setPayrollState('TaxVersionAdjusted');
+        addLog('State Progressed', `Custom adjustments applied to official Tax ledger for employee ID ${empId}.`);
+      }
+    };
+
+    if (payrollState === 'Approved' || payrollState === 'Paid') {
+      setShowStateResetWarning(empId);
+      // We will let the confirmation handle it
+    } else {
+      executeUpdate();
+    }
+  };
+
+  const confirmModification = (empId: string, updatedFields: Partial<PayrollEmployee>) => {
+    setEmployees(prev => prev.map(e => {
+      if (e.id === empId) {
+        return { ...e, ...updatedFields };
+      }
+      return e;
+    }));
+    const oldState = payrollState;
+    setPayrollState('Draft');
+    setShowStateResetWarning(null);
+    addLog('State Reverted', `Confirmed modification for employee ID ${empId}. Payroll state reset from ${oldState} to Draft.`);
+  };
+
+  // --- Filter and Search ---
+  const filteredEmployees = employees.filter(emp => {
+    if (userAccessType === 'Staff') {
+      if (simulatedUser) {
+        return emp.name.toLowerCase().includes(simulatedUser.name.toLowerCase());
+      }
+      return false;
+    }
+    if (userAccessType === 'Manager') {
+      if (!allowedBranches.includes(emp.branch)) {
+        return false;
+      }
+    } else {
+      // Admin branch filter
+      if (selectedBranch !== 'All Branches' && emp.branch !== selectedBranch) {
+        return false;
+      }
+    }
+    // 3. Contract filter
+    if (selectedContract !== 'All Contracts' && emp.contractType !== selectedContract) {
+      return false;
+    }
+    // 4. Search query
+    const searchLower = searchQuery.toLowerCase();
+    return emp.name.toLowerCase().includes(searchLower) || emp.role.toLowerCase().includes(searchLower);
+  });
+
+  // KPI Metrics
+  const calculatedMetrics = filteredEmployees.map(e => getEmployeeCalculatedDetails(e, displayLedger));
+  const totalReportedHours = calculatedMetrics.reduce((sum, item) => sum + item.reportedHours, 0);
+  const totalGrossCost = calculatedMetrics.reduce((sum, item) => sum + item.totalActualIncome, 0);
+  const totalNetPayout = calculatedMetrics.reduce((sum, item) => sum + item.netTransfer, 0);
+  const totalCashPayout = calculatedMetrics.reduce((sum, item) => sum + item.cashPay, 0);
+
+  // --- Compensatory Leave booking ---
+  const handleBookCompensatoryLeave = () => {
+    if (!compensatoryLeaveEmp) return;
+    const emp = compensatoryLeaveEmp;
+    
+    // Check FWHA balance
+    if (emp.fwhaBalance < compensatoryHours) {
+      alert(`Employee ${emp.name} only has ${emp.fwhaBalance.toFixed(1)}h in their FWHA account, which is insufficient for ${compensatoryHours}h of compensatory leave.`);
+      return;
+    }
+
+    const updatedBalance = emp.fwhaBalance - compensatoryHours;
+    handleDataModification(emp.id, { fwhaBalance: updatedBalance });
+    addLog('Compensatory Leave', `Approved ${compensatoryHours}h of compensatory leave for ${emp.name}. Balance reduced to ${updatedBalance.toFixed(1)}h.`);
+    setCompensatoryLeaveEmp(null);
+  };
+
+  // --- Export File generators ---
+  const getDATEVPreview = () => {
+    let output = `[DATEV ASCII-Import | Payroll June 2026]\n`;
+    output += `Format: CSV | Client ID: JB-HCM99 | Consultant: 10294\n`;
+    output += `========================================================\n`;
+    output += `EmpNo,TaxId,SocialSecNum,TaxClass,ReportedHours,BaseWage,BaseWageCode,ExemptPremiums,ExemptTips,TipsCode,NetPayout,AccountingCode\n`;
+    employees.forEach((emp, index) => {
+      const calc = getEmployeeCalculatedDetails(emp, 'tax');
+      output += `${100 + index},"${emp.taxId}","${emp.socialSecurityNo}","${emp.taxClass}",${calc.reportedHours.toFixed(2)},${calc.baseSalary.toFixed(2)},"${codeBaseSalary}",${calc.totalPremiums.toFixed(2)},${calc.tips.toFixed(2)},"${codeTipsDistribution}",${calc.netTransfer.toFixed(2)},"Code-F (${codeEveningPremium}/${codeNightPremium}/${codeSundayPremium}/${codeHolidayPremium})"\n`;
+    });
+    return output;
+  };
+
+  const getBMDPreview = () => {
+    let output = `[BMD Lohnimport | Version 4.3 | Austria Standard]\n`;
+    output += `Client: JOHNS_BISTRO_VIETNAM | Period: 2026-06\n`;
+    output += `========================================================\n`;
+    output += `PERSNR;NAME;SVNR;STKL;HOURS;BASE;BASE_CODE;PREMIUMS;PREMIUMS_CODES;TIPS;TIPS_CODE;NET_PAYOUT;S_CODE\n`;
+    employees.forEach((emp, index) => {
+      const calc = getEmployeeCalculatedDetails(emp, 'tax');
+      output += `${1000 + index};"${emp.name}";"${emp.socialSecurityNo}";"${emp.taxClass}";${calc.reportedHours.toFixed(2)};${calc.baseSalary.toFixed(2)};"${codeBaseSalary}";${calc.totalPremiums.toFixed(2)};"(${codeEveningPremium},${codeNightPremium},${codeSundayPremium},${codeHolidayPremium})";${calc.tips.toFixed(2)};"${codeTipsDistribution}";${calc.netTransfer.toFixed(2)};"F_EXEMPT"\n`;
+    });
+    return output;
+  };
+
+  const getCSVPreview = () => {
+    let output = `Employee Name,Branch,Role,Contract Type,Reported Hours,Base Salary,Base Salary Code,Premiums,Premiums Codes,Tips,Tips Code,Sachbezug,Estimated Tax,Net Payout\n`;
+    employees.forEach(emp => {
+      const calc = getEmployeeCalculatedDetails(emp, displayLedger);
+      output += `"${emp.name}","${emp.branch}","${emp.role}","${emp.contractType}",${calc.reportedHours.toFixed(2)},${calc.baseSalary.toFixed(2)},"${codeBaseSalary}",${calc.totalPremiums.toFixed(2)},"(${codeEveningPremium},${codeNightPremium},${codeSundayPremium},${codeHolidayPremium})",${calc.tips.toFixed(2)},"${codeTipsDistribution}",${calc.foodDeduction.toFixed(2)},${calc.taxesAndInsurance.toFixed(2)},${calc.netTransfer.toFixed(2)}\n`;
+    });
+    return output;
   };
 
   return (
-    <div className="space-y-6 max-w-[1300px] mx-auto pb-16 font-sans text-left">
-      {/* 1. Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 select-none">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 tracking-tight font-display">
-            Payroll
-          </h1>
-          <p className="text-sm text-slate-700 mt-1 font-normal">
-            Process payroll, manage payments and view payroll history.
-          </p>
+    <div className="w-full bg-[#FAFAFA] min-h-screen pb-16 font-sans text-slate-700 antialiased" id="payroll-workspace">
+      
+      {/* ⚠️ Access limit warning for employees */}
+      {!isAdmin && (
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-800 px-6 py-3 text-sm flex items-center gap-2" id="employee-access-banner">
+          <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0" />
+          <span>
+            <strong>🔒 Employee Mode ({simulatedUser?.name || 'Staff'}):</strong> Internal payroll ledger is hidden to protect commercial data. You are authorized to access, edit, and export the Tax & Accounting ledger for the <strong>{userBranch}</strong> branch only.
+          </span>
         </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button
-            onClick={() => alert("Excel file containing current payroll summary with 32 staff records has been downloaded successfully!")}
-            className="px-4 py-2 border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-[14px] font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-3xs"
-          >
-            <FileDown className="w-4 h-4 text-slate-700" />
-            <span>Export</span>
-          </button>
-          <button
-            onClick={() => setIsSubmitModalOpen(true)}
-            className="px-4 py-2 bg-[#7553FF] hover:bg-[#623EE2] text-white rounded-xl text-[14px] font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-3xs hover:-translate-y-px"
-          >
-            <Plus className="w-4 h-4 text-white" />
-            <span>Run Payroll</span>
-          </button>
-        </div>
-      </div>
+      )}
 
-      {/* 2. KPI Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Total Payroll Cost */}
-        <div className="bg-white border border-[#EAE4DC] rounded-lg p-5 flex items-center gap-4 hover:shadow-card_hover shadow-card transition-all">
-          <div className="w-12 h-12 rounded-md bg-[#F5F3FF] flex items-center justify-center text-[#7553FF] shrink-0 border border-purple-100/50">
-            <FileText className="w-5 h-5" />
-          </div>
-          <div className="leading-tight">
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-slate-700 font-semibold uppercase tracking-wider">Total Payroll Cost</span>
-              <HelpCircle className="w-3.5 h-3.5 text-slate-700 cursor-pointer" title="Sum of all net payouts for this period" />
-            </div>
-            <p className="text-xl font-bold text-[#1C1814] mt-1 font-sans">
-              ${totalPayrollCost.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-slate-700 mt-0.5 font-normal">May 12 – May 18, 2024</p>
-          </div>
-        </div>
-
-        {/* Total Employees */}
-        <div className="bg-white border border-[#EAE4DC] rounded-lg p-5 flex items-center gap-4 hover:shadow-card_hover shadow-card transition-all">
-          <div className="w-12 h-12 rounded-md bg-[#EEFDF4] flex items-center justify-center text-[#15803D] shrink-0 border border-emerald-100">
-            <Users className="w-5 h-5" />
-          </div>
-          <div className="leading-tight">
-            <span className="text-xs text-slate-700 font-semibold uppercase tracking-wider">Total Employees</span>
-            <p className="text-xl font-bold text-[#1C1814] mt-1 font-sans">
-              {totalEmployees}
-            </p>
-            <p className="text-xs text-slate-700 mt-0.5 font-normal">Active employees</p>
-          </div>
-        </div>
-
-        {/* Total Hours */}
-        <div className="bg-white border border-[#EAE4DC] rounded-lg p-5 flex items-center gap-4 hover:shadow-card_hover shadow-card transition-all">
-          <div className="w-12 h-12 rounded-md bg-[#EFF6FF] flex items-center justify-center text-[#1D4ED8] shrink-0 border border-blue-100">
-            <Clock className="w-5 h-5" />
-          </div>
-          <div className="leading-tight">
-            <span className="text-xs text-slate-700 font-semibold uppercase tracking-wider">Total Hours</span>
-            <p className="text-xl font-bold text-[#1C1814] mt-1 font-sans">
-              {totalHours.toFixed(2)}h
-            </p>
-            <p className="text-xs text-slate-700 mt-0.5 font-normal">All hours</p>
-          </div>
-        </div>
-
-        {/* Average Hourly Rate */}
-        <div className="bg-white border border-[#EAE4DC] rounded-lg p-5 flex items-center gap-4 hover:shadow-card_hover shadow-card transition-all">
-          <div className="w-12 h-12 rounded-md bg-[#FFFBEB] flex items-center justify-center text-[#B45309] shrink-0 border border-amber-100">
-            <TrendingUp className="w-5 h-5" />
-          </div>
-          <div className="leading-tight">
-            <span className="text-xs text-slate-700 font-semibold uppercase tracking-wider">Average Hourly Rate</span>
-            <p className="text-xl font-bold text-[#1C1814] mt-1 font-sans">
-              ${avgHourlyRate.toFixed(2)}
-            </p>
-            <p className="text-xs text-slate-700 mt-0.5 font-normal">Across all employees</p>
-          </div>
-        </div>
-
-        {/* Payroll Status */}
-        <div className="bg-white border border-[#EAE4DC] rounded-lg p-5 flex items-center gap-4 hover:shadow-card_hover shadow-card transition-all">
-          <div className="w-12 h-12 rounded-md bg-[#FEF2F2] flex items-center justify-center text-[#B91C1C] shrink-0 border border-rose-100">
-            <CheckCircle className="w-5 h-5" />
-          </div>
-          <div className="leading-tight">
-            <span className="text-xs text-slate-700 font-semibold uppercase tracking-wider block">Payroll Status</span>
-            <div className="mt-1.5 flex items-center">
-              {payrollStatus === "Draft" ? (
-                <span className="inline-flex items-center gap-1.5 bg-[#FAF9F7] text-slate-650 px-2.5 py-0.5 rounded-full text-xs font-semibold select-none border border-slate-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block shrink-0" />
-                  Draft
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 bg-[#EEFDF4] text-[#15803D] px-2.5 py-0.5 rounded-full text-xs font-semibold select-none border border-emerald-200 animate-pulse">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] inline-block shrink-0" />
-                  Approved
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-700 mt-1 font-normal">
-              {payrollStatus === "Draft" ? "Not submitted" : "Processed & Disbursed"}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Action Filter Row */}
-      <div className="bg-white border border-[#EAE4DC] rounded-lg p-5 flex flex-col gap-4 select-none shadow-card">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Calendar Selector */}
-            <div className="relative">
-              <Calendar className="w-4 h-4 text-slate-700 absolute left-3 top-3 pointer-events-none" />
-              <select
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="bg-white border border-slate-200 rounded-xl py-2 pl-9 pr-8 font-sans text-[14px] font-semibold text-slate-700 focus:outline-none focus:border-[#7553FF] cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M7%209l3%203%203-3%22%20stroke%3D%22%23475569%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.8%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_10px_center] bg-no-repeat w-[260px]"
-              >
-                <option value="May 12 – May 18, 2024">May 12 – May 18, 2024</option>
-                <option value="May 05 – May 11, 2024">May 05 – May 11, 2024</option>
-                <option value="Apr 28 – May 04, 2024">Apr 28 – May 04, 2024</option>
-              </select>
-            </div>
-
-            {/* Department Filter */}
-            <select
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl py-2 px-3.5 font-sans text-[14px] font-semibold text-slate-700 focus:outline-none focus:border-[#7553FF] cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M7%209l3%203%203-3%22%20stroke%3D%22%23475569%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.8%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_10px_center] bg-no-repeat pr-8 w-[180px]"
-            >
-              <option value="All Departments">All Departments</option>
-              <option value="Service">Service</option>
-              <option value="Management">Management</option>
-              <option value="Kitchen">Kitchen</option>
-              <option value="Bar">Bar</option>
-            </select>
-
-            {/* Location Filter */}
-            <select
-              value={selectedLocation}
-              onChange={(e) => setSelectedLocation(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl py-2 px-3.5 font-sans text-[14px] font-semibold text-slate-700 focus:outline-none focus:border-[#7553FF] cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M7%209l3%203%203-3%22%20stroke%3D%22%23475569%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.8%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_10px_center] bg-no-repeat pr-8 w-[180px]"
-            >
-              <option value="All Locations">All Locations</option>
-              <option value="HQ">HQ</option>
-              <option value="Kitchen Area">Kitchen Area</option>
-              <option value="Front Desk">Front Desk</option>
-            </select>
-
-            {/* Employment Types */}
-            <select
-              value={selectedEmploymentType}
-              onChange={(e) => setSelectedEmploymentType(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl py-2 px-3.5 font-sans text-[14px] font-semibold text-slate-700 focus:outline-none focus:border-[#7553FF] cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M7%209l3%203%203-3%22%20stroke%3D%22%23475569%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.8%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_10px_center] bg-no-repeat pr-8 w-[210px]"
-            >
-              <option value="All Employment Types">All Employment Types</option>
-              <option value="Hourly">Hourly</option>
-              <option value="Salary">Salary</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-none">
-              <Search className="w-4 h-4 text-slate-700 absolute left-3.5 top-3 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Search staff by name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64 bg-white border border-slate-200 rounded-xl py-2 pl-10 pr-4 font-sans text-[14px] focus:outline-none focus:border-[#7553FF] text-slate-755"
-              />
-            </div>
-            <button
-              onClick={() => {
-                setSelectedDepartment("All Departments");
-                setSelectedLocation("All Locations");
-                setSelectedEmploymentType("All Employment Types");
-                setSearchQuery("");
-                alert("Filters reset to default!");
-              }}
-              className="px-4 py-2 border border-slate-200 hover:border-slate-300 text-slate-600 rounded-xl text-[14px] font-semibold transition-all flex items-center gap-2 cursor-pointer shadow-3xs"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-slate-700" />
-              <span>Filters</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs segment */}
-      <div className="border-b border-slate-100 flex gap-6 text-[14px] font-semibold font-sans mt-8 select-none">
-        <button
-          onClick={() => setActiveTab("summary")}
-          className={`pb-2.5 px-1 border-b-2 transition-all cursor-pointer ${
-            activeTab === "summary"
-              ? "border-[#7553FF] text-[#7553FF] font-bold"
-              : "border-transparent text-slate-700 hover:text-slate-600"
-          }`}
-        >
-          Payroll Summary
-        </button>
-        <button
-          onClick={() => setActiveTab("payments")}
-          className={`pb-2.5 px-1 border-b-2 transition-all cursor-pointer ${
-            activeTab === "payments"
-              ? "border-[#7553FF] text-[#7553FF] font-bold"
-              : "border-transparent text-slate-700 hover:text-slate-600"
-          }`}
-        >
-          Payments
-        </button>
-        <button
-          onClick={() => setActiveTab("history")}
-          className={`pb-2.5 px-1 border-b-2 transition-all cursor-pointer ${
-            activeTab === "history"
-              ? "border-[#7553FF] text-[#7553FF] font-bold"
-              : "border-transparent text-slate-700 hover:text-slate-600"
-          }`}
-        >
-          Payroll History
-        </button>
-      </div>
-
-      {/* 4. MAIN CONTENT TABS */}
-      <AnimatePresence mode="wait">
-        {activeTab === "summary" && (
-          <motion.div
-            key="summary-view"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            className="space-y-4"
-          >
-            {/* Sub header for active payroll summary status */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 py-3 select-none">
-              <div className="text-left">
-                <div className="flex items-center gap-2.5">
-                  <h2 className="text-lg font-bold text-slate-800">
-                    Payroll Summary
-                  </h2>
-                  <span className="bg-[#EEF2FF] text-[#5B39E3] text-xs px-2.5 py-0.5 rounded-full font-semibold select-none border border-[#DDD6FE]">
-                    Draft
-                  </span>
-                </div>
-                <p className="text-[13px] text-slate-700 mt-1 font-normal">
-                  Review and confirm payroll before submitting.
+      {/* State Reset dialog if edit occurs on Approved/Paid */}
+      {showStateResetWarning && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" id="state-reset-warning-dialog">
+          <div className="bg-white p-6 max-w-md w-full rounded-lg border border-slate-200 shadow-xl">
+            <div className="flex gap-3 text-amber-700 mb-4">
+              <AlertTriangle className="w-6 h-6 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">Revert Payroll status to Draft?</h3>
+                <p className="text-sm mt-1 text-slate-700">
+                  Payroll is currently in <strong>{payrollState}</strong> status. Any modification to hours, rate, or allowances will automatically revert the status to <strong>Draft</strong> and require re-approval to prevent tax discrepancy.
                 </p>
               </div>
-
-              <div className="flex items-center gap-4 shrink-0 font-sans text-[14px]">
-                <span className="text-slate-700 font-medium">
-                  Pay Period: May 12 – May 18, 2024
-                </span>
-                <button
-                  onClick={() => {
-                    if (filteredStaff.length > 0) {
-                      setActiveEmployee(filteredStaff[0]);
-                    } else {
-                      alert("No staff in the list!");
-                    }
-                  }}
-                  className="px-4 py-2 border border-[#7553FF]/20 hover:border-[#7553FF] text-[#7553FF] hover:bg-[#F5F3FF] rounded-xl text-[14px] font-semibold transition-all flex items-center gap-2 cursor-pointer bg-white"
-                >
-                  <Eye className="w-4 h-4" />
-                  <span>Preview Payslip</span>
-                </button>
-              </div>
             </div>
-
-            {/* MAIN TABLE */}
-            <div className="bg-white border border-[#EAE4DC] rounded-lg overflow-hidden shadow-card">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse min-w-[1000px]">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-[#FAF9F7]/40 text-[13px] font-semibold text-slate-700 uppercase tracking-wider select-none">
-                      <th className="px-5 py-4 text-left w-12">
-                        <input
-                          type="checkbox"
-                          checked={filteredStaff.length > 0 && selectedRows.length === filteredStaff.length}
-                          onChange={(e) => handleSelectAll(e.target.checked)}
-                          className="w-4 h-4 rounded border-slate-300 text-[#7553FF] focus:ring-[#7553FF] cursor-pointer"
-                        />
-                      </th>
-                      <th className="px-5 py-4 text-left font-sans text-[13px]">Staff</th>
-                      <th className="px-4 py-4 text-left font-sans text-[13px]">Department</th>
-                      <th className="px-4 py-4 text-left font-sans text-[13px]">Location</th>
-                      <th className="px-4 py-4 text-center font-sans text-[13px]">Hours</th>
-                      <th className="px-4 py-4 text-left font-sans text-[13px]">Rate Type</th>
-                      <th className="px-4 py-4 text-right font-sans text-[13px]">Rate</th>
-                      <th className="px-4 py-4 text-right font-sans text-[13px]">Gross Pay</th>
-                      <th className="px-4 py-4 text-right font-sans text-[13px]">Deductions</th>
-                      <th className="px-5 py-4 text-center font-sans text-[13px]">Net Pay</th>
-                      <th className="px-5 py-4 text-center font-sans text-[13px] w-14"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-[14px] text-slate-600 font-sans">
-                    {filteredStaff.length === 0 ? (
-                      <tr>
-                        <td colSpan={11} className="py-12 text-center text-slate-700 font-normal">
-                          <AlertTriangle className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-                          <p>No payroll records found matching the active filters.</p>
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredStaff.map((record) => {
-                        const isChecked = selectedRows.includes(record.id);
-                        const photo = avatars[record.name];
-                        const initials = record.name.split(" ").map(n => n[0]).join("");
-
-                        return (
-                          <tr
-                            key={record.id}
-                            className={`hover:bg-slate-50/20 transition-all font-sans ${
-                              isChecked ? "bg-indigo-50/10" : ""
-                            }`}
-                          >
-                            <td className="py-4 px-5">
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={(e) => handleToggleRow(record.id, e.target.checked)}
-                                className="w-4 h-4 rounded border-slate-300 text-[#7553FF] focus:ring-[#7553FF] cursor-pointer"
-                              />
-                            </td>
-                            {/* Staff Info */}
-                            <td className="py-4 px-5">
-                              <div className="flex items-center gap-3">
-                                {photo ? (
-                                  <img
-                                    src={photo}
-                                    alt={record.name}
-                                    className="w-10 h-10 rounded-full object-cover border border-slate-100 shrink-0"
-                                    referrerPolicy="no-referrer"
-                                  />
-                                ) : (
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs tracking-wide uppercase shrink-0 ${nameColors[record.name] || 'bg-slate-150 text-slate-605'}`}>
-                                    {initials}
-                                  </div>
-                                )}
-                                <div className="text-left leading-tight">
-                                  <span className="font-semibold text-slate-800 block text-[14px]">
-                                    {record.name}
-                                  </span>
-                                  <span className="text-xs text-slate-700 font-normal mt-0.5 block">
-                                    {record.role}
-                                  </span>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Department */}
-                            <td className="py-4 px-4 text-left text-slate-700 font-normal text-[14px]">
-                              {record.department}
-                            </td>
-
-                            {/* Location */}
-                            <td className="py-4 px-4 text-left text-slate-600 font-normal text-[14px]">
-                              {record.location}
-                            </td>
-
-                            {/* Hours Worked */}
-                            <td className="py-4 px-4 text-center leading-tight">
-                              <span className="font-semibold text-slate-800 text-[14px]">
-                                {record.hours.toFixed(2)}
-                              </span>
-                              {record.hasOT && (
-                                <span className="text-[#7553FF] text-[11px] font-semibold mt-0.5 block bg-[#F0ECFF] rounded px-1.5 py-0.5 w-fit mx-auto select-none">
-                                  OT {record.otHours.toFixed(2)}h
-                                </span>
-                              )}
-                            </td>
-
-                            {/* Rate Type */}
-                            <td className="py-4 px-4 text-left">
-                              <span className={`inline-flex px-2 py-0.5 text-xs font-semibold rounded-md ${
-                                record.rateType === "Salary"
-                                  ? "bg-purple-50 text-purple-700 border border-purple-100"
-                                  : "bg-blue-50 text-blue-700 border border-blue-100"
-                              }`}>
-                                {record.rateType}
-                              </span>
-                            </td>
-
-                            {/* Rate */}
-                            <td className="py-4 px-4 text-right font-semibold text-slate-800 text-[14px] whitespace-pre-line">
-                              {record.rateType === "Salary" ? `$${record.rate.toFixed(2)} /week` : `$${record.rate.toFixed(2)}`}
-                            </td>
-
-                            {/* Gross Pay */}
-                            <td className="py-4 px-4 text-right font-semibold text-slate-800 text-[14px]">
-                              ${record.grossPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                            </td>
-
-                            {/* Deductions */}
-                            <td className="py-4 px-4 text-right text-slate-700 font-normal text-[14px]">
-                              ${record.deductions.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                            </td>
-
-                            {/* Net Pay (The premium green bg tag!) */}
-                            <td className="py-4 px-5 text-center whitespace-nowrap">
-                              <span className="inline-block bg-[#F0FDF4] text-[#166534] text-[14px] font-bold px-4 py-1.5 rounded-xl text-center min-w-[95px]">
-                                ${record.netPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                              </span>
-                            </td>
-
-                            {/* Options action dots */}
-                            <td className="py-4 px-5 text-center relative">
-                              <button
-                                onClick={() => setActiveActionMenuId(activeActionMenuId === record.id ? null : record.id)}
-                                className="w-8 h-8 rounded-full border border-transparent hover:border-slate-200 text-slate-700 hover:text-slate-800 transition-all flex items-center justify-center cursor-pointer"
-                              >
-                                <MoreVertical className="w-4 h-4" />
-                              </button>
-
-                              {/* Dropdown Action menu details */}
-                              {activeActionMenuId === record.id && (
-                                <>
-                                  <div
-                                    className="fixed inset-0 z-40"
-                                    onClick={() => setActiveActionMenuId(null)}
-                                  />
-                                  <div className="absolute right-4 top-10 w-44 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1.5 text-left text-[14px] text-slate-700">
-                                    <button
-                                      onClick={() => handleEditStaffClick(record)}
-                                      className="w-full px-3.5 py-2 text-left hover:bg-slate-50 flex items-center gap-2"
-                                    >
-                                      <span>⚙ Edit Rates</span>
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        setActiveEmployee(record);
-                                        setActiveActionMenuId(null);
-                                      }}
-                                      className="w-full px-3.5 py-2 text-left hover:bg-slate-50 flex items-center gap-2 text-[#7553FF]"
-                                    >
-                                      <Eye className="w-3.5 h-3.5" />
-                                      <span>View Payslip</span>
-                                    </button>
-                                    <div className="h-px bg-slate-100 my-1" />
-                                    <button
-                                      onClick={() => handleDeleteStaff(record.id)}
-                                      className="w-full px-3.5 py-2 text-left hover:bg-rose-50 text-[#B91C1C] font-semibold flex items-center gap-2 transition-colors"
-                                    >
-                                      <span>✕ Remove</span>
-                                    </button>
-                                  </div>
-                                </>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Table pagination footer */}
-              <div className="border-t border-slate-100 py-3.5 px-6 flex flex-col sm:flex-row items-center justify-between gap-4 select-none bg-[#FAF9F7]/10">
-                <div className="flex items-center gap-2.5 font-sans text-[14px] text-slate-700">
-                  <span>Show</span>
-                  <select className="border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 font-semibold focus:outline-none">
-                    <option>10</option>
-                    <option>25</option>
-                    <option>50</option>
-                  </select>
-                  <span>per page</span>
-                </div>
-
-                <div className="flex items-center gap-4 text-[14px]">
-                  <span className="text-slate-700 font-medium">1 – 8 of 32</span>
-                  <div className="flex items-center gap-1">
-                    <button className="p-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all cursor-pointer">
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button className="px-3 py-1 bg-[#F0ECFF] text-[#7553FF] font-bold rounded-lg border border-[#DDD6FE] text-xs">
-                      1
-                    </button>
-                    <button className="px-3 py-1 hover:bg-slate-50 text-slate-700 rounded-lg text-xs" onClick={() => alert("Moving to page 2...")}>
-                      2
-                    </button>
-                    <button className="px-3 py-1 hover:bg-slate-50 text-slate-700 rounded-lg text-xs" onClick={() => alert("Moving to page 3...")}>
-                      3
-                    </button>
-                    <button className="px-3 py-1 hover:bg-slate-50 text-slate-700 rounded-lg text-xs" onClick={() => alert("Moving to page 4...")}>
-                      4
-                    </button>
-                    <button className="p-1.5 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-all cursor-pointer" onClick={() => alert("Moving to next page...")}>
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div className="flex justify-end gap-3">
+              <button 
+                onClick={() => setShowStateResetWarning(null)}
+                className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm hover:bg-slate-50"
+              >
+                Cancel Changes
+              </button>
+              <button 
+                onClick={() => {
+                  const emp = employees.find(e => e.id === showStateResetWarning);
+                  if (emp && editingEmployee) {
+                    confirmModification(emp.id, editingEmployee);
+                    setEditingEmployee(null);
+                  } else {
+                    setShowStateResetWarning(null);
+                  }
+                }}
+                className="px-4 py-2 bg-rose-600 text-white rounded-lg text-sm font-medium hover:bg-rose-700"
+              >
+                Confirm & Revert to Draft
+              </button>
             </div>
-          </motion.div>
-        )}
+          </div>
+        </div>
+      )}
 
-        {activeTab === "payments" && (
-          <motion.div
-            key="payments-view"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            className="space-y-4 text-left"
-          >
-            <div className="bg-white border border-[#EAE4DC] rounded-lg p-6 shadow-card">
-              <h2 className="text-lg font-bold text-slate-800">Direct Bank Payouts</h2>
-              <p className="text-sm text-slate-700 mt-1">Beneficiary list and transaction status synchronized for this period.</p>
-              
-              <div className="overflow-x-auto mt-6">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-[#FAF9F7]/40 text-[13px] font-semibold text-slate-700 uppercase tracking-wider select-none text-left">
-                      <th className="py-4 px-4 font-sans">Payment Ref</th>
-                      <th className="py-4 px-4 font-sans">Staff Beneficiary</th>
-                      <th className="py-4 px-4 font-sans">Bank Branch</th>
-                      <th className="py-4 px-4 font-sans">Account No.</th>
-                      <th className="py-4 px-4 text-right font-sans">Gross Amount</th>
-                      <th className="py-4 px-4 text-center font-sans">Direct Transfer Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-[14px] text-slate-700 font-sans">
-                    {[
-                      { ref: "PMT-876251", name: "Le Chi", bank: "Techcombank Ho Chi Minh", acc: "1902847551029", amount: 880.00, status: "SUCCESS" },
-                      { ref: "PMT-876252", name: "Tran Binh", bank: "Vietcombank Ha Noi", acc: "1002947118274", amount: 962.50, status: "SUCCESS" },
-                      { ref: "PMT-876253", name: "Pham Dung", bank: "MB Bank Da Nang", acc: "982736410293", amount: 1005.00, status: "SUCCESS" },
-                      { ref: "PMT-876254", name: "Hoang Em", bank: "Sacombank Nha Trang", acc: "060281940591", amount: 720.00, status: "SUCCESS" },
-                      { ref: "PMT-876255", name: "Vu Giang", bank: "ACB Bank Can Tho", acc: "1029475103", amount: 835.00, status: "PENDING" },
-                    ].map((tx) => (
-                      <tr key={tx.ref} className="hover:bg-slate-50/10">
-                        <td className="py-3.5 px-4 font-mono text-slate-700 font-medium">{tx.ref}</td>
-                        <td className="py-3.5 px-4 font-semibold text-slate-800">{tx.name}</td>
-                        <td className="py-3.5 px-4 text-slate-600">{tx.bank}</td>
-                        <td className="py-3.5 px-4 font-mono text-slate-550">{tx.acc}</td>
-                        <td className="py-3.5 px-4 text-right font-bold text-slate-800">${tx.amount.toFixed(2)}</td>
-                        <td className="py-3.5 px-4 text-center">
-                          {tx.status === "SUCCESS" ? (
-                            <span className="inline-flex items-center gap-1.5 bg-[#F0FDF4] text-[#166534] border border-[#DCFCE7] px-2.5 py-0.5 rounded-full text-xs font-semibold select-none">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#22C55E] inline-block shrink-0" />
-                              SUCCESS
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 bg-[#FFFBEB] text-[#92400E] border border-[#FEF3C7] px-2.5 py-0.5 rounded-full text-xs font-semibold select-none animate-pulse">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] inline-block shrink-0" />
-                              PROCESSING
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+      {/* Flat Header Layout */}
+      <div className="w-full pt-6" id="payroll-header">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-2 border-b border-[#EAE4DC]">
+          <div className="space-y-1.5 text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-semibold text-[#7553FF] bg-[#7553FF]/10 px-2 py-0.5 rounded-[2px] uppercase tracking-wider font-sans">HR & Finance</span>
+              <span className="text-[12px] text-slate-700 font-mono">Period: June 2026</span>
             </div>
-          </motion.div>
-        )}
+            <h1 className="text-[28px] font-semibold text-[#1C1814] tracking-tight flex items-center gap-2.5 font-sans">
+              <Coins className="w-[24px] h-[24px] text-[#7553FF]" />
+              <span>Payroll Reconciliation & Settlement</span>
+            </h1>
+            <p className="text-[14px] text-slate-700 font-normal leading-relaxed font-sans">
+              Dual-ledger payroll system: Automatic reconciliation of internal costs and official tax reporting.
+            </p>
+          </div>
 
-        {activeTab === "history" && (
-          <motion.div
-            key="history-view"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            className="space-y-4 text-left"
-          >
-            <div className="bg-white border border-[#EAE4DC] rounded-lg p-6 shadow-card">
-              <h2 className="text-lg font-bold text-slate-800">Historical Statements</h2>
-              <p className="text-sm text-slate-700 mt-1">View locked and submitted statements for previous accounting terms.</p>
-              
-              <div className="overflow-x-auto mt-6">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-100 bg-[#FAF9F7]/40 text-[13px] font-semibold text-slate-700 uppercase tracking-wider select-none text-left">
-                      <th className="py-4 px-4 font-sans">Period Range</th>
-                      <th className="py-4 px-4 text-center font-sans">Submissions</th>
-                      <th className="py-4 px-4 text-right font-sans">Total Payroll Cost</th>
-                      <th className="py-4 px-4 text-right font-sans">Total Hours Worked</th>
-                      <th className="py-4 px-4 font-sans pl-12">Disbursed Date</th>
-                      <th className="py-4 px-4 text-center font-sans">Statement Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-[14px] text-slate-700 font-sans">
-                    {[
-                      { period: "May 05 – May 11, 2024", count: "32 Employees", cost: 27950.00, hours: 1220.00, date: "May 13, 2024" },
-                      { period: "Apr 28 – May 04, 2024", count: "30 Employees", cost: 25420.50, hours: 1180.25, date: "May 06, 2024" },
-                      { period: "Apr 21 – Apr 27, 2024", count: "31 Employees", cost: 26850.10, hours: 1205.50, date: "Apr 29, 2024" },
-                      { period: "Apr 14 – Apr 20, 2024", count: "29 Employees", cost: 24100.00, hours: 1110.00, date: "Apr 22, 2024" },
-                    ].map((history) => (
-                      <tr key={history.period} className="hover:bg-slate-50/10">
-                        <td className="py-3.5 px-4 font-semibold text-slate-800">{history.period}</td>
-                        <td className="py-3.5 px-4 text-center text-slate-600">{history.count}</td>
-                        <td className="py-3.5 px-4 text-right font-bold text-[#166534]">${history.cost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                        <td className="py-3.5 px-4 text-right text-slate-600">{history.hours.toFixed(2)}h</td>
-                        <td className="py-3.5 px-4 pl-12 text-slate-700">{history.date}</td>
-                        <td className="py-3.5 px-4 text-center">
-                          <span className="inline-flex items-center gap-1.5 bg-[#FAF9F7] text-[#1C1814] border border-slate-200 px-2.5 py-0.5 rounded-full text-xs font-semibold select-none">
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-600 inline-block shrink-0" />
-                            LOCKED & SAVED
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* 5. PAYSLIP DETAIL DRAWER/MODAL DISPLAY */}
-      <AnimatePresence>
-        {activeEmployee && (
-          <>
-            {/* Backdrop slide panel */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setActiveEmployee(null)}
-              className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-40"
-            />
-
-            {/* Slide-out pay receipt panel */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-white border-l border-slate-200 shadow-2xl z-50 p-6 flex flex-col justify-between overflow-y-auto text-left font-sans"
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setShowExportModal(true)}
+              className="h-10 px-4 bg-white border border-[#EAE4DC] hover:bg-slate-50 text-slate-700 font-medium text-[14px] rounded-lg transition-all flex items-center gap-2 cursor-pointer select-none"
+              id="btn-export-reports"
             >
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                  <div className="space-y-1 text-left">
-                    <span className="text-[11px] font-bold px-2.5 py-1 bg-purple-50 text-[#7553FF] rounded-md uppercase tracking-wider">
-                      RESTAURANT CORPORATE PAYSLIP
-                    </span>
-                    <h2 className="text-xl font-bold text-slate-800 mt-2">{activeEmployee.name}</h2>
-                    <p className="text-xs text-slate-700 font-medium">{activeEmployee.role} • {activeEmployee.department} Department</p>
-                  </div>
-                  <button
-                    onClick={() => setActiveEmployee(null)}
-                    className="p-2 hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-full text-slate-700 transition-all cursor-pointer inline-flex items-center justify-center shrink-0"
+              <FileDown className="w-[16px] h-[16px]" />
+              <span>Export Reports</span>
+            </button>
+            
+            {/* State Actions */}
+            {isAdmin && (
+              <div className="flex items-center gap-2">
+                {payrollState === 'Draft' && (
+                  <button 
+                    onClick={() => {
+                      setPayrollState('TaxVersionCreated');
+                      addLog('Create Tax Ledger', 'Successfully cloned Internal Ledger data into Official Tax Ledger and applied auto-capping filters.');
+                    }}
+                    className="h-10 px-4 bg-[#7553FF] hover:bg-[#623EE2] text-white font-medium text-[14px] rounded-lg transition-all flex items-center gap-2 border-none cursor-pointer select-none shadow-sm"
                   >
-                    <X className="w-4 h-4" />
+                    <Plus className="w-[16px] h-[16px]" />
+                    <span>Create Tax Version</span>
                   </button>
+                )}
+
+                {(payrollState === 'TaxVersionCreated' || payrollState === 'TaxVersionAdjusted') && (
+                  <button 
+                    onClick={() => {
+                      setPayrollState('Approved');
+                      addLog('Approve Payroll', 'Approved payroll statements for all branches. Transitioned ledger status to Approved.');
+                    }}
+                    className="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-[14px] rounded-lg transition-all flex items-center gap-2 border-none cursor-pointer select-none shadow-sm"
+                  >
+                    <UserCheck className="w-[16px] h-[16px]" />
+                    <span>Approve Payroll</span>
+                  </button>
+                )}
+
+                {payrollState === 'Approved' && (
+                  <button 
+                    onClick={() => {
+                      setPayrollState('Paid');
+                      addLog('Execute Payment', 'Marked payroll as fully paid. Direct transfers processed to bank accounts.');
+                    }}
+                    className="h-10 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-[14px] rounded-lg transition-all flex items-center gap-2 border-none cursor-pointer select-none shadow-sm"
+                  >
+                    <CheckCircle2 className="w-[16px] h-[16px]" />
+                    <span>Record Fully Paid</span>
+                  </button>
+                )}
+
+                {payrollState === 'Paid' && (
+                  <span className="h-10 px-4 bg-emerald-50 text-emerald-700 border border-emerald-100 text-[14px] font-normal rounded-lg flex items-center gap-2">
+                    <ShieldCheck className="w-[16px] h-[16px] text-emerald-600" />
+                    <span>Completed & Settled</span>
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full mt-6" id="payroll-dashboard-body">
+        {userAccessType === 'Staff' ? (
+          (() => {
+            const emp = employees.find(e => e.name.toLowerCase().includes(simulatedUser?.name?.toLowerCase() || '')) || employees[0];
+            if (!emp) {
+              return (
+                <div className="bg-white border border-[#EAE4DC] rounded-xl p-8 text-center text-slate-750">
+                  No personal earnings record could be resolved. Please contact the administrator.
                 </div>
-
-                <div className="space-y-4">
-                  {/* Payout summary boxes */}
-                  <div className="p-4 bg-slate-50/50 rounded-md border border-[#EAE4DC] space-y-3.5">
-                    <div className="flex justify-between items-center text-[13px]">
-                      <span className="text-slate-700 font-medium">Standard Hours Rate:</span>
-                      <span className="font-semibold text-slate-800">
-                        {activeEmployee.rateType === "Salary" ? `${activeEmployee.rateText}` : `$${activeEmployee.rate.toFixed(2)}/hr`}
-                      </span>
+              );
+            }
+            const calc = getEmployeeCalculatedDetails(emp, 'tax');
+            return (
+              <div className="space-y-6 max-w-2xl mx-auto text-left" id="personal-earnings-dashboard">
+                <div className="bg-white border border-[#EAE4DC] p-6 rounded-2xl shadow-3xs">
+                  <h2 className="text-xl font-medium text-slate-900 tracking-tight mb-1">My Pay Stub & Earnings History</h2>
+                  <p className="text-sm text-slate-700 mb-6">Showing secure official pay stub for the current period. Commercial rosters and company cost summaries are restricted.</p>
+                  
+                  <div className="border border-dashed border-slate-300 p-6 bg-[#FAF9F7]/40 rounded-xl font-sans text-slate-800" id="payslip-paper">
+                    
+                    {/* Header Details */}
+                    <div className="flex justify-between border-b border-slate-200 pb-4 mb-4">
+                      <div className="text-left">
+                        <h3 className="font-semibold text-sm text-slate-900">JOHN'S BISTRO GMBH</h3>
+                        <p className="text-xs text-slate-700">Branch Code: {emp.branch}</p>
+                        <p className="text-xs text-slate-700">Germany - National Operations</p>
+                      </div>
+                      <div className="text-right">
+                        <h4 className="font-medium text-xs text-[#7553FF] uppercase tracking-wider">Individual Payslip Statement</h4>
+                        <p className="text-xs text-slate-700 font-mono">Period: 06/2026</p>
+                        <p className="text-xs text-slate-700 font-mono">Created: {new Date().toLocaleDateString()}</p>
+                      </div>
                     </div>
 
-                    <div className="flex justify-between items-center text-[13px] pt-2 border-t border-slate-100">
-                      <span className="text-slate-700 font-medium">Gross Hours Worked:</span>
-                      <span className="font-semibold text-slate-800">
-                        {activeEmployee.hours.toFixed(2)}h
-                      </span>
+                    {/* Employee Profile */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs border-b border-slate-200 pb-4 mb-4 bg-slate-50/50 p-3 rounded-lg text-left">
+                      <div className="space-y-1">
+                        <p><strong className="text-slate-900 font-medium">Employee:</strong> {emp.name}</p>
+                        <p><strong className="text-slate-900 font-medium">Role:</strong> {emp.role}</p>
+                        <p><strong className="text-slate-900 font-medium">Contract Type:</strong> {emp.contractType}</p>
+                        <p><strong className="text-slate-900 font-medium">Social Security No:</strong> {emp.socialSecurityNo}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p><strong className="text-slate-900 font-medium">Tax ID:</strong> {emp.taxId}</p>
+                        <p><strong className="text-slate-900 font-medium">Tax Class:</strong> {emp.taxClass}</p>
+                        <p><strong className="text-slate-900 font-medium">Health Insurance:</strong> {emp.healthProvider}</p>
+                        <p><strong className="text-slate-900 font-medium">Dependent Allowance:</strong> {emp.dependentAllowance}</p>
+                      </div>
                     </div>
 
-                    {activeEmployee.hasOT && (
-                      <div className="flex justify-between items-center text-[13px] pt-2 border-t border-slate-100">
-                        <span className="text-purple-600 font-medium">Overtime Hours Multiplier:</span>
-                        <span className="font-semibold text-purple-700 font-mono">
-                          +{activeEmployee.otHours.toFixed(2)}h (at 1.5x rate)
+                    {/* Operational performance stats */}
+                    <div className="mb-4 text-xs grid grid-cols-3 gap-2 text-left">
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="text-slate-700 block text-[10px]">Actual Hours</span>
+                        <span className="font-mono font-medium text-xs">{emp.actualHours.toFixed(1)}h</span>
+                      </div>
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="text-slate-700 block text-[10px]">Standard Hours</span>
+                        <span className="font-mono font-medium text-xs">{emp.standardHours.toFixed(1)}h</span>
+                      </div>
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="text-slate-700 block text-[10px]">Certified Sick Leave</span>
+                        <span className="font-mono font-medium text-xs text-rose-700">{emp.sickLeavesWithCert} days</span>
+                      </div>
+                    </div>
+
+                    {/* Financial item breakdown */}
+                    <div className="mb-4 text-left">
+                      <h4 className="font-medium text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Gross Earnings</h4>
+                      <table className="w-full text-xs text-slate-700">
+                        <tbody>
+                          <tr className="border-b border-slate-50 py-1">
+                            <td className="py-1">Agreed Base Salary {emp.contractType === 'Monthly' ? '(Salary)' : `(Hourly @ €${emp.baseRate})`}</td>
+                            <td className="text-right py-1 font-mono">€{calc.baseSalary.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                          </tr>
+                          
+                          {calc.eveningPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Evening Shift Premium (10% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.eveningPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.nightPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Night Shift Premium (25% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.nightPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.sundayPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Sunday Premium (50% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.sundayPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.holidayPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Holiday Premium (125% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.holidayPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+
+                          {calc.tips > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-[#7553FF]">
+                              <td className="py-1">Allocated Tips (Tax Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.tips.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+
+                          {emp.adjustment !== 0 && (
+                            <tr className="border-b border-slate-50 py-1">
+                              <td className="py-1">Adjustment / Other ({emp.adjustmentNote || 'Adjustment'})</td>
+                              <td className="text-right py-1 font-mono">€{emp.adjustment.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+
+                          {calc.deductionUnpaid > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-rose-700">
+                              <td className="py-1">Unpaid Leave Deduction ({emp.unpaidLeaves} days)</td>
+                              <td className="text-right py-1 font-mono">-€{calc.deductionUnpaid.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Deductions */}
+                    <div className="mb-4 text-left">
+                      <h4 className="font-medium text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Deductions & Offsets</h4>
+                      <table className="w-full text-xs text-slate-700">
+                        <tbody>
+                          {calc.foodDeduction > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-rose-700">
+                              <td className="py-1">Sachbezug Food Allowance Deduction</td>
+                              <td className="text-right py-1 font-mono">-€{calc.foodDeduction.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.taxesAndInsurance > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-rose-700">
+                              <td className="py-1">Estimated Tax & Social Security ({ (emp.taxesAndInsuranceRate*100).toFixed(0) }%)</td>
+                              <td className="text-right py-1 font-mono">-€{calc.taxesAndInsurance.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Totals Summary */}
+                    <div className="border-t-2 border-slate-400 pt-4 mt-4 flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl" id="payslip-totals">
+                      <div className="text-left leading-tight">
+                        <span className="text-[10px] text-slate-400 block uppercase font-medium">Payment Method: Bank Transfer</span>
+                        <span className="text-xs font-semibold font-sans">OFFICIAL NET DISBURSEMENT</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xl font-mono font-medium">
+                          €{calc.netTransfer.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                         </span>
+                      </div>
+                    </div>
+
+                    {/* FWHA summary if Monthly */}
+                    {emp.contractType === 'Monthly' && (
+                      <div className="mt-4 text-xs text-slate-700 bg-blue-50 p-2.5 rounded-lg border border-blue-100 flex items-center justify-between">
+                        <span>📊 <strong>Flex Work Hour Account (FWHA):</strong> Previous: <strong className="font-mono">{emp.fwhaBalance.toFixed(1)}h</strong> | Delta: <strong className="font-mono">{(emp.actualHours - emp.standardHours).toFixed(1)}h</strong></span>
+                        <span>Ending: <strong className="font-mono">{calc.finalFwhaBalance.toFixed(1)}h</strong></span>
                       </div>
                     )}
 
-                    <div className="flex justify-between items-center text-[13px] pt-2 border-t border-slate-100">
-                      <span className="text-slate-700 font-bold block pt-1">Total Gross Earnings:</span>
-                      <span className="font-bold text-slate-800 pt-1 text-sm">
-                        ${activeEmployee.grossPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
                   </div>
 
-                  {/* Deductions panel */}
-                  <div className="p-4 bg-rose-50/20 rounded-md border border-rose-100/40 space-y-2.5">
-                    <p className="text-[11px] font-bold text-[#B91C1C] uppercase tracking-wider block">Deductions Breakdown</p>
-                    <div className="flex justify-between items-center text-[13px]">
-                      <span className="text-slate-700 font-medium">Income Tax & Social Ins. (7.5%):</span>
-                      <span className="font-semibold text-[#B91C1C]">
-                        -${activeEmployee.deductions.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* NET PAYOUT OUTCOME CARD */}
-                  <div className="p-5 bg-[#7553FF]/5 rounded-md border border-[#7553FF]/15 text-center space-y-1.5">
-                    <p className="text-[11px] font-bold text-[#7553FF] uppercase tracking-widest">NET SETTLED PAYOUT</p>
-                    <p className="text-3xl font-bold text-slate-800 font-display">
-                      ${activeEmployee.netPay.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-[11px] text-slate-700 font-normal">Transferred via bank wire transfer</p>
+                  <div className="mt-6 flex justify-end">
+                    <button 
+                      onClick={() => {
+                        const text = getCSVPreview();
+                        const blob = new Blob([text], { type: 'text/plain' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `payslip-${emp.id}-personal.txt`;
+                        a.click();
+                      }}
+                      className="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 flex items-center gap-1.5 cursor-pointer shadow-3xs"
+                    >
+                      <FileDown className="w-4 h-4" />
+                      Download Personal Statement
+                    </button>
                   </div>
                 </div>
-
-                {/* Company policy warning terms */}
-                <div className="p-3 bg-[#FAF9F7] rounded-xl border border-slate-150/60 text-[12px] text-slate-700 font-normal select-none leading-relaxed">
-                  <span className="font-semibold text-slate-700 block mb-0.5">Note:</span> This statement belongs to Restaurant Operations Staff. Incurred tax rates are calculated based on automatic labor timesheet coordinates.
-                </div>
               </div>
+            );
+          })()
+        ) : (
+          <>
+            {/* State Machine Stepper */}
+            <div className="bg-white border border-[#1C1814]/5 rounded-lg p-5 mb-6 shadow-sm" id="state-machine-stepper">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-800">Payroll Status:</span>
+              <span className={`px-2 py-0.5 text-xs font-normal rounded-[2px] border ${
+                payrollState === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                payrollState === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                'bg-blue-50 text-blue-700 border-blue-200'
+              } uppercase tracking-wide`}>
+                {payrollState}
+              </span>
+            </div>
+            
+            {/* Steps Visual */}
+            <div className="flex items-center gap-2 text-[14px] font-medium text-slate-700 w-full md:w-auto overflow-x-auto py-1">
+              {[
+                { key: 'Draft', label: '1. Draft' },
+                { key: 'TaxVersionCreated', label: '2. Tax Version Created' },
+                { key: 'TaxVersionAdjusted', label: '3. Tax Adjusted' },
+                { key: 'Approved', label: '4. Approved' },
+                { key: 'Paid', label: '5. Settled & Paid' }
+              ].map((step, idx) => {
+                const isActive = payrollState === step.key;
+                const isCompleted = ['Draft', 'TaxVersionCreated', 'TaxVersionAdjusted', 'Approved', 'Paid'].indexOf(payrollState) >= idx;
+                return (
+                  <div key={step.key} className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`px-2 py-1 rounded-[2px] ${
+                      isActive ? 'bg-[#7553FF] text-white' : isCompleted ? 'bg-[#7553FF]/20 text-[#7553FF]' : 'bg-slate-100 text-slate-700'
+                    }`}>
+                      {step.label}
+                    </span>
+                    {idx < 4 && <span className="text-slate-700">→</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
-              <div className="space-y-3 pt-4 border-t border-slate-100">
-                <button
-                  onClick={() => {
-                    alert(`Payroll statement PDF receipt for ${activeEmployee.name} downloaded successfully!`);
-                  }}
-                  className="w-full py-3 bg-[#7553FF] hover:bg-[#623EE2] text-white font-bold text-sm rounded-xl transition-all h-12 flex items-center justify-center gap-2 cursor-pointer shadow-3xs hover:-translate-y-px"
-                >
-                  <FileDown className="w-4 h-4 text-white" />
-                  <span>Download PDF Statement</span>
-                </button>
-                <button
-                  onClick={() => setActiveEmployee(null)}
-                  className="w-full py-2.5 bg-white border border-slate-200 hover:border-slate-350 text-slate-600 font-semibold text-xs rounded-xl h-10 cursor-pointer"
-                >
-                  Close Receipt
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* 6. MODAL TO CONFIRM RUN PAYROLL */}
-      <AnimatePresence>
-        {isSubmitModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSubmitModalOpen(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative bg-white rounded-lg max-w-md w-full shadow-2xl border border-[#EAE4DC] overflow-hidden z-50 p-6 space-y-6 text-left"
+        {/* Dual Ledger Toggler for Admins */}
+        {isAdmin && (
+          <div className="flex bg-white p-1 rounded-lg border border-[#EAE4DC] mb-6 w-fit" id="ledger-toggler-wrapper">
+            <button
+              onClick={() => setLedger('internal')}
+              className={`flex-1 py-2 px-2 text-center text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                ledger === 'internal'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-700 hover:bg-slate-50'
+              }`}
             >
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-md bg-indigo-50 text-[#7553FF] shrink-0 flex items-center justify-center border border-purple-100">
-                  <ShieldAlert className="w-6 h-6" />
-                </div>
-                <div className="space-y-2 flex-1">
-                  <h3 className="text-lg font-bold text-slate-800 tracking-tight font-display">
-                    Review and Submit Payroll?
-                  </h3>
-                  <p className="text-sm text-slate-700 font-normal leading-relaxed">
-                    You are preparing to finalize the current payroll list of **{totalEmployees} staff**. Total cost is **${totalPayrollCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}**.
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 bg-[#F5F3FF] text-[#7553FF] rounded-md text-[13px] space-y-2 border border-purple-100">
-                <p className="font-bold">What happens next?</p>
-                <ul className="list-disc pl-4 space-y-1 text-slate-600 font-normal">
-                  <li>Automatic salary bank direct slips are drafted.</li>
-                  <li>Draft status moves to Approved level.</li>
-                  <li>Notifications dispatched to employees.</li>
-                </ul>
-              </div>
-
-              <div className="flex gap-3 justify-end pt-2">
-                <button
-                  onClick={() => setIsSubmitModalOpen(false)}
-                  className="px-4 py-2.5 bg-white border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-600 font-semibold text-sm rounded-xl transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleRunPayrollSubmit}
-                  className="px-5 py-2.5 bg-[#7553FF] hover:bg-[#623EE2] text-white font-bold text-sm rounded-xl transition-all cursor-pointer"
-                >
-                  Confirm and Disburse
-                </button>
-              </div>
-            </motion.div>
+              <Users className="w-4 h-4" />
+              Internal Ledger (Actual Costs)
+            </button>
+            <button
+              onClick={() => setLedger('tax')}
+              className={`flex-1 py-2 px-2 text-center text-sm font-medium rounded-md transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                ledger === 'tax'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              Official Tax Ledger (Accounting)
+            </button>
           </div>
         )}
-      </AnimatePresence>
 
-      {/* 7. MODAL SUCCESS COMPLETED PAYRUN */}
-      <AnimatePresence>
-        {isSuccessModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSuccessModalOpen(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
-            />
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative bg-white rounded-lg max-w-md w-full shadow-2xl border border-[#EAE4DC] overflow-hidden z-50 p-6 space-y-5 text-center"
-            >
-              <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-100">
-                <Check className="w-8 h-8 font-bold" />
-              </div>
-
-              <div className="space-y-1.5 text-center">
-                <h3 className="text-xl font-bold text-[#1C1814] tracking-tight font-display">
-                  Payroll Submitted Successfully!
-                </h3>
-                <p className="text-sm text-slate-700 font-normal">
-                  The statement period has been successfully processed and locked.
-                </p>
-              </div>
-
-              <div className="p-4 bg-slate-50 text-slate-650 rounded-md text-[14px] leading-relaxed select-none text-left space-y-1">
-                <p className="font-semibold text-slate-700">Audit Trail details:</p>
-                <p>• Value Payout: <strong>${totalPayrollCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</strong></p>
-                <p>• Employees count: <strong>{totalEmployees} active records</strong></p>
-                <p>• Date processed: <strong>June 23, 2026 09:12 PM</strong></p>
-              </div>
-
-              <button
-                onClick={() => setIsSuccessModalOpen(false)}
-                className="w-full py-3 bg-[#7553FF] hover:bg-[#623EE2] text-white font-bold text-sm rounded-xl transition-all cursor-pointer h-12 inline-flex items-center justify-center shadow-3xs"
-              >
-                Okay, Perfect!
-              </button>
-            </motion.div>
+        {/* 📊 KPI Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" id="kpi-cards-grid">
+          
+          <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+            <div>
+              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Total Reported Hours</p>
+              <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
+                {totalReportedHours.toFixed(1)}h
+              </h3>
+              <p className="text-sm text-slate-700 mt-1">Calculated via {displayLedger === 'internal' ? 'Internal Ledger' : 'Official Tax Ledger'}</p>
+            </div>
+            <div className="p-3 bg-[#7553FF]/10 rounded-lg">
+              <Clock className="w-6 h-6 text-[#7553FF]" />
+            </div>
           </div>
-        )}
-      </AnimatePresence>
 
-      {/* 8. EDIT RATES & DETAILS MODAL */}
-      <AnimatePresence>
-        {isEditModalOpen && editingStaff && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsEditModalOpen(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
-            />
+          <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+            <div>
+              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Total Gross Personnel Costs</p>
+              <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
+                €{totalGrossCost.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </h3>
+              <p className="text-sm text-slate-700 mt-1">Includes premiums & adjustments</p>
+            </div>
+            <div className="p-3 bg-[#7553FF]/10 rounded-lg">
+              <TrendingUp className="w-6 h-6 text-[#7553FF]" />
+            </div>
+          </div>
 
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative bg-white rounded-lg max-w-md w-full shadow-2xl border border-[#EAE4DC] overflow-hidden z-50 p-6 space-y-5 text-left font-sans"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <h3 className="text-lg font-bold text-slate-800 font-display">Update Rates & Hours</h3>
-                <button
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="p-1 hover:bg-slate-50 border border-slate-200 rounded-full text-slate-700 cursor-pointer transition-all"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+          <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+            <div>
+              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Net Bank Transfers</p>
+              <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
+                €{totalNetPayout.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </h3>
+              <p className="text-sm text-slate-700 mt-1">Officially wired to bank accounts</p>
+            </div>
+            <div className="p-3 bg-[#7553FF]/10 rounded-lg">
+              <FileText className="w-6 h-6 text-[#7553FF]" />
+            </div>
+          </div>
 
-              <div className="space-y-4">
-                {/* Employee Name readout */}
-                <div className="text-sm select-none leading-tight">
-                  <span className="text-slate-700 block font-normal text-xs uppercase tracking-wider">Employee</span>
-                  <span className="text-slate-800 font-bold block mt-1 text-[15px]">{editingStaff.name} ({editingStaff.role})</span>
-                </div>
+          <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
+            <div>
+              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Total Cash Payments</p>
+              <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
+                €{totalCashPayout.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </h3>
+              <p className="text-sm text-slate-700 mt-1">FWHA overflow & Minijob caps</p>
+            </div>
+            <div className="p-3 bg-indigo-50 rounded-lg">
+              <Coins className="w-6 h-6 text-indigo-600" />
+            </div>
+          </div>
 
-                {/* Hours Worked input */}
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 font-semibold uppercase tracking-wider block">Worked Hours</label>
+        </div>
+
+        {/* Dynamic Tip Pool Distribution Controller Card */}
+        {isAdmin && (
+          <div className="bg-white border border-[#1C1814]/5 rounded-lg p-6 mb-6 shadow-sm" id="dynamic-tips-controller">
+            <div className="flex items-center gap-2 mb-4">
+              <Coins className="w-5 h-5 text-[#7553FF]" />
+              <h2 className="text-lg font-bold text-slate-900 font-sans">Dynamic Tip Pool Allocation System</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 uppercase tracking-wider mb-1.5">Total Period Tip Pool (EUR)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-slate-700 text-sm">€</span>
                   <input
                     type="number"
-                    step="0.05"
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-[14px] text-slate-800 focus:outline-none focus:border-[#7553FF]"
-                    value={editingStaff.hours}
-                    onChange={(e) => setEditingStaff({ ...editingStaff, hours: parseFloat(e.target.value) || 0 })}
+                    value={totalTipPool}
+                    onChange={(e) => setTotalTipPool(Math.max(0, parseFloat(e.target.value) || 0))}
+                    className="w-full h-10 pl-7 pr-3 py-2 border border-[#EAE4DC] text-slate-800 text-sm focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20 rounded-lg"
                   />
                 </div>
+              </div>
 
-                {/* Overtime check toggle */}
-                <div className="flex items-center justify-between py-1 select-none">
-                  <span className="text-sm text-slate-700 font-medium">Includes Paid Overtime</span>
+              <div>
+                <button
+                  onClick={() => recalculateTips(totalTipPool)}
+                  className="w-full h-10 bg-[#7553FF] hover:bg-[#623EE2] text-white text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 border-none cursor-pointer select-none"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Distribute by Weighted Hours</span>
+                </button>
+              </div>
+
+              <div className="text-sm text-slate-700 border-l border-[#EAE4DC] pl-4 py-1">
+                <span className="font-semibold block mb-0.5 text-slate-800">Weighted allocation rules:</span>
+                Service: <span className="font-mono font-medium">1.0</span> | Kitchen: <span className="font-mono font-medium">0.8</span> | Bar: <span className="font-mono font-medium">0.9</span> | Office/Other: <span className="font-mono font-medium">0.5</span>. Manual edits below trigger <strong>Lock</strong> mode.
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🔍 Filters Bar */}
+        <div className="bg-white border border-[#1C1814]/5 p-4 rounded-lg shadow-sm mb-6 flex flex-col md:flex-row gap-4 items-center justify-between" id="filter-bar">
+          
+          <div className="relative w-full md:w-72">
+            <Search className="w-4 h-4 text-slate-700 absolute left-3 top-3" />
+            <input
+              type="text"
+              placeholder="Search staff, roles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-10 pl-9 pr-3 py-2 border border-[#EAE4DC] text-slate-800 text-sm focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20 rounded-lg"
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+            
+            {isAdmin && (
+              <select
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value)}
+                className="h-10 px-3 border border-[#EAE4DC] text-slate-700 text-sm rounded-lg focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20"
+              >
+                <option value="All Branches">All Branches</option>
+                <option value="HCM 1">HCM 1 Branch</option>
+                <option value="HCM 2">HCM 2 Branch</option>
+                <option value="HN 1">HN 1 Branch</option>
+                <option value="HQ">Headquarters (HQ)</option>
+              </select>
+            )}
+
+            <select
+              value={selectedContract}
+              onChange={(e) => setSelectedContract(e.target.value)}
+              className="h-10 px-3 border border-[#EAE4DC] text-slate-700 text-sm rounded-lg focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20"
+            >
+              <option value="All Contracts">All Contracts</option>
+              <option value="Hourly">Hourly Contracts</option>
+              <option value="Monthly">Monthly Contracts</option>
+              <option value="Minijob">Minijob (Capped)</option>
+            </select>
+            
+            <button
+              onClick={() => {
+                setSelectedBranch('All Branches');
+                setSelectedContract('All Contracts');
+                setSearchQuery('');
+              }}
+              className="h-10 w-10 border border-[#EAE4DC] text-slate-700 hover:bg-slate-50 rounded-lg flex items-center justify-center transition-colors cursor-pointer"
+              title="Reset filters"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
+
+        </div>
+
+        {/* 📋 Main Data Table */}
+        <div className="bg-white border border-[#1C1814]/5 rounded-xl overflow-hidden shadow-sm" id="main-payroll-table-container">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#FAF9F7] border-b border-[#EAE4DC]">
+                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest">Employee Name</th>
+                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest">Contract Type</th>
+                  
+                  {/* Ledger-specific Columns */}
+                  {displayLedger === 'internal' ? (
+                    <>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Actual Hours</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Base Salary</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Exempt Premiums</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Tips</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Meal Deduction</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Cash Pay Out</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right bg-[#7553FF]/5">Net Bank Payout</th>
+                    </>
+                  ) : (
+                    <>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Tax-Reported Hours</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Taxable Salary</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Tax-Exempt Premiums</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Reported Tips</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Taxes & Social Security</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right bg-[#7553FF]/5">Official Net Payout</th>
+                    </>
+                  )}
+                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-center">FWHA & Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredEmployees.length === 0 ? (
+                  <tr>
+                    <td colSpan={10} className="py-8 text-center text-slate-700 text-sm">
+                      No payroll records found matching the active filters.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredEmployees.map(emp => {
+                    const calc = getEmployeeCalculatedDetails(emp, displayLedger);
+                    const staffMember = staff.find(s => s.id === emp.id || s.name.toLowerCase() === emp.name.toLowerCase());
+                    const exitDate = staffMember?.exitDate;
+                    return (
+                      <tr key={emp.id} className="hover:bg-slate-50/50 transition-all cursor-pointer">
+                        
+                        {/* Name & Role */}
+                        <td className="py-4 px-5">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={emp.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                              alt={emp.name}
+                              className="w-10 h-10 rounded-full object-cover border border-slate-100"
+                              referrerPolicy="no-referrer"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-sans font-medium text-slate-900 block text-[14px] leading-[20px]">{emp.name}</span>
+                                {exitDate && (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-red-100 text-red-800 border border-red-200 uppercase tracking-wider">
+                                    Exit: {exitDate}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="text-[12px] text-slate-700">{emp.role}</span>
+                                <span className="text-[12px] text-[#7553FF] px-1 bg-[#7553FF]/10 rounded-[2px] font-mono font-normal">{emp.branch}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Contract Badge (Flat Style) */}
+                        <td className="py-4 px-5">
+                          <span className={`px-2 py-0.5 text-xs font-normal rounded-[2px] border ${
+                            emp.contractType === 'Minijob' ? 'bg-[#7553FF]/10 text-[#7553FF] border-[#7553FF]/20' :
+                            emp.contractType === 'Monthly' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                            'bg-slate-50 text-slate-700 border-slate-200'
+                          } uppercase tracking-wide`}>
+                            {emp.contractType}
+                          </span>
+                        </td>
+
+                        {/* --- Internal Ledger Columns --- */}
+                        {displayLedger === 'internal' ? (
+                          <>
+                            {/* Actual Hours */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-slate-800">
+                              {calc.reportedHours.toFixed(1)}h
+                            </td>
+
+                            {/* Base Salary */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-slate-800">
+                              €{calc.baseSalary.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </td>
+
+                            {/* Premiums */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-slate-800">
+                              <span className="text-emerald-700">€{calc.totalPremiums.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
+                            </td>
+
+                            {/* Tips */}
+                            <td className="py-4 px-5 text-right">
+                              <div className="flex items-center justify-end gap-1.5 font-mono text-sm text-slate-800">
+                                {isAdmin ? (
+                                  <div className="flex items-center gap-1">
+                                    <button 
+                                      onClick={() => handleDataModification(emp.id, { tipsLocked: !emp.tipsLocked })}
+                                      className={`p-1 rounded-md transition-colors ${emp.tipsLocked ? 'text-[#7553FF] bg-[#7553FF]/10' : 'text-slate-700 hover:bg-slate-100'}`}
+                                      title={emp.tipsLocked ? "Manual override active (Locked)" : "Unlocked (Auto-distributed)"}
+                                    >
+                                      {emp.tipsLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                                    </button>
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      value={emp.tips}
+                                      onChange={(e) => {
+                                        const value = parseFloat(e.target.value) || 0;
+                                        handleDataModification(emp.id, { tips: value, tipsLocked: true });
+                                      }}
+                                      className="w-16 text-right border border-[#EAE4DC] focus:outline-none focus:border-[#7553FF] py-0.5 px-1 rounded-md text-xs"
+                                    />
+                                  </div>
+                                ) : (
+                                  <span>€{calc.tips.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Food Deduction */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-rose-700">
+                              -€{calc.foodDeduction.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </td>
+
+                            {/* Cash Pay (Out-of-tax overflows) */}
+                            <td className="py-4 px-5 text-right font-mono text-sm">
+                              {calc.cashPay > 0 ? (
+                                <span className="text-[#7553FF] font-medium">€{calc.cashPay.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
+                              ) : (
+                                <span className="text-slate-700">-</span>
+                              )}
+                            </td>
+
+                            {/* Final bank transfer (Internal Ledger) */}
+                            <td className="py-4 px-5 text-right font-mono text-sm font-semibold text-slate-900 bg-[#7553FF]/5">
+                              €{calc.netTransfer.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </td>
+                          </>
+                        ) : (
+                          // --- Tax Ledger Columns ---
+                          <>
+                            {/* Reported Hours (Minijob scale downs shown here!) */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-slate-800">
+                              <div className="flex flex-col items-end">
+                                <span>{calc.reportedHours.toFixed(1)}h</span>
+                                {calc.isCapped && (
+                                  <span className="text-xs text-[#7553FF] font-sans font-medium uppercase tracking-wider bg-[#7553FF]/10 px-1 mt-0.5 rounded-[2px]">Scaled down (Minijob)</span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Base wage */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-slate-800">
+                              €{calc.baseSalary.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </td>
+
+                            {/* Exempt Premiums */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-emerald-700">
+                              €{calc.totalPremiums.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </td>
+
+                            {/* Reported Tips */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-slate-800">
+                              €{calc.tips.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </td>
+
+                            {/* Taxes & Social security */}
+                            <td className="py-4 px-5 text-right font-mono text-sm text-rose-700">
+                              {calc.taxesAndInsurance > 0 ? (
+                                <span>-€{calc.taxesAndInsurance.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
+                              ) : (
+                                <span className="text-emerald-700 font-medium">Exempt (0%)</span>
+                              )}
+                            </td>
+
+                            {/* Auszahlung (Official Net) */}
+                            <td className="py-4 px-5 text-right font-mono text-sm font-semibold text-indigo-700 bg-[#7553FF]/5">
+                              €{calc.netTransfer.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                            </td>
+                          </>
+                        )}
+
+                        {/* FWHA / Actions Column */}
+                        <td className="py-4 px-5">
+                          <div className="flex items-center justify-center gap-2">
+                            {/* FWHA Indicator for Monthly */}
+                            {emp.contractType === 'Monthly' ? (
+                              <div className="flex items-center gap-1 bg-blue-50 border border-blue-100 px-2 py-1 rounded-md" title="Flex Work Hour Account (FWHA)">
+                                <Clock className="w-3.5 h-3.5 text-blue-600" />
+                                <span className="text-xs font-mono font-medium text-blue-800">{calc.finalFwhaBalance.toFixed(1)}h</span>
+                              </div>
+                            ) : (
+                              <span className="text-xs text-slate-700 font-mono">-</span>
+                            )}
+
+                            {/* View payslip */}
+                            <button
+                              onClick={() => setActiveEmployee(emp)}
+                              className="p-1 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors"
+                              title="View Payslip Details"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+
+                            {/* Edit rates (Admin only) */}
+                            {isAdmin && (
+                              <button
+                                onClick={() => setEditingEmployee(emp)}
+                                className="p-1 text-slate-700 hover:text-[#7553FF] hover:bg-[#7553FF]/10 rounded-md transition-colors"
+                                title="Adjust hours & premiums"
+                              >
+                                <SlidersHorizontal className="w-4 h-4" />
+                              </button>
+                            )}
+
+                            {/* Apply Compensatory Leave (Monthly only, Admin only) */}
+                            {isAdmin && emp.contractType === 'Monthly' && (
+                              <button
+                                onClick={() => setCompensatoryLeaveEmp(emp)}
+                                className="p-1 text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                                title="Book compensatory leave (FWHA deduction)"
+                              >
+                                <UserCheck className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Audit Logs and state histories */}
+        <div className="bg-white border border-[#1C1814]/5 rounded-lg p-6 mt-6 shadow-sm" id="audit-log-section">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-[#7553FF]" />
+              <h2 className="text-base font-bold text-slate-900 font-sans">Settlement Audit Trail (Audit Log Trail)</h2>
+            </div>
+            <span className="text-sm text-slate-700">Strict regulatory tracking under EU Lohnsteuer-Richtlinien.</span>
+          </div>
+
+          <div className="max-h-40 overflow-y-auto space-y-2.5 font-mono text-sm text-slate-700 divide-y divide-slate-50">
+            {auditLogs.map(log => (
+              <div key={log.id} className="pt-2 flex justify-between gap-4">
+                <div>
+                  <span className="text-slate-700">[{log.time}]</span>{' '}
+                  <span className="text-[#7553FF] font-semibold">{log.action}:</span>{' '}
+                  <span className="text-slate-800">{log.note}</span>
+                </div>
+                <span className="text-[#7553FF] font-sans text-xs uppercase font-semibold">User: {log.user}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        </>
+        )}
+      </div>
+
+      {/* --- SLIDEOUT DRAWER: PAYSLIP DETAIL --- */}
+      <AnimatePresence>
+        {activeEmployee && (() => {
+          const emp = activeEmployee;
+          const calc = getEmployeeCalculatedDetails(emp, displayLedger);
+          return (
+            <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm" id="payslip-drawer-overlay">
+              <motion.div
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                className="w-full max-w-2xl bg-white h-full shadow-2xl flex flex-col border-l border-slate-200"
+                id="payslip-drawer-content"
+              >
+                
+                {/* Header */}
+                <div className="p-6 border-b border-[#EAE4DC] flex items-center justify-between bg-[#FAF9F7]">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 font-sans">Payslip Statement Details</h2>
+                    <p className="text-sm text-slate-700 mt-0.5">Ledger Mode: <strong>{displayLedger === 'internal' ? 'Internal Payroll' : 'Federal Accounting & Taxes'}</strong></p>
+                  </div>
+                  <button 
+                    onClick={() => setActiveEmployee(null)}
+                    className="p-1 text-slate-700 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Body - Paper lookalike slip */}
+                <div className="flex-1 overflow-y-auto p-6" id="payslip-document-wrapper">
+                  <div className="border border-dashed border-slate-300 p-6 bg-amber-50/10 rounded-lg font-sans text-slate-800" id="payslip-paper">
+                    
+                    {/* Header Details */}
+                    <div className="flex justify-between border-b border-slate-200 pb-4 mb-4">
+                      <div className="text-left">
+                        <h3 className="font-bold text-sm text-slate-900">JOHN'S BISTRO GMBH</h3>
+                        <p className="text-sm text-slate-700">Branch Code: {emp.branch}</p>
+                        <p className="text-sm text-slate-700">Germany - National Operations</p>
+                      </div>
+                      <div className="text-right">
+                        <h4 className="font-bold text-xs text-[#7553FF] uppercase tracking-wider">Individual Payslip Statement</h4>
+                        <p className="text-sm text-slate-700 font-mono">Period: 06/2026</p>
+                        <p className="text-sm text-slate-700 font-mono">Created: {new Date().toLocaleDateString()}</p>
+                      </div>
+                    </div>
+
+                    {/* Employee Profile Cards */}
+                    <div className="grid grid-cols-2 gap-4 text-sm border-b border-slate-200 pb-4 mb-4 bg-slate-50/50 p-3 rounded-lg text-left">
+                      <div className="space-y-1">
+                        <p><strong className="text-slate-900 font-medium">Employee:</strong> {emp.name}</p>
+                        <p><strong className="text-slate-900 font-medium">Role:</strong> {emp.role}</p>
+                        <p><strong className="text-slate-900 font-medium">Contract Type:</strong> {emp.contractType}</p>
+                        <p><strong className="text-slate-900 font-medium">Social Security No:</strong> {emp.socialSecurityNo}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p><strong className="text-slate-900 font-medium">Tax ID:</strong> {emp.taxId}</p>
+                        <p><strong className="text-slate-900 font-medium">Tax Class:</strong> {emp.taxClass}</p>
+                        <p><strong className="text-slate-900 font-medium">Health Insurance Provider:</strong> {emp.healthProvider}</p>
+                        <p><strong className="text-slate-900 font-medium">Dependent Allowance:</strong> {emp.dependentAllowance}</p>
+                      </div>
+                    </div>
+
+                    {/* Exit Settlement Alert */}
+                    {(() => {
+                      const staffMember = staff.find(s => s.id === emp.id || s.name.toLowerCase() === emp.name.toLowerCase());
+                      const exitDate = staffMember?.exitDate;
+                      if (!exitDate) return null;
+                      
+                      const fwhaBal = emp.fwhaBalance;
+                      let fwhaMsg = "";
+                      if (fwhaBal > 0) {
+                        fwhaMsg = `Employee has a positive FWHA balance of +${fwhaBal.toFixed(1)}h surplus. Please arrange cash settlement outside of the system.`;
+                      } else if (fwhaBal < 0) {
+                        fwhaMsg = `Employee has a negative FWHA balance of ${fwhaBal.toFixed(1)}h deficit. Please arrange deductions or clawback outside of the system.`;
+                      } else {
+                        fwhaMsg = `Employee has a neutral (0.0h) FWHA balance. No outstanding flextime hours settlement required.`;
+                      }
+
+                      return (
+                        <div className="mb-4 bg-red-50/70 border border-red-200/60 p-3.5 rounded-lg text-xs leading-relaxed text-red-800 flex items-start gap-2.5">
+                          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5 animate-pulse" />
+                          <div>
+                            <span className="font-bold text-red-900 block uppercase tracking-wider mb-0.5">⚠️ Exit Settlement Warning</span>
+                            <p className="font-normal text-red-800">
+                              This employee is scheduled for termination/exit on <strong>{exitDate}</strong>.
+                            </p>
+                            <p className="font-semibold text-red-900 mt-1">
+                              {fwhaMsg}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Operational performance stats */}
+                    <div className="mb-4 text-sm grid grid-cols-3 gap-2 text-left">
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="text-slate-700 block text-xs">Actual Attendance Hours</span>
+                        <span className="font-mono font-semibold text-xs">{emp.actualHours.toFixed(1)}h</span>
+                      </div>
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="text-slate-700 block text-xs">Standard Contractual Hours</span>
+                        <span className="font-mono font-semibold text-xs">{emp.standardHours.toFixed(1)}h</span>
+                      </div>
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <span className="text-slate-700 block text-xs">Certified Sick Leave</span>
+                        <span className="font-mono font-semibold text-xs text-rose-700">{emp.sickLeavesWithCert} days</span>
+                      </div>
+                    </div>
+
+                    {/* Financial item breakdown */}
+                    <div className="mb-4 text-left">
+                      <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Gross Earnings Breakdown</h4>
+                      <table className="w-full text-sm text-slate-700">
+                        <tbody>
+                          <tr className="border-b border-slate-50 py-1">
+                            <td className="py-1">Agreed Base Salary {emp.contractType === 'Monthly' ? '(Salary)' : `(Hourly @ €${emp.baseRate})`}</td>
+                            <td className="text-right py-1 font-mono">€{calc.baseSalary.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                          </tr>
+                          
+                          {/* Premiums if existing */}
+                          {calc.eveningPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Evening Shift Premium (10% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.eveningPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.nightPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Night Shift Premium (25% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.nightPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.sundayPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Sunday Premium (50% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.sundayPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.holidayPremium > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-emerald-800">
+                              <td className="py-1">Holiday Premium (125% - Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.holidayPremium.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+
+                          {calc.tips > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-[#7553FF]">
+                              <td className="py-1">Allocated Tips (Tax Exempt)</td>
+                              <td className="text-right py-1 font-mono">€{calc.tips.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+
+                          {emp.adjustment !== 0 && (
+                            <tr className="border-b border-slate-50 py-1">
+                              <td className="py-1">Adjustment / Other ({emp.adjustmentNote || 'Adjustment'})</td>
+                              <td className="text-right py-1 font-mono">€{emp.adjustment.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+
+                          {calc.fwhaPayout > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-indigo-700 font-semibold">
+                              <td className="py-1">FWHA Excess Payout (+40h Capped Out)</td>
+                              <td className="text-right py-1 font-mono">€{calc.fwhaPayout.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+
+                          {calc.deductionUnpaid > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-rose-700">
+                              <td className="py-1">Unpaid Leave Deduction ({emp.unpaidLeaves} days)</td>
+                              <td className="text-right py-1 font-mono">-€{calc.deductionUnpaid.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Deductions */}
+                    <div className="mb-4 text-left">
+                      <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Deductions & Offsets Details</h4>
+                      <table className="w-full text-sm text-slate-700">
+                        <tbody>
+                          {calc.foodDeduction > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-rose-700">
+                              <td className="py-1 font-sans">Sachbezug Food Allowance Deduction</td>
+                              <td className="text-right py-1 font-mono">-€{calc.foodDeduction.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {calc.taxesAndInsurance > 0 && (
+                            <tr className="border-b border-slate-50 py-1 text-rose-700">
+                              <td className="py-1">Estimated Tax & Social Security ({ (emp.taxesAndInsuranceRate*100).toFixed(0) }%)</td>
+                              <td className="text-right py-1 font-mono">-€{calc.taxesAndInsurance.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                          {emp.contractType === 'Minijob' && calc.isCapped && displayLedger === 'internal' && (
+                            <tr className="border-b border-slate-50 py-1 text-indigo-700">
+                              <td className="py-1">Cash Pay Overflow (Exempt over €603)</td>
+                              <td className="text-right py-1 font-mono">-€{(emp.actualHours * emp.baseRate + calc.tips - lowIncomeThreshold).toLocaleString('de-DE', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Totals Summary */}
+                    <div className="border-t-2 border-slate-400 pt-4 mt-4 flex justify-between items-center bg-slate-900 text-white p-4 rounded-lg" id="payslip-totals">
+                      <div className="text-left">
+                        <span className="text-xs text-slate-400 block uppercase font-semibold">Payment Method: Bank Transfer</span>
+                        <span className="text-sm font-bold font-sans">
+                          {displayLedger === 'internal' ? 'BANK TRANSFER NET AMOUNT (BANK NET)' : 'OFFICIAL NET DISBURSEMENT (AUSZAHLUNG)'}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-mono font-bold">
+                          €{calc.netTransfer.toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* FWHA summary if Monthly */}
+                    {emp.contractType === 'Monthly' && (
+                      <div className="mt-4 text-xs text-slate-700 bg-blue-50 p-2.5 rounded-lg border border-blue-100 flex items-center justify-between">
+                        <span>📊 <strong>Flex Work Hour Account (FWHA):</strong> Previous Balance: <strong className="font-mono">{emp.fwhaBalance.toFixed(1)}h</strong> | Period Delta: <strong className="font-mono">{(emp.actualHours - emp.standardHours).toFixed(1)}h</strong></span>
+                        <span>Ending Balance: <strong className="font-mono">{calc.finalFwhaBalance.toFixed(1)}h</strong></span>
+                      </div>
+                    )}
+
+                  </div>
+                </div>
+
+                {/* Footer buttons */}
+                <div className="p-4 border-t border-[#EAE4DC] bg-[#FAF9F7] flex gap-3 justify-end">
+                  <button 
+                    onClick={() => {
+                      const text = displayLedger === 'internal' ? getCSVPreview() : getDATEVPreview();
+                      const blob = new Blob([text], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `payslip-${emp.id}-${displayLedger}.txt`;
+                      a.click();
+                    }}
+                    className="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <FileDown className="w-4 h-4" />
+                    Download Declaration File
+                  </button>
+                  <button 
+                    onClick={() => setActiveEmployee(null)}
+                    className="px-4 py-2 border border-[#EAE4DC] text-slate-700 text-sm rounded-lg hover:bg-[#FAF9F7] cursor-pointer"
+                  >
+                    Close Window
+                  </button>
+                </div>
+
+              </motion.div>
+            </div>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* --- MODAL: EDIT EMPLOYEE RATES & HOURS --- */}
+      {editingEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" id="edit-employee-modal">
+          <div className="bg-white rounded-lg border border-[#EAE4DC] shadow-2xl max-w-lg w-full overflow-hidden">
+            <div className="p-5 border-b border-[#EAE4DC] bg-[#FAF9F7] flex justify-between items-center">
+              <div className="text-left">
+                <h3 className="font-bold text-slate-800 text-base">Adjust Hours & Premiums</h3>
+                <p className="text-xs text-slate-700 mt-0.5">{editingEmployee.name} | {editingEmployee.role}</p>
+              </div>
+              <button onClick={() => setEditingEmployee(null)} className="p-1 hover:bg-slate-100 rounded-full cursor-pointer">
+                <X className="w-5 h-5 text-slate-700" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto" id="edit-modal-fields">
+              <div className="grid grid-cols-2 gap-4 text-left">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-800 mb-1">Actual Work Hours</label>
                   <input
-                    type="checkbox"
-                    className="w-4 h-4 rounded border-slate-350 text-[#7553FF] focus:ring-[#7553FF] cursor-pointer"
-                    checked={editingStaff.hasOT}
-                    onChange={(e) => setEditingStaff({ ...editingStaff, hasOT: e.target.checked, otHours: e.target.checked ? 3.0 : 0 })}
+                    type="number"
+                    value={editingEmployee.actualHours}
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, actualHours: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-[#EAE4DC] text-sm text-slate-800 focus:outline-none focus:border-[#7553FF] rounded-lg"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-800 mb-1">Agreed Hourly Rate (€/h)</label>
+                  <input
+                    type="number"
+                    value={editingEmployee.baseRate}
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, baseRate: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-[#EAE4DC] text-sm text-slate-800 focus:outline-none focus:border-[#7553FF] rounded-lg"
+                  />
+                </div>
+              </div>
 
-                {editingStaff.hasOT && (
-                  <div className="space-y-1">
-                    <label className="text-xs text-slate-700 font-semibold uppercase tracking-wider block">OT Hours count</label>
+              {/* Special Premiums Hours inputs */}
+              <div className="border-t border-[#EAE4DC] pt-3">
+                <h4 className="text-xs font-bold text-[#7553FF] uppercase tracking-wider mb-2">Special Shift Hours (Premium Hours)</h4>
+                <div className="grid grid-cols-2 gap-3 text-xs text-slate-700">
+                  <div>
+                    <label className="block text-slate-700 mb-1">Evening Hours (Shift premium 10%)</label>
                     <input
                       type="number"
-                      step="0.05"
-                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-[14px] text-slate-800 focus:outline-none focus:border-[#7553FF]"
-                      value={editingStaff.otHours}
-                      onChange={(e) => setEditingStaff({ ...editingStaff, otHours: parseFloat(e.target.value) || 0 })}
+                      value={editingEmployee.eveningHours}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, eveningHours: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-[#EAE4DC] text-sm focus:outline-none focus:border-[#7553FF] rounded-lg"
                     />
                   </div>
-                )}
+                  <div>
+                    <label className="block text-slate-700 mb-1">Night Hours (Shift premium 25%)</label>
+                    <input
+                      type="number"
+                      value={editingEmployee.nightHours}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, nightHours: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-[#EAE4DC] text-sm focus:outline-none focus:border-[#7553FF] rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 mb-1">Sunday Hours (Shift premium 50%)</label>
+                    <input
+                      type="number"
+                      value={editingEmployee.sundayHours}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, sundayHours: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-[#EAE4DC] text-sm focus:outline-none focus:border-[#7553FF] rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-700 mb-1">Holiday Hours (Shift premium 125%)</label>
+                    <input
+                      type="number"
+                      value={editingEmployee.holidayHours}
+                      onChange={(e) => setEditingEmployee({ ...editingEmployee, holidayHours: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-1.5 border border-[#EAE4DC] text-sm focus:outline-none focus:border-[#7553FF] rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
 
-                {/* Rate details price */}
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 font-semibold uppercase tracking-wider block">
-                    {editingStaff.rateType === "Salary" ? "Weekly Salary ($)" : "Hourly Rate ($)"}
-                  </label>
+              {/* Deductions & other adjustments */}
+              <div className="border-t border-[#EAE4DC] pt-3 grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-800 mb-1">Unpaid Leaves (Days)</label>
                   <input
                     type="number"
-                    step="0.5"
-                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-[14px] text-slate-800 focus:outline-none focus:border-[#7553FF]"
-                    value={editingStaff.rate}
-                    onChange={(e) => setEditingStaff({ ...editingStaff, rate: parseFloat(e.target.value) || 0 })}
+                    value={editingEmployee.unpaidLeaves}
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, unpaidLeaves: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-[#EAE4DC] text-sm text-slate-800 focus:outline-none focus:border-[#7553FF] rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-800 mb-1">Certified Sick Leaves (Days)</label>
+                  <input
+                    type="number"
+                    value={editingEmployee.sickLeavesWithCert}
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, sickLeavesWithCert: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-[#EAE4DC] text-sm text-slate-800 focus:outline-none focus:border-[#7553FF] rounded-lg"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3">
-                <button
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 border border-slate-200 hover:border-slate-300 rounded-xl text-slate-650 hover:bg-slate-50 font-semibold text-[13px] transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveEdit}
-                  className="px-5 py-2.5 bg-[#7553FF] hover:bg-[#623EE2] text-white font-bold rounded-xl text-[13px] transition-all cursor-pointer shadow-3xs"
-                >
-                  Apply Changes
-                </button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-800 mb-1">Adjustment / Extra Allowance (€)</label>
+                  <input
+                    type="number"
+                    value={editingEmployee.adjustment}
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, adjustment: parseFloat(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-[#EAE4DC] text-sm text-slate-800 focus:outline-none focus:border-[#7553FF] rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-800 mb-1">Adjustment Reason / Note</label>
+                  <input
+                    type="text"
+                    value={editingEmployee.adjustmentNote}
+                    onChange={(e) => setEditingEmployee({ ...editingEmployee, adjustmentNote: e.target.value })}
+                    className="w-full px-3 py-2 border border-[#EAE4DC] text-sm text-slate-800 focus:outline-none focus:border-[#7553FF] rounded-lg"
+                  />
+                </div>
               </div>
-            </motion.div>
+
+            </div>
+
+            <div className="p-4 bg-[#FAF9F7] border-t border-[#EAE4DC] flex justify-end gap-3">
+              <button 
+                onClick={() => setEditingEmployee(null)}
+                className="px-4 py-2 border border-[#EAE4DC] text-slate-700 text-sm rounded-lg hover:bg-slate-100 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  if (editingEmployee) {
+                    if (payrollState === 'Approved' || payrollState === 'Paid') {
+                      setShowStateResetWarning(editingEmployee.id);
+                    } else {
+                      handleDataModification(editingEmployee.id, editingEmployee);
+                      setEditingEmployee(null);
+                    }
+                  }
+                }}
+                className="px-4 py-2 bg-[#7553FF] text-white text-sm font-medium rounded-lg hover:bg-[#6042E0] cursor-pointer"
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+
+      {/* --- MODAL: COMPENSATORY LEAVE DEDUCTION FROM FWHA --- */}
+      {compensatoryLeaveEmp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" id="compensatory-leave-modal">
+          <div className="bg-white rounded-lg border border-[#EAE4DC] shadow-2xl max-w-sm w-full overflow-hidden">
+            <div className="p-5 border-b border-[#EAE4DC] bg-[#FAF9F7] text-left">
+              <h3 className="font-bold text-slate-800 text-base">Book Compensatory Leave</h3>
+              <p className="text-xs text-slate-700 mt-0.5">{compensatoryLeaveEmp.name}</p>
+            </div>
+
+            <div className="p-5 space-y-4 text-left">
+              <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-800">
+                <span className="font-bold block mb-1">FWHA Account Status:</span>
+                Current Balance: <strong className="font-mono">{compensatoryLeaveEmp.fwhaBalance.toFixed(1)} hours</strong>. <br />
+                Booking compensatory leave deducts 1-to-1 from the accumulated FWHA balance without reducing the base salary of the employee.
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-800 mb-1">Compensatory Hours to Book</label>
+                <input
+                  type="number"
+                  value={compensatoryHours}
+                  onChange={(e) => setCompensatoryHours(Math.max(1, parseFloat(e.target.value) || 0))}
+                  className="w-full px-3 py-2 border border-[#EAE4DC] text-sm text-slate-800 focus:outline-none focus:border-[#7553FF] rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 bg-[#FAF9F7] border-t border-[#EAE4DC] flex justify-end gap-3">
+              <button onClick={() => setCompensatoryLeaveEmp(null)} className="px-3 py-1.5 border text-xs text-slate-700 rounded-lg cursor-pointer">Cancel</button>
+              <button 
+                onClick={handleBookCompensatoryLeave}
+                className="px-3 py-1.5 bg-[#7553FF] text-white text-xs font-medium rounded-lg hover:bg-[#6042E0] cursor-pointer"
+              >
+                Approve FWHA Deduction
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL: EXPORT DATA TO TAX AUTHORITIES --- */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" id="export-reports-modal">
+          <div className="bg-white rounded-lg border border-[#EAE4DC] shadow-2xl max-w-2xl w-full overflow-hidden">
+            <div className="p-5 border-b border-[#EAE4DC] bg-[#FAF9F7] flex justify-between items-center">
+              <div className="text-left">
+                <h3 className="font-bold text-slate-800 text-base">Export Tax & Accounting Declarations</h3>
+                <p className="text-xs text-slate-700 mt-0.5">Compatible with national accounting standards (DATEV, BMD, CSV)</p>
+              </div>
+              <button onClick={() => setShowExportModal(false)} className="p-1 hover:bg-slate-100 rounded-full cursor-pointer">
+                <X className="w-5 h-5 text-slate-700" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="flex gap-4 text-left">
+                {[
+                  { key: 'DATEV', label: 'DATEV Standard (Germany)', desc: 'Export ASCII CSV compatible with the DATEV declaration portal.' },
+                  { key: 'BMD', label: 'BMD Lohn (Austria)', desc: 'Export BMD standard format Lohnimport 4.3 for Tax authorities.' },
+                  { key: 'CSV', label: 'Standard CSV (International)', desc: 'Export full payroll CSV file for internal reconciliation.' }
+                ].map(tmpl => (
+                  <button
+                    key={tmpl.key}
+                    onClick={() => setExportTemplate(tmpl.key as any)}
+                    className={`flex-1 p-3 text-left border rounded-lg transition-all cursor-pointer ${
+                      exportTemplate === tmpl.key 
+                        ? 'border-[#7553FF] bg-[#7553FF]/5 shadow-sm' 
+                        : 'border-[#EAE4DC] hover:bg-[#FAF9F7]'
+                    }`}
+                  >
+                    <span className="font-bold text-xs block text-slate-900">{tmpl.label}</span>
+                    <span className="text-[10px] text-slate-700 mt-1 block leading-relaxed">{tmpl.desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Text Preview */}
+              <div className="text-left">
+                <span className="block text-xs font-semibold text-slate-800 mb-1">File Preview:</span>
+                <pre className="bg-slate-900 text-emerald-400 p-4 rounded-lg font-mono text-xs overflow-auto h-52 leading-relaxed">
+                  {exportTemplate === 'DATEV' && getDATEVPreview()}
+                  {exportTemplate === 'BMD' && getBMDPreview()}
+                  {exportTemplate === 'CSV' && getCSVPreview()}
+                </pre>
+              </div>
+            </div>
+
+            <div className="p-4 bg-[#FAF9F7] border-t border-[#EAE4DC] flex justify-end gap-3">
+              <button 
+                onClick={() => {
+                  const text = exportTemplate === 'DATEV' ? getDATEVPreview() : (exportTemplate === 'BMD' ? getBMDPreview() : getCSVPreview());
+                  const blob = new Blob([text], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `payroll-export-${exportTemplate.toLowerCase()}-june2026.txt`;
+                  a.click();
+                  addLog('Export File', `Successfully generated and downloaded ${exportTemplate} formatted payroll statements.`);
+                  setShowExportModal(false);
+                }}
+                className="px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 flex items-center gap-1.5 cursor-pointer"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                <span>Download File (.TXT/.CSV)</span>
+              </button>
+              <button 
+                onClick={() => setShowExportModal(false)}
+                className="px-4 py-2 border border-[#EAE4DC] text-slate-700 text-sm rounded-lg hover:bg-[#FAF9F7] cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

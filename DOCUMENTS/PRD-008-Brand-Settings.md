@@ -1,11 +1,11 @@
 ---
-iid: PRD-008
+id: PRD-Brand-Settings
 type: prd
 status: draft
 project: Gastro Hub
 owner: "@ba-team"
 tags: [brand-settings, brand-profile, store-management, notifications, system-access, hr-payroll]
-linked-to: [[PRD-001-Staff-Roles]], [[PRD-002-Shift-Planner]], [[PRD-003-Checkin-Management]], [[PRD-005-Payroll]]
+linked-to: [[PRD-Staff-Roles]], [[PRD-Shift-Planner]], [[PRD-Checkin-Management]], [[PRD-Payroll]], [[PRD-Tenant-Workspace-Auth]], [[PRD-Super-Admin]]
 created: 2026-06-26
 updated: 2026-06-26
 ---
@@ -19,7 +19,7 @@ updated: 2026-06-26
    - [2.2 Tab: Store Management (Quản lý chi nhánh)](#22-tab-store-management-quản-lý-chi-nhánh)
    - [2.3 Tab: Notification (Cài đặt thông báo)](#23-tab-notification-cài-đặt-thông-báo)
    - [2.4 Tab: System Access (Phân quyền hệ thống)](#24-tab-system-access-phân-quyền-hệ-thống)
-   - [2.5 Tab: HR &amp; Payroll (Nhân sự &amp; Lương - Đức)](#25-tab-hr--payroll-nhân-sự--lương---đức)
+   - [2.5 Tab: HR & Payroll (Nhân sự & Lương - Tuân thủ Địa phương)](#25-tab-hr--payroll-nhân-sự--lương---tuân-thủ-địa-phương)
 3. [Quy Tắc Nghiệp Vụ &amp; Ràng Buộc (Business Rules &amp; Constraints)](#3-quy-tắc-nghiệp-vụ--ràng-buộc-business-rules--constraints)
 4. [Quy Tắc Hoạt Động Độc Lập &amp; Tích Hợp (Standalone &amp; Integrated Rules)](#4-quy-tắc-hoạt-động-độc-lập--tích-hợp-standalone--integrated-rules)
 5. [Kịch Bản Chức Năng Chi Tiết (Given-When-Then Scenarios)](#5-kịch-bản-chức-năng-chi-tiết-given-when-then-scenarios)
@@ -54,7 +54,8 @@ graph TD
 Ghi nhận và hiển thị các thông tin pháp lý và thông tin liên hệ cấp tổng công ty/thương hiệu.
 
 * **Thông tin cơ bản:**
-  * Tên thương hiệu (`brandName` - Bắt buộc, duy nhất).
+  * Tên thương hiệu (`brandName` - Bắt buộc, **không bắt buộc là duy nhất**; nhiều khách hàng/thương hiệu có thể đặt tên giống nhau).
+  * **Định danh duy nhất hệ thống (`brandId` - UUID):** Hệ thống tự động tạo mã UUID duy nhất khi khởi tạo Brand. Hệ thống chạy tập trung trên một domain duy nhất và phân quyền truy cập theo mô hình Workspace (tương tự như ClickUp). Người dùng sau khi đăng nhập sẽ lựa chọn Brand/Workspace mình được cấp quyền truy cập để làm việc.
   * Logo/Ảnh đại diện thương hiệu (Upload file hình ảnh dạng PNG/JPG, tối đa 2MB).
   * Họ tên chủ sở hữu (`ownerName` - Bắt buộc).
 * **Thông tin liên hệ & Pháp lý:**
@@ -66,9 +67,6 @@ Ghi nhận và hiển thị các thông tin pháp lý và thông tin liên hệ 
   * Mã số thuế GTGT Châu Âu (`vatId` - Bắt buộc đối với các doanh nghiệp thuộc Liên minh Châu Âu EU có đăng ký thuế GTGT. Định dạng linh hoạt bắt đầu bằng mã quốc gia 2 ký tự tương ứng với `brandCountry` (ví dụ: `DE` đối với Đức, `FR` đối với Pháp, `AT` đối với Áo...) và theo sau là chuỗi từ 2 đến 12 ký tự chữ và số. Cho phép liên kết API VIES của EU để xác thực trực tuyến tính hợp lệ của mã số thuế).
 * **Thiết lập chung:**
   * Đơn vị tiền tệ mặc định (`currency` - Cố định là `EUR`).
-* > [!NOTE]
-  > Tab này không chứa cấu hình múi giờ (timezone) và không chứa brand slug. Múi giờ hoạt động sẽ được cấu hình trực tiếp tại từng chi nhánh ở Tab Store Management.
-  >
 
 ---
 
@@ -84,6 +82,9 @@ Quản lý danh sách các chi nhánh cửa hàng thực tế thuộc quyền qu
   * Số điện thoại chi nhánh (`storePhone` - Bắt buộc).
   * Giờ mở cửa/đóng cửa hàng ngày (`operatingHours` - Cấu hình khoảng giờ làm việc trong ngày của chi nhánh, ví dụ: 08:00 - 22:00).
   * Trạng thái hoạt động (`status` - `Active` (Hoạt động) hoặc `Inactive` (Tạm ngưng)).
+  * **Cài đặt xử lý quên check-in/out (`forgetCheckinBehavior`):** Quyền thiết lập của từng Chi nhánh (Store-level setting) để các ca trưởng chủ động quản lý theo thực tế:
+    1. `Snap to Shift`: Tính giờ làm việc khớp chuẩn theo thời gian ca trực được lập lịch sẵn trong tuần.
+    2. `Snap to Actual`: Tính giờ làm việc dựa trên giờ thực tế do người có thẩm quyền (Shift Leader / Admin) của chi nhánh phê duyệt và xác nhận điều chỉnh thủ công.
 
 ---
 
@@ -142,16 +143,13 @@ Cấu hình tuân thủ luật lao động và các tham số tính lương đư
 Hệ thống tự động kích hoạt gói quy định pháp lý tương ứng của quốc gia hoạt động:
 
 * **Vùng/Tỉnh bang tính thuế (`payrollRegion`):** Chọn vùng/bang/tỉnh tương ứng của quốc gia hoạt động (ví dụ: bang `Bayern` của Đức, bang `Tirol` của Áo, vùng `Île-de-France` của Pháp...).
-  * *Mục đích:* Dùng để tự động đồng bộ lịch các ngày nghỉ lễ chính thức (Public Holidays) của địa phương đó vào hệ thống lập lịch ca trực (`PRD-002`) và tính lương làm ngày lễ (`PRD-005`).
+  * *Mục đích:* Dùng để tự động đồng bộ lịch các ngày nghỉ lễ chính thức (Public Holidays) của địa phương đó vào hệ thống lập lịch ca trực (`PRD-Shift-Planner`) và tính lương làm ngày lễ (`PRD-Payroll`).
 * **Hạn mức thu nhập miễn thuế / Hợp đồng đặc biệt (`lowIncomeThreshold`):** Mức trần thu nhập tháng tối đa được miễn thuế hoặc áp dụng bảo hiểm đặc biệt đối với các loại hợp đồng ngắn hạn/thu nhập thấp.
   * *Hành vi:* Hệ thống tự động gợi ý giá trị mặc định của quốc gia sở tại (ví dụ: đối với Đức mặc định là `603.00` EUR cho hợp đồng Minijob; đối với Áo gợi ý mức `Geringfügigkeitsgrenze` tương ứng) và cho phép Admin điều chỉnh thủ công.
 * **Quy tắc khấu trừ giờ nghỉ giải lao tự động (`autoBreakDeduction`):** Lựa chọn Bật/Tắt.
   * *Hành vi:* Khi Bật, hệ thống tự động trừ giờ nghỉ khi tính giờ công thực tế dựa trên độ dài ca làm việc liên tục. Các mốc giờ và thời gian nghỉ sẽ tự động điền sẵn theo luật định của quốc gia sở tại, nhưng cho phép sửa đổi linh hoạt:
     * *Mốc 1 (Threshold 1):* Ca làm việc đạt từ `X` giờ đến dưới `Y` giờ -> Tự động trừ `A` phút (ví dụ đối với Đức: từ 6.0 giờ đến dưới 9.0 giờ -> tự động trừ 30 phút).
     * *Mốc 2 (Threshold 2):* Ca làm việc đạt từ `Z` giờ trở lên -> Tự động trừ `B` phút (ví dụ đối với Đức: từ 9.0 giờ trở lên -> tự động trừ 45 phút).
-* **Xử lý quên check-in/out (`forgetCheckinBehavior`):** Cấu hình cách tính giờ khi nhân viên quên check-in/out:
-  1. `Snap to Shift`: Tính giờ làm việc khớp chuẩn theo thời gian ca trực được lập lịch sẵn trong tuần.
-  2. `Snap to Actual`: Tính giờ làm việc dựa trên giờ thực tế do người có thẩm quyền phê duyệt và xác nhận điều chỉnh thủ công.
 
 #### 2.5.2 Cấu hình Tài khoản giờ tích lũy (Flexible Working Hours Account - FWHA)
 
@@ -165,16 +163,26 @@ FWHA là tài khoản quản lý giờ tích lũy làm thêm (OT) phục vụ ch
 
 #### 2.5.3 Cấu hình Phụ cấp Đặc biệt & Hình thức Tính lương (Special Premiums & Wage Mapping)
 
-* **Hình thức tính lương toàn hệ thống (`brandSalaryType`):**
-  * `Hourly Rate` (Theo giờ): Lương cơ bản tính bằng tổng số giờ làm việc thực tế nhân với mức lương giờ trong hợp đồng.
-  * `Monthly Salaried` (Lương cứng tháng): Lương cơ bản cố định theo tháng (`salaryAmount` hợp đồng), giờ chênh lệch thừa/thiếu so với giờ tiêu chuẩn tháng (ví dụ công thức: `số giờ hợp đồng/tuần * 4.33 tuần`) được chuyển vào tài khoản FWHA.
+* **Hình thức tính lương toàn hệ thống (`brandSalaryType`):** Mặc định là `Hourly Rate` (Tính lương theo giờ công thực tế) áp dụng cho toàn bộ nhân sự. Đối với các hợp đồng thỏa thuận lương cứng theo tháng (`Monthly Salaried`), hệ thống vẫn hỗ trợ quy đổi về số giờ làm việc chuẩn để phục vụ việc tích lũy/khấu trừ giờ vào tài khoản FWHA / Gleitzeitkonto.
 * **Cài đặt Phụ cấp Đặc biệt (Special Premiums):** Cho phép cấu hình các loại phụ cấp làm việc ngoài giờ đặc biệt theo luật lao động của quốc gia sở tại:
-  * **Phụ cấp làm ca đêm (`nightShiftPremiumRate` & `nightShiftStartTime`):** Tỷ lệ phần trăm cộng thêm (ví dụ: `25%` lương giờ) và khoảng giờ bắt đầu tính phụ cấp đêm (ví dụ: từ `22:00` đến `06:00` sáng hôm sau).
+  * **Phụ cấp làm ca tối (`eveningShiftPremiumRate` & `eveningShiftStartTime`):** Tỷ lệ phần trăm cộng thêm (ví dụ: `10%` lương giờ) và khoảng giờ bắt đầu tính ca tối (ví dụ: từ `18:00` hoặc `20:00` đến trước ca đêm).
+  * **Phụ cấp làm ca đêm (`nightShiftPremiumRate` & `nightShiftStartTime`):** Tỷ lệ phần trăm cộng thêm (ví dụ: `25%` lương giờ) và khoảng giờ bắt đầu tính phụ cấp đêm (ví dụ: từ `22:00` hoặc `23:00` đến `06:00` sáng hôm sau).
   * **Phụ cấp làm Chủ nhật (`sundayPremiumRate`):** Tỷ lệ phần trăm phụ cấp làm ngày Chủ nhật (ví dụ: `50%`).
   * **Phụ cấp làm ngày Lễ (`holidayPremiumRate`):** Tỷ lệ phần trăm phụ cấp làm ngày Lễ chính thức (ví dụ: `125%`).
+* **Cấu hình chia tiền Tips động (Dynamic Tip Distribution Settings):**
+  * **Bật/Tắt hệ thống chia tips tự động (`enableTipDistribution`):** Cho phép hệ thống tính toán phân bổ tips tự động cuối kỳ lương.
+  * **Cấu hình trọng số chia tips theo bộ phận (Departmental Tip Weights):**
+    * Trọng số tips Bếp (`tipWeightKitchen` - mặc định: `0.8`).
+    * Trọng số tips Phục vụ (`tipWeightService` - mặc định: `1.0`).
+    * Trọng số tips Quầy bar (`tipWeightBar` - mặc định: `0.9`).
+  * Các tham số trọng số này cho phép Admin điều chỉnh linh hoạt trực tiếp trên giao diện để áp dụng cho thuật toán phân bổ.
+* **Cài đặt chính sách chuyển phép năm cũ (Vacation Rollover Policy Settings):**
+  * **Cho phép chuyển phép năm cũ (`allowVacationRollover`):** Chọn `Yes` (Cho phép chuyển số dư ngày phép chưa dùng sang năm tiếp theo) hoặc `No` (Triệt tiêu toàn bộ ngày phép dư vào ngày 31/12 cuối năm).
+  * **Ngày hết hạn phép cũ chuyển sang (`vacationRolloverExpiryDate`):** Chọn thời điểm hết hạn (mặc định: `31/03` của năm sau) hoặc chọn `Never` (Không bao giờ hết hạn).
+  * **Hành vi xử lý phần phép cũ hết hạn chưa dùng (`vacationRolloverRemainderAction`):** Chọn `Expire` (Triệt tiêu về 0) hoặc `Convert to Flextime` (Tự động quy đổi sang giờ tích lũy FWHA / Gleitzeitkonto theo tỷ lệ 1 ngày phép = 8.0 giờ công).
 * **Bản đồ mã khoản lương kế toán (`accountingWageCodes`):**
-  * Admin thiết lập mã số hạch toán kế toán tương ứng với từng loại thu nhập để xuất file kế toán lương.
-  * Các loại mã cần thiết lập: Mã lương giờ cơ bản, mã phụ cấp đêm, mã phụ cấp Chủ nhật, mã phụ cấp ngày Lễ, mã thanh toán OT vượt trần.
+  * Admin thiết lập mã số hạch toán kế toán tương ứng với từng loại thu nhập để xuất file kế toán lương tương thích với DATEV:
+  * Các loại mã cần thiết lập: Mã lương giờ cơ bản (ví dụ: `1000`), mã phụ cấp ca tối, mã phụ cấp ca đêm (ví dụ: `2500`), mã phụ cấp Chủ nhật (ví dụ: `2600`), mã phụ cấp ngày Lễ (ví dụ: `2700`), mã phân bổ tiền tips, mã thanh toán OT vượt trần.
   * **Mẫu xuất file kế toán (Export Template):** Hỗ trợ lựa chọn định dạng file xuất tương thích theo từng hệ thống phần mềm kế toán của quốc gia sở tại (ví dụ: chọn xuất file chuẩn `DATEV` đối với Đức, chuẩn `BMD` đối với Áo, hoặc định dạng CSV chuẩn hóa quốc tế đối với các quốc gia khác).
 
 ---
@@ -199,11 +207,11 @@ FWHA là tài khoản quản lý giờ tích lũy làm thêm (OT) phục vụ ch
   * Màn hình cấu hình lưu trữ dữ liệu tĩnh vào cơ sở dữ liệu.
   * System Access hoạt động như bộ lọc menu cục bộ.
 * **Chế độ Tích hợp (Integrated Mode):**
-  * *Tích hợp với [[PRD-001-Staff-Roles]]:* Gán vai trò đã tạo tại Tab System Access vào Staff Profile.
-  * *Tích hợp với [[PRD-002-Shift-Planner]]:* Đồng bộ lịch lễ dựa trên vùng hoạt động `payrollRegion` được cấu hình.
-  * *Tích hợp với [[PRD-003-Checkin-Management]]:* Áp dụng luật khấu trừ giờ nghỉ tự động theo quy tắc cấu hình của từng quốc gia.
-  * *Tích hợp với [[PRD-005-Payroll]]:* Sử dụng cấu hình `brandSalaryType`, `lowIncomeThreshold` và Accounting Wage Code Mapping để tính toán bảng lương và xuất mẫu báo cáo kế toán (Export Template) tương thích theo quốc gia.
-  * *Tích hợp với [[PRD-006-Tenant-Workspace-Auth]]:* Áp dụng quyền truy cập vào Workspace dựa trên cấu hình System Access.
+  * *Tích hợp với [[PRD-Staff-Roles]]:* Gán vai trò đã tạo tại Tab System Access vào Staff Profile.
+  * *Tích hợp với [[PRD-Shift-Planner]]:* Đồng bộ lịch lễ dựa trên vùng hoạt động `payrollRegion` được cấu hình.
+  * *Tích hợp với [[PRD-Checkin-Management]]:* Áp dụng luật khấu trừ giờ nghỉ tự động theo quy tắc cấu hình của từng quốc gia.
+  * *Tích hợp với [[PRD-Payroll]]:* Sử dụng cấu hình `brandSalaryType`, `lowIncomeThreshold` và Accounting Wage Code Mapping để tính toán bảng lương và xuất mẫu báo cáo kế toán (Export Template) tương thích theo quốc gia.
+  * *Tích hợp với [[PRD-Tenant-Workspace-Auth]]:* Áp dụng quyền truy cập vào Workspace dựa trên cấu hình System Access.
 
 ---
 
@@ -255,12 +263,13 @@ FWHA là tài khoản quản lý giờ tích lũy làm thêm (OT) phục vụ ch
 * - [ ] Đổi trạng thái Store sang `Inactive` sẽ vô hiệu hóa việc lập lịch làm việc và chấm công tại chi nhánh đó.
 * - [ ] Bật/Tắt cài đặt sự kiện thông báo tại Tab Notification hoạt động chính xác cho các vai trò tương ứng qua các kênh (Email, Push, Mobile).
 * - [ ] Chỉ tài khoản có vai trò `Admin` mới hiển thị menu và truy cập được cấu hình `System Access`.
-* - [ ] Admin có thể thực hiện đầy đủ các thao tác Thêm, Sửa, Xóa (CRUD) các nhóm vai trò/quyền tự định nghĩa ở Tab System Access mà không có chức năng gán nhân sự trực tiếp.
+* - [ ] Admin có thể thực hiện đầy đủ các thao tác Thêm, Sửa, Xóa (CRUD) các nhóm vai trò/quyền tự định nghĩa tại Tab System Access.
+* - [ ] Việc gán nhóm quyền cho nhân viên được thực hiện trực tiếp tại màn hình hồ sơ nhân viên (Staff Profile).
 * - [ ] Hệ thống chặn hành vi xóa nhóm quyền nếu có bất kỳ nhân viên `Active` nào đang được gán nhóm quyền đó.
 * - [ ] Khi nhân viên được gán một hoặc nhiều nhóm quyền, thanh Sidebar hiển thị chính xác và đầy đủ các công cụ tương ứng (phép hợp logic gộp các quyền).
 * - [ ] Nhóm quyền hỗ trợ cấu hình và lưu thành công thuộc tính Phạm vi Dữ liệu (Data Scope) ở dạng `Brand-wide` hoặc `Assigned Stores`.
 * - [ ] Hệ thống thực thi lọc dữ liệu chính xác ở tầng API khi người dùng có nhóm quyền `Assigned Stores` thực hiện truy xuất thông tin của bất kỳ phân hệ nào.
 * - [ ] Hệ thống chặn thành công truy cập qua URL đối với các công cụ không thuộc danh mục quyền tự phục vụ mặc định và không có trong các nhóm quyền được gán của nhân viên đó.
 * - [ ] Thay đổi vùng/bang hoạt động (`payrollRegion`) tự động cập nhật lịch ngày nghỉ lễ tương ứng cho các chi nhánh thuộc quốc gia hoạt động chính của Brand.
-* - [ ] Cấu hình hạn mức đặc biệt (`lowIncomeThreshold`) và các tỷ lệ phụ cấp đặc biệt (làm đêm, Chủ nhật, lễ) được lưu đúng định dạng và được áp dụng chính xác cho các công thức tính toán lương của PRD-005.
+* - [ ] Cấu hình hạn mức đặc biệt (`lowIncomeThreshold`) và các tỷ lệ phụ cấp đặc biệt (làm đêm, Chủ nhật, lễ) được lưu đúng định dạng và được áp dụng chính xác cho các công thức tính toán lương của PRD-Payroll.
 * - [ ] Form cấu hình bản đồ mã khoản lương hỗ trợ lưu trữ đầy đủ các mã số hạch toán kế toán và xuất chính xác file kế toán lương theo mẫu xuất (Export Template) được chọn.

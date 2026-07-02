@@ -231,6 +231,14 @@ export default function Settings({
   const [brandName, setBrandName] = useState(() => {
     return localStorage.getItem('gastro_brand_name') || storeName || 'Gastro Hub';
   });
+  const [brandId] = useState(() => {
+    let id = localStorage.getItem('gastro_brand_id');
+    if (!id) {
+      id = 'e57fa873-4f96-41b4-9276-85764d26da5c';
+      localStorage.setItem('gastro_brand_id', id);
+    }
+    return id;
+  });
   const [ownerName, setOwnerName] = useState(() => {
     return localStorage.getItem('gastro_brand_owner') || 'Nguyen An';
   });
@@ -268,10 +276,17 @@ export default function Settings({
     timezone: string;
     operatingHours: string;
     status: 'Active' | 'Inactive';
+    forgetCheckinBehavior?: 'Snap to Shift' | 'Snap to Actual';
   }[]>(() => {
     const cached = localStorage.getItem('gastro_stores');
     if (cached) {
-      try { return JSON.parse(cached); } catch (e) {}
+      try {
+        const parsed = JSON.parse(cached);
+        return parsed.map((s: any) => ({
+          ...s,
+          forgetCheckinBehavior: s.forgetCheckinBehavior || 'Snap to Shift'
+        }));
+      } catch (e) {}
     }
     return [
       {
@@ -281,7 +296,8 @@ export default function Settings({
         phone: "+49 89 555-1234",
         timezone: "Europe/Berlin",
         operatingHours: "08:00 - 22:00",
-        status: "Active"
+        status: "Active",
+        forgetCheckinBehavior: "Snap to Shift"
       },
       {
         id: "store-2",
@@ -290,7 +306,8 @@ export default function Settings({
         phone: "+43 1 555-4321",
         timezone: "Europe/Vienna",
         operatingHours: "09:00 - 23:00",
-        status: "Active"
+        status: "Active",
+        forgetCheckinBehavior: "Snap to Actual"
       },
       {
         id: "store-3",
@@ -299,7 +316,8 @@ export default function Settings({
         phone: "+33 1 555-6789",
         timezone: "Europe/Paris",
         operatingHours: "10:00 - 00:00",
-        status: "Inactive"
+        status: "Inactive",
+        forgetCheckinBehavior: "Snap to Shift"
       }
     ];
   });
@@ -316,6 +334,7 @@ export default function Settings({
   const [storeFormTimezone, setStoreFormTimezone] = useState('Europe/Berlin');
   const [storeFormHours, setStoreFormHours] = useState('08:00 - 22:00');
   const [storeFormStatus, setStoreFormStatus] = useState<'Active' | 'Inactive'>('Active');
+  const [storeFormForgetBehavior, setStoreFormForgetBehavior] = useState<'Snap to Shift' | 'Snap to Actual'>('Snap to Shift');
 
   // 2.3 Tab: Notification states
   const [notifRules, setNotifRules] = useState<{
@@ -438,6 +457,46 @@ export default function Settings({
   });
   const [holidayPremiumRate, setHolidayPremiumRate] = useState(() => {
     return localStorage.getItem('gastro_holiday_premium_rate') || '125';
+  });
+
+  const [eveningShiftPremiumEnabled, setEveningShiftPremiumEnabled] = useState(() => {
+    return localStorage.getItem('gastro_evening_shift_premium_enabled') !== 'false';
+  });
+  const [eveningShiftPremiumRate, setEveningShiftPremiumRate] = useState(() => {
+    return localStorage.getItem('gastro_evening_shift_premium_rate') || '10';
+  });
+  const [eveningShiftStartTime, setEveningShiftStartTime] = useState(() => {
+    return localStorage.getItem('gastro_evening_shift_start_time') || '18:00';
+  });
+
+  const [enableTipDistribution, setEnableTipDistribution] = useState(() => {
+    return localStorage.getItem('gastro_enable_tip_distribution') !== 'false';
+  });
+  const [tipWeightKitchen, setTipWeightKitchen] = useState(() => {
+    return localStorage.getItem('gastro_tip_weight_kitchen') || '0.8';
+  });
+  const [tipWeightService, setTipWeightService] = useState(() => {
+    return localStorage.getItem('gastro_tip_weight_service') || '1.0';
+  });
+  const [tipWeightBar, setTipWeightBar] = useState(() => {
+    return localStorage.getItem('gastro_tip_weight_bar') || '0.9';
+  });
+
+  const [allowVacationRollover, setAllowVacationRollover] = useState(() => {
+    return localStorage.getItem('gastro_allow_vacation_rollover') || 'Yes';
+  });
+  const [vacationRolloverExpiryDate, setVacationRolloverExpiryDate] = useState(() => {
+    return localStorage.getItem('gastro_vacation_rollover_expiry_date') || '31/03';
+  });
+  const [vacationRolloverRemainderAction, setVacationRolloverRemainderAction] = useState(() => {
+    return localStorage.getItem('gastro_vacation_rollover_remainder_action') || 'Convert to Flextime';
+  });
+
+  const [codeEveningPremium, setCodeEveningPremium] = useState(() => {
+    return localStorage.getItem('gastro_code_evening_premium') || '2400';
+  });
+  const [codeTipsDistribution, setCodeTipsDistribution] = useState(() => {
+    return localStorage.getItem('gastro_code_tips_distribution') || '5000';
   });
 
   const [codeBaseSalary, setCodeBaseSalary] = useState(() => {
@@ -577,6 +636,7 @@ export default function Settings({
     localStorage.setItem('gastro_brand_country', brandCountry);
     localStorage.setItem('gastro_local_tax_id', localTaxId);
     localStorage.setItem('gastro_vat_id', vatId);
+    localStorage.setItem('gastro_brand_id', brandId);
     localStorage.setItem('gastro_branch_logo_url', branchLogoUrl);
     localStorage.setItem('gastro_branch_cover_url', branchCoverUrl);
     
@@ -598,6 +658,9 @@ export default function Settings({
     localStorage.setItem('gastro_overtime_payout_cycle', overtimePayoutCycle);
     
     localStorage.setItem('gastro_brand_salary_type', brandSalaryType);
+    localStorage.setItem('gastro_evening_shift_premium_enabled', eveningShiftPremiumEnabled ? 'true' : 'false');
+    localStorage.setItem('gastro_evening_shift_premium_rate', eveningShiftPremiumRate);
+    localStorage.setItem('gastro_evening_shift_start_time', eveningShiftStartTime);
     localStorage.setItem('gastro_night_shift_premium_enabled', nightShiftPremiumEnabled ? 'true' : 'false');
     localStorage.setItem('gastro_night_shift_premium_rate', nightShiftPremiumRate);
     localStorage.setItem('gastro_night_shift_start_time', nightShiftStartTime);
@@ -605,11 +668,22 @@ export default function Settings({
     localStorage.setItem('gastro_sunday_premium_rate', sundayPremiumRate);
     localStorage.setItem('gastro_holiday_premium_enabled', holidayPremiumEnabled ? 'true' : 'false');
     localStorage.setItem('gastro_holiday_premium_rate', holidayPremiumRate);
+
+    localStorage.setItem('gastro_enable_tip_distribution', enableTipDistribution ? 'true' : 'false');
+    localStorage.setItem('gastro_tip_weight_kitchen', tipWeightKitchen);
+    localStorage.setItem('gastro_tip_weight_service', tipWeightService);
+    localStorage.setItem('gastro_tip_weight_bar', tipWeightBar);
+
+    localStorage.setItem('gastro_allow_vacation_rollover', allowVacationRollover);
+    localStorage.setItem('gastro_vacation_rollover_expiry_date', vacationRolloverExpiryDate);
+    localStorage.setItem('gastro_vacation_rollover_remainder_action', vacationRolloverRemainderAction);
     
     localStorage.setItem('gastro_code_base_salary', codeBaseSalary);
+    localStorage.setItem('gastro_code_evening_premium', codeEveningPremium);
     localStorage.setItem('gastro_code_night_premium', codeNightPremium);
     localStorage.setItem('gastro_code_sunday_premium', codeSundayPremium);
     localStorage.setItem('gastro_code_holiday_premium', codeHolidayPremium);
+    localStorage.setItem('gastro_code_tips_distribution', codeTipsDistribution);
     localStorage.setItem('gastro_code_overtime_payout', codeOvertimePayout);
     localStorage.setItem('gastro_export_template', exportTemplate);
     
@@ -816,14 +890,14 @@ export default function Settings({
                   
                   {/* Basic Specifications */}
                   <div>
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-l-4 border-[#7553FF] pl-2.5">
+                    <h3 className="text-sm font-bold text-slate-800 tracking-wider mb-4 border-l-4 border-[#7553FF] pl-2.5">
                       Basic Specifications
                     </h3>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                       {/* Brand Name */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Brand / Store Name <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -833,11 +907,30 @@ export default function Settings({
                           className="w-full bg-white border border-slate-200 rounded-xl py-2 px-4 text-[14px] font-light text-[#1C1814] focus:outline-hidden focus:border-[#7553FF] shadow-none"
                           required
                         />
+                        <span className="text-[10px] text-slate-500">
+                          Note: Brand name is not necessarily unique.
+                        </span>
+                      </div>
+
+                      {/* Brand ID (UUID) */}
+                      <div className="space-y-1.5 flex flex-col">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
+                          Brand ID (UUID)
+                        </label>
+                        <input
+                          type="text"
+                          value={brandId}
+                          readOnly
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 px-4 text-[14px] font-mono text-slate-500 cursor-not-allowed shadow-none"
+                        />
+                        <span className="text-[10px] text-slate-500">
+                          Unique workspace UUID identifier.
+                        </span>
                       </div>
 
                       {/* Owner Name */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Owner Full Name <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -853,7 +946,7 @@ export default function Settings({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start mt-4">
                       {/* Contact Email */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Contact Email Address <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -867,7 +960,7 @@ export default function Settings({
 
                       {/* Contact Phone */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Contact Phone Number <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -883,12 +976,12 @@ export default function Settings({
 
                   {/* Physical Address & EU VAT Registry */}
                   <div className="pt-4 border-t border-slate-100">
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-l-4 border-[#7553FF] pl-2.5">
+                    <h3 className="text-sm font-bold text-slate-800 tracking-wider mb-4 border-l-4 border-[#7553FF] pl-2.5">
                       Tax & Financial Settings
                     </h3>
 
                     <div className="space-y-1.5 flex flex-col mb-4">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      <label className="text-xs font-bold text-slate-500 tracking-wider">
                         Main Office Headquarters Address <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -903,7 +996,7 @@ export default function Settings({
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                       {/* Active Country Selection */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Operating Country <span className="text-red-500">*</span>
                         </label>
                         <select
@@ -921,7 +1014,7 @@ export default function Settings({
 
                       {/* Local Tax ID with dynamic standard hints */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider flex items-center justify-between">
                           <span>Local Tax ID <span className="text-red-500">*</span></span>
                           {brandCountry === 'DE' && <span className="text-[10px] text-[#7553FF] font-mono font-bold">Steuernummer</span>}
                         </label>
@@ -944,7 +1037,7 @@ export default function Settings({
 
                       {/* European Union VAT ID */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider flex items-center justify-between">
                           <span>EU VAT Number <span className="text-red-500">*</span></span>
                           <span className="text-[10px] text-[#7553FF] font-mono font-bold">USt-IdNr</span>
                         </label>
@@ -969,7 +1062,7 @@ export default function Settings({
                     {/* Fixed Currency Indicator */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start mt-4">
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Settlement Currency
                         </label>
                         <div className="w-full bg-slate-100 border border-slate-200 rounded-xl py-2.5 px-4 text-[14px] font-medium text-slate-700 flex items-center justify-between">
@@ -982,14 +1075,14 @@ export default function Settings({
 
                   {/* Imagery & Identity (Logo & Banner) */}
                   <div className="pt-4 border-t border-slate-100">
-                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-l-4 border-[#7553FF] pl-2.5">
+                    <h3 className="text-sm font-bold text-slate-800 tracking-wider mb-4 border-l-4 border-[#7553FF] pl-2.5">
                       Brand Imagery Assets
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Logo Upload */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Brand Logo Accent
                         </label>
                         <input
@@ -1039,7 +1132,7 @@ export default function Settings({
 
                       {/* Cover Banner Upload */}
                       <div className="space-y-1.5 flex flex-col">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-slate-500 tracking-wider">
                           Cover Page Banner
                         </label>
                         <input
@@ -1118,8 +1211,7 @@ export default function Settings({
                     Synchronize, audit, and coordinate branch offices linked to your global GastroHub business subscription.
                   </p>
                 </div>
-                
-                <button
+                     <button
                   type="button"
                   onClick={() => {
                     setEditingStore(null);
@@ -1129,6 +1221,7 @@ export default function Settings({
                     setStoreFormTimezone('Europe/Berlin');
                     setStoreFormHours('08:00 - 22:00');
                     setStoreFormStatus('Active');
+                    setStoreFormForgetBehavior('Snap to Shift');
                     setIsStoreModalOpen(true);
                   }}
                   className="px-4 py-2 bg-[#7553FF] hover:bg-[#623EE2] text-white font-bold text-sm rounded-xl transition-all flex items-center gap-1.5 cursor-pointer border-none shadow-xs"
@@ -1166,6 +1259,7 @@ export default function Settings({
                               setStoreFormTimezone(st.timezone);
                               setStoreFormHours(st.operatingHours);
                               setStoreFormStatus(st.status);
+                              setStoreFormForgetBehavior(st.forgetCheckinBehavior || 'Snap to Shift');
                               setIsStoreModalOpen(true);
                             }}
                             className="w-7 h-7 hover:bg-slate-100 text-slate-700 rounded-lg flex items-center justify-center transition border-none cursor-pointer"
@@ -1199,6 +1293,10 @@ export default function Settings({
                         <div className="flex items-center gap-1.5 text-slate-700 font-normal">
                           <Clock className="w-3.5 h-3.5 text-slate-400" />
                           <span>{st.operatingHours} ({st.timezone})</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-slate-700 font-normal">
+                          <AlertCircle className="w-3.5 h-3.5 text-indigo-500" />
+                          <span>Forget: <strong className="text-slate-900">{st.forgetCheckinBehavior || 'Snap to Shift'}</strong></span>
                         </div>
                         <div className="flex items-center gap-1.5 text-slate-700 font-normal">
                           <Globe className="w-3.5 h-3.5 text-slate-400" />
@@ -1249,7 +1347,7 @@ export default function Settings({
                         <div className="space-y-3 pt-2 text-[13px]">
                           {/* Name */}
                           <div className="space-y-1">
-                            <label className="text-slate-700 font-bold uppercase tracking-wider text-[11px]">Branch Name *</label>
+                            <label className="text-slate-700 font-bold tracking-wider text-[11px]">Branch Name *</label>
                             <input
                               type="text"
                               value={storeFormName}
@@ -1262,7 +1360,7 @@ export default function Settings({
 
                           {/* Address */}
                           <div className="space-y-1">
-                            <label className="text-slate-700 font-bold uppercase tracking-wider text-[11px]">Address *</label>
+                            <label className="text-slate-700 font-bold tracking-wider text-[11px]">Address *</label>
                             <input
                               type="text"
                               value={storeFormAddress}
@@ -1275,7 +1373,7 @@ export default function Settings({
 
                           {/* Phone */}
                           <div className="space-y-1">
-                            <label className="text-slate-700 font-bold uppercase tracking-wider text-[11px]">Contact Hotline *</label>
+                            <label className="text-slate-700 font-bold tracking-wider text-[11px]">Contact Hotline *</label>
                             <input
                               type="text"
                               value={storeFormPhone}
@@ -1288,7 +1386,7 @@ export default function Settings({
 
                           {/* Timezone */}
                           <div className="space-y-1">
-                            <label className="text-slate-700 font-bold uppercase tracking-wider text-[11px]">Store Timezone</label>
+                            <label className="text-slate-700 font-bold tracking-wider text-[11px]">Store Timezone</label>
                             <select
                               value={storeFormTimezone}
                               onChange={(e) => setStoreFormTimezone(e.target.value)}
@@ -1303,7 +1401,7 @@ export default function Settings({
 
                           {/* Operating Hours */}
                           <div className="space-y-1">
-                            <label className="text-slate-700 font-bold uppercase tracking-wider text-[11px]">Daily Hours</label>
+                            <label className="text-slate-700 font-bold tracking-wider text-[11px]">Daily Hours</label>
                             <input
                               type="text"
                               value={storeFormHours}
@@ -1315,7 +1413,7 @@ export default function Settings({
 
                           {/* Status */}
                           <div className="space-y-1">
-                            <label className="text-slate-700 font-bold uppercase tracking-wider text-[11px]">Store Status</label>
+                            <label className="text-slate-700 font-bold tracking-wider text-[11px]">Store Status</label>
                             <select
                               value={storeFormStatus}
                               onChange={(e) => setStoreFormStatus(e.target.value as any)}
@@ -1324,6 +1422,22 @@ export default function Settings({
                               <option value="Active">Active</option>
                               <option value="Inactive">Inactive</option>
                             </select>
+                          </div>
+
+                          {/* Forget Check-in Behavior */}
+                          <div className="space-y-1">
+                            <label className="text-slate-700 font-bold tracking-wider text-[11px]">Forget Check-in Behavior</label>
+                            <select
+                              value={storeFormForgetBehavior}
+                              onChange={(e) => setStoreFormForgetBehavior(e.target.value as any)}
+                              className="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 focus:outline-hidden focus:border-[#7553FF]"
+                            >
+                              <option value="Snap to Shift">Snap to Shift</option>
+                              <option value="Snap to Actual">Snap to Actual</option>
+                            </select>
+                            <span className="text-[10px] text-slate-500 leading-tight block">
+                              Calculate work hours matching shift limits (Snap to Shift) or actual verified adjustings (Snap to Actual).
+                            </span>
                           </div>
                         </div>
 
@@ -1353,7 +1467,8 @@ export default function Settings({
                                   phone: storeFormPhone,
                                   timezone: storeFormTimezone,
                                   operatingHours: storeFormHours,
-                                  status: storeFormStatus
+                                  status: storeFormStatus,
+                                  forgetCheckinBehavior: storeFormForgetBehavior
                                 } : s));
                                 triggerLocalToast("Branch details updated", "success");
                               } else {
@@ -1368,7 +1483,8 @@ export default function Settings({
                                     phone: storeFormPhone,
                                     timezone: storeFormTimezone,
                                     operatingHours: storeFormHours,
-                                    status: storeFormStatus
+                                    status: storeFormStatus,
+                                    forgetCheckinBehavior: storeFormForgetBehavior
                                   }
                                 ]);
                                 triggerLocalToast("New branch created", "success");
@@ -1481,18 +1597,18 @@ export default function Settings({
                   </div>
                   <div className="space-y-2">
                     <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                      Bạn không có quyền truy cập chức năng này
+                      You do not have permission to access this feature
                     </h2>
                     <p className="text-slate-600 font-sans text-[14px] leading-relaxed">
-                      Chỉ tài khoản có vai trò <strong>Admin</strong> mới được phép truy cập màn hình cấu hình này. Nhân viên hoặc các nhóm quyền thường không được phép xem hay truy cập trang cấu hình System Access.
+                      Only accounts with the <strong>Admin</strong> role are permitted to access this configuration page. Employees and standard privilege groups are restricted from viewing or modifying the System Access settings.
                     </p>
                   </div>
                   <div className="p-4 bg-rose-50/70 border border-rose-100 rounded-xl text-left text-xs font-normal text-rose-800 leading-normal">
-                    <strong>Thông tin tài khoản mô phỏng hiện tại:</strong>
+                    <strong>Current Simulated Account Details:</strong>
                     <ul className="list-disc pl-4 mt-1.5 space-y-1 font-mono">
-                      <li>Họ và tên: {simulatedUser?.name || "Nguyen An"}</li>
-                      <li>Vai trò: {simulatedUser?.role || "Crew Profile"}</li>
-                      <li>Quyền hệ thống: {simulatedUser?.systemAccessLevel || "Employee"}</li>
+                      <li>Full Name: {simulatedUser?.name || "Nguyen An"}</li>
+                      <li>Role: {simulatedUser?.role || "Crew Profile"}</li>
+                      <li>System Access Level: {simulatedUser?.systemAccessLevel || "Employee"}</li>
                     </ul>
                   </div>
                 </div>
@@ -1542,14 +1658,14 @@ export default function Settings({
                 
                 {/* 2.5.1 LOCAL LABOR COMPLIANCE (Đức & Áo) */}
                 <div className="bg-white border border-[#1C1814]/5 rounded-2xl p-6 shadow-sm space-y-4">
-                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-l-4 border-[#7553FF] pl-2.5">
+                  <h3 className="text-sm font-bold text-slate-800 tracking-wider border-l-4 border-[#7553FF] pl-2.5">
                     Local Labor Regulations
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Region Selection */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      <label className="text-xs font-bold text-slate-500 tracking-wider">
                         Federal Land / Region (German Bundesland)
                       </label>
                       <select
@@ -1568,7 +1684,7 @@ export default function Settings({
 
                     {/* Mini-job low income limit */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                      <label className="text-xs font-bold text-slate-500 tracking-wider flex items-center justify-between">
                         <span>Mini-Job Geringfügigkeitsgrenze (€)</span>
                         <span className="text-[10px] bg-indigo-50 text-indigo-700 px-1.5 py-0.2 rounded-sm font-mono font-bold">GERMANY</span>
                       </label>
@@ -1661,39 +1777,18 @@ export default function Settings({
                       </div>
                     )}
                   </div>
-
-                  {/* Forget Check-in Behavior */}
-                  <div className="pt-4 border-t border-slate-100">
-                    <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        Unregistered Attendance Handler (Forget Check-in)
-                      </label>
-                      <select
-                        value={forgetCheckinBehavior}
-                        onChange={(e) => setForgetCheckinBehavior(e.target.value)}
-                        className="w-full bg-white border border-slate-200 rounded-xl py-2.5 px-3 text-[14px] font-light text-[#1C1814]"
-                      >
-                        <option value="Snap to Shift">Snap to Scheduled Shift hours (Default)</option>
-                        <option value="Zero Hours">Flag as Absent / Force 0 Hours audit</option>
-                        <option value="Alert Flag">Maintain Active alert flags for Manager audit</option>
-                      </select>
-                      <span className="text-[11px] font-light text-slate-500">
-                        Determines the automatic wage calculations behavior when staff members fail to scan clock-out tags.
-                      </span>
-                    </div>
-                  </div>
                 </div>
 
                 {/* 2.5.2 FLEXIBLE WORKING HOURS ACCOUNT (FWHA / ARBEITSZEITKONTO) */}
                 <div className="bg-white border border-[#1C1814]/5 rounded-2xl p-6 shadow-sm space-y-4">
-                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-l-4 border-[#7553FF] pl-2.5">
+                  <h3 className="text-sm font-bold text-slate-800 tracking-wider border-l-4 border-[#7553FF] pl-2.5">
                     Arbeitszeitkonto (FWHA) parameters
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Max Positive Credit */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      <label className="text-xs font-bold text-slate-500 tracking-wider">
                         Maximum positive credit limit (Plusstunden)
                       </label>
                       <div className="relative">
@@ -1713,7 +1808,7 @@ export default function Settings({
 
                     {/* Max Negative Debt */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      <label className="text-xs font-bold text-slate-500 tracking-wider">
                         Maximum negative debt limit (Minusstunden)
                       </label>
                       <div className="relative">
@@ -1749,7 +1844,7 @@ export default function Settings({
                     {annualLeaveRollover && (
                       <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
                         <div className="space-y-1.5">
-                          <label className="text-[10px] text-slate-500 block uppercase tracking-wider">Rollover Rate Ceiling</label>
+                          <label className="text-[10px] text-slate-500 block tracking-wider">Rollover Rate Ceiling</label>
                           <input 
                             type="number" 
                             value={leaveRolloverRate} 
@@ -1760,7 +1855,7 @@ export default function Settings({
                         </div>
                         
                         <div className="space-y-1.5">
-                          <label className="text-[10px] text-slate-500 block uppercase tracking-wider">Overtime Compensation Cycle</label>
+                          <label className="text-[10px] text-slate-500 block tracking-wider">Overtime Compensation Cycle</label>
                           <select 
                             value={overtimePayoutCycle} 
                             onChange={(e) => setOvertimePayoutCycle(e.target.value)}
@@ -1778,7 +1873,7 @@ export default function Settings({
 
                 {/* 2.5.3 PHỤ CẤP ĐẶC BIỆT & TAX-FREE PREMIUM RATES */}
                 <div className="bg-white border border-[#1C1814]/5 rounded-2xl p-6 shadow-sm space-y-4">
-                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-l-4 border-[#7553FF] pl-2.5">
+                  <h3 className="text-sm font-bold text-slate-800 tracking-wider border-l-4 border-[#7553FF] pl-2.5">
                     Special premiums (SFN-Zuschläge) & Tax Exceptions
                   </h3>
 
@@ -1787,7 +1882,7 @@ export default function Settings({
                   </div>
 
                   <div className="space-y-1 flex flex-col">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Statutory Base Salary Model</label>
+                    <label className="text-xs font-bold text-slate-500 tracking-wider">Statutory Base Salary Model</label>
                     <select
                       value={brandSalaryType}
                       onChange={(e) => setBrandSalaryType(e.target.value)}
@@ -1798,7 +1893,39 @@ export default function Settings({
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+                    {/* Evening Premium */}
+                    <div className="border border-slate-100 p-4 rounded-xl space-y-3 bg-slate-50/50">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={eveningShiftPremiumEnabled}
+                          onChange={(e) => setEveningShiftPremiumEnabled(e.target.checked)}
+                          className="accent-[#7553FF] rounded-xs"
+                        />
+                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Evening Premium</span>
+                      </label>
+                      {eveningShiftPremiumEnabled && (
+                        <div className="space-y-1.5 text-xs">
+                          <label className="text-[10px] text-slate-500 block">Rate Exception (%)</label>
+                          <input 
+                            type="number" 
+                            value={eveningShiftPremiumRate} 
+                            onChange={(e) => setEveningShiftPremiumRate(e.target.value)}
+                            className="bg-white border border-slate-200 rounded-lg p-1 text-xs font-mono w-full" 
+                          />
+                          <label className="text-[10px] text-slate-500 block mt-1">Start Hour</label>
+                          <input 
+                            type="text" 
+                            value={eveningShiftStartTime} 
+                            onChange={(e) => setEveningShiftStartTime(e.target.value)}
+                            placeholder="18:00"
+                            className="bg-white border border-slate-200 rounded-lg p-1 text-xs font-mono w-full" 
+                          />
+                        </div>
+                      )}
+                    </div>
+
                     {/* Night Premium */}
                     <div className="border border-slate-100 p-4 rounded-xl space-y-3 bg-slate-50/50">
                       <label className="flex items-center gap-2 cursor-pointer">
@@ -1883,16 +2010,136 @@ export default function Settings({
                   </div>
                 </div>
 
+                {/* 2.5.3b DYNAMIC TIP DISTRIBUTION SETTINGS */}
+                <div className="bg-white border border-[#1C1814]/5 rounded-2xl p-6 shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-slate-800 tracking-wider border-l-4 border-[#7553FF] pl-2.5">
+                    Dynamic Tip Distribution Settings
+                  </h3>
+                  <p className="text-xs text-slate-500 font-sans">
+                    Configure automated tip pool allocation weightings for different departments.
+                  </p>
+
+                  <div className="pt-2 space-y-3.5">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={enableTipDistribution}
+                        onChange={(e) => setEnableTipDistribution(e.target.checked)}
+                        className="mt-1 accent-[#7553FF] rounded-xs"
+                      />
+                      <div>
+                        <span className="text-[14px] leading-[21px] font-bold text-slate-800 block">Enable Automated Tip Distribution</span>
+                        <span className="text-xs text-slate-500 font-sans">
+                          Calculate and distribute periodic tips based on department-specific weight quotients.
+                        </span>
+                      </div>
+                    </label>
+
+                    {enableTipDistribution && (
+                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-slate-500 block tracking-wider">Kitchen Tip Weight</label>
+                          <input 
+                            type="number" 
+                            step="0.1"
+                            value={tipWeightKitchen} 
+                            onChange={(e) => setTipWeightKitchen(e.target.value)}
+                            className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-mono w-full" 
+                          />
+                          <span className="text-[10px] text-slate-400">Default Kitchen weight: 0.8</span>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-slate-500 block tracking-wider">Service Tip Weight</label>
+                          <input 
+                            type="number" 
+                            step="0.1"
+                            value={tipWeightService} 
+                            onChange={(e) => setTipWeightService(e.target.value)}
+                            className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-mono w-full" 
+                          />
+                          <span className="text-[10px] text-slate-400">Default Service weight: 1.0</span>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] text-slate-500 block tracking-wider">Bar Tip Weight</label>
+                          <input 
+                            type="number" 
+                            step="0.1"
+                            value={tipWeightBar} 
+                            onChange={(e) => setTipWeightBar(e.target.value)}
+                            className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-mono w-full" 
+                          />
+                          <span className="text-[10px] text-slate-400">Default Bar weight: 0.9</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2.5.3c VACATION ROLLOVER POLICY SETTINGS */}
+                <div className="bg-white border border-[#1C1814]/5 rounded-2xl p-6 shadow-sm space-y-4">
+                  <h3 className="text-sm font-bold text-slate-800 tracking-wider border-l-4 border-[#7553FF] pl-2.5">
+                    Vacation Rollover Policy Settings
+                  </h3>
+                  <p className="text-xs text-slate-500 font-sans">
+                    Configure rules for rolling over unused holiday balances into the next calendar year.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-500 tracking-wider block">Allow Vacation Rollover</label>
+                      <select
+                        value={allowVacationRollover}
+                        onChange={(e) => setAllowVacationRollover(e.target.value)}
+                        className="bg-white border border-slate-200 rounded-xl p-2 text-xs w-full h-[38px] cursor-pointer"
+                      >
+                        <option value="Yes">Yes (Allow unused days to roll over)</option>
+                        <option value="No">No (Unused days forfeit on Dec 31st)</option>
+                      </select>
+                    </div>
+
+                    {allowVacationRollover === 'Yes' && (
+                      <>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-slate-500 tracking-wider block">Expiry Date for Rollover</label>
+                          <select
+                            value={vacationRolloverExpiryDate}
+                            onChange={(e) => setVacationRolloverExpiryDate(e.target.value)}
+                            className="bg-white border border-slate-200 rounded-xl p-2 text-xs w-full h-[38px] cursor-pointer"
+                          >
+                            <option value="31/03">March 31st (Next Year Q1)</option>
+                            <option value="30/06">June 30th (Next Year H1)</option>
+                            <option value="Never">Never (Does not expire)</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-slate-500 tracking-wider block">Action on Unused Rollover</label>
+                          <select
+                            value={vacationRolloverRemainderAction}
+                            onChange={(e) => setVacationRolloverRemainderAction(e.target.value)}
+                            className="bg-white border border-slate-200 rounded-xl p-2 text-xs w-full h-[38px] cursor-pointer"
+                          >
+                            <option value="Expire">Forfeit (Expire to 0)</option>
+                            <option value="Convert to Flextime">Convert to Gleitzeit/Flextime (1 Day = 8.0 hrs)</option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
                 {/* 2.5.4 BOOKKEEPING EXPORTS & WAGE CODE MAPPINGS */}
                 <div className="bg-white border border-[#1C1814]/5 rounded-2xl p-6 shadow-sm space-y-4">
-                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider border-l-4 border-[#7553FF] pl-2.5">
+                  <h3 className="text-sm font-bold text-slate-800 tracking-wider border-l-4 border-[#7553FF] pl-2.5">
                     Accounting Wage Codes (Lohnarten Export Mappings)
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Export Template Selector */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Export Ledger Template</label>
+                      <label className="text-xs font-bold text-slate-500 tracking-wider">Export Ledger Template</label>
                       <select
                         value={exportTemplate}
                         onChange={(e) => setExportTemplate(e.target.value)}
@@ -1907,7 +2154,7 @@ export default function Settings({
 
                     {/* Base Salary Code */}
                     <div className="space-y-1.5 flex flex-col">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider font-sans">Base Salary Wage Code</label>
+                      <label className="text-xs font-bold text-slate-500 tracking-wider font-sans">Base Salary Wage Code</label>
                       <input
                         type="text"
                         value={codeBaseSalary}
@@ -1918,10 +2165,21 @@ export default function Settings({
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2 font-mono text-xs">
+                  <div className="grid grid-cols-2 md:grid-cols-6 gap-4 pt-2 font-mono text-xs">
+                    {/* Code Evening */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-500 tracking-wider font-sans">Evening Wage Code</label>
+                      <input 
+                        type="text" 
+                        value={codeEveningPremium} 
+                        onChange={(e) => setCodeEveningPremium(e.target.value)}
+                        className="bg-white border border-slate-200 rounded-lg p-1.5 w-full font-mono text-xs" 
+                      />
+                    </div>
+
                     {/* Code Night */}
                     <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 uppercase tracking-wider font-sans">Night Wage Code</label>
+                      <label className="text-[10px] text-slate-500 tracking-wider font-sans">Night Wage Code</label>
                       <input 
                         type="text" 
                         value={codeNightPremium} 
@@ -1932,7 +2190,7 @@ export default function Settings({
 
                     {/* Code Sunday */}
                     <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 uppercase tracking-wider font-sans">Sunday Wage Code</label>
+                      <label className="text-[10px] text-slate-500 tracking-wider font-sans">Sunday Wage Code</label>
                       <input 
                         type="text" 
                         value={codeSundayPremium} 
@@ -1943,7 +2201,7 @@ export default function Settings({
 
                     {/* Code Holiday */}
                     <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 uppercase tracking-wider font-sans">Holiday Wage Code</label>
+                      <label className="text-[10px] text-slate-500 tracking-wider font-sans">Holiday Wage Code</label>
                       <input 
                         type="text" 
                         value={codeHolidayPremium} 
@@ -1952,9 +2210,20 @@ export default function Settings({
                       />
                     </div>
 
+                    {/* Code Tips Distribution */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] text-slate-500 tracking-wider font-sans">Tips Wage Code</label>
+                      <input 
+                        type="text" 
+                        value={codeTipsDistribution} 
+                        onChange={(e) => setCodeTipsDistribution(e.target.value)}
+                        className="bg-white border border-slate-200 rounded-lg p-1.5 w-full font-mono text-xs" 
+                      />
+                    </div>
+
                     {/* Code Overtime Payout */}
                     <div className="space-y-1">
-                      <label className="text-[10px] text-slate-500 uppercase tracking-wider font-sans">Overtime Wage Code</label>
+                      <label className="text-[10px] text-slate-500 tracking-wider font-sans">Overtime Wage Code</label>
                       <input 
                         type="text" 
                         value={codeOvertimePayout} 

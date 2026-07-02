@@ -220,7 +220,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
 
                 {/* Interactive Drag & Drop Area */}
                 <div className="space-y-2">
-                  <label className="text-[13px] font-light text-[#1C1814] uppercase tracking-wider block font-sans">
+                  <label className="text-[13px] font-light text-[#1C1814] tracking-wider block font-sans">
                     Upload Avatar File
                   </label>
                   <div
@@ -228,10 +228,10 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     onClick={triggerFileInput}
-                    className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all select-none flex flex-col items-center justify-center ${
+                    className={`border border-dashed rounded-xl p-4 text-center cursor-pointer transition-all select-none flex flex-col items-center justify-center ${
                       isDragging
                         ? 'border-[#7553FF] bg-[#7553FF]/5 shadow-inner scale-[0.98]'
-                        : 'border-[#C8BFB5]/70 hover:border-[#7553FF]/50 bg-white hover:bg-[#7553FF]/[0.01]'
+                        : 'border-[#e2e8f0] hover:border-[#7553FF]/50 bg-white hover:bg-[#7553FF]/[0.01]'
                     }`}
                   >
                     <input
@@ -264,7 +264,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
                     <div className="w-6 h-6 rounded-md bg-[#7553FF]/10 text-[#7553FF] flex items-center justify-center">
                       <User className="w-3.5 h-3.5" />
                     </div>
-                    <h4 className="text-[14px] font-extrabold text-[#1C1814] uppercase tracking-wider font-sans">
+                    <h4 className="text-[14px] font-extrabold text-[#1C1814] tracking-wider font-sans">
                       Basic Specifications
                     </h4>
                   </div>
@@ -276,7 +276,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Name Input */}
                     <div className="space-y-1.5">
-                      <label className="text-[12px] font-light text-[#1C1814] uppercase tracking-wider block font-sans">
+                      <label className="text-[12px] font-light text-[#1C1814] tracking-wider block font-sans">
                         Full Name <span className="text-rose-500 font-serif">*</span>
                       </label>
                       <div className="relative">
@@ -294,7 +294,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
 
                     {/* Email Input */}
                     <div className="space-y-1.5">
-                      <label className="text-[12px] font-light text-[#1C1814] uppercase tracking-wider block font-sans">
+                      <label className="text-[12px] font-light text-[#1C1814] tracking-wider block font-sans">
                         Email Address <span className="text-rose-500 font-serif">*</span>
                       </label>
                       <div className="relative">
@@ -318,7 +318,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
                     <div className="w-6 h-6 rounded-md bg-[#7553FF]/10 text-[#7553FF] flex items-center justify-center">
                       <Key className="w-3.5 h-3.5" />
                     </div>
-                    <h4 className="text-[14px] font-extrabold text-[#1C1814] uppercase tracking-wider font-sans">
+                    <h4 className="text-[14px] font-extrabold text-[#1C1814] tracking-wider font-sans">
                       Change Security Password
                     </h4>
                   </div>
@@ -328,10 +328,10 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
                   </p>
 
                   {/* Vertical layout for Password Fields */}
-                  <div className="flex flex-col gap-4 max-w-md">
+                  <div className="flex flex-col gap-4 max-w">
                     {/* Current Password */}
                     <div className="space-y-1.5">
-                      <label className="text-[12px] font-light text-[#1C1814] uppercase tracking-wider block font-sans">
+                      <label className="text-[12px] font-light text-[#1C1814] tracking-wider block font-sans">
                         Current Password
                       </label>
                       <div className="relative">
@@ -360,7 +360,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
 
                     {/* New Password */}
                     <div className="space-y-1.5">
-                      <label className="text-[12px] font-light text-[#1C1814] uppercase tracking-wider block font-sans">
+                      <label className="text-[12px] font-light text-[#1C1814] tracking-wider block font-sans">
                         New Password
                       </label>
                       <div className="relative">
@@ -389,7 +389,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
 
                     {/* Confirm New Password */}
                     <div className="space-y-1.5">
-                      <label className="text-[12px] font-light text-[#1C1814] uppercase tracking-wider block font-sans">
+                      <label className="text-[12px] font-light text-[#1C1814] tracking-wider block font-sans">
                         Confirm New Password
                       </label>
                       <div className="relative">

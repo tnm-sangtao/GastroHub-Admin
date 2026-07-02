@@ -23,7 +23,7 @@ export default function DatePicker({
   placeholder = 'Select date',
   error = false,
   minYear = 1940,
-  maxYear = new Date().getFullYear(),
+  maxYear = new Date().getFullYear() + 5,
   label
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -158,7 +158,7 @@ export default function DatePicker({
   return (
     <div className="relative w-full text-left font-sans" ref={containerRef}>
       {label && (
-        <label className="text-[12px] font-semibold text-slate-600 block mb-1">
+        <label className="text-[14px] font-semibold text-slate-700 block mb-1">
           {label}
         </label>
       )}
@@ -178,7 +178,7 @@ export default function DatePicker({
           <CalendarIcon className={`w-4 h-4 transition-colors duration-200 ${isOpen ? 'text-[#7553FF]' : 'text-slate-700'}`} />
         </div>
 
-        <div className="w-full pl-10 pr-10 text-xs text-slate-800 font-medium truncate">
+        <div className="w-full pl-10 pr-10 text-[14px] text-slate-800 font-medium truncate">
           {isValidValue ? (
             getFormattedDisplay()
           ) : (

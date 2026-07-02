@@ -1350,7 +1350,7 @@ export function CheckinView() {
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Check-In Time</label>
+                      <label className="text-[14px] font-bold text-slate-700 tracking-wide">Check-In Time</label>
                       <input
                         type="text"
                         placeholder="e.g. 08:58 AM"
@@ -1363,7 +1363,7 @@ export function CheckinView() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Check-In Location Subtitle</label>
+                      <label className="text-[14px] font-bold text-slate-700 tracking-wide">Check-In Location Subtitle</label>
                       <input
                         type="text"
                         placeholder="e.g. Front Desk"
@@ -1378,7 +1378,7 @@ export function CheckinView() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Check-Out Time</label>
+                      <label className="text-[14px] font-bold text-slate-700 tracking-wide">Check-Out Time</label>
                       <input
                         type="text"
                         placeholder="e.g. 05:02 PM"
@@ -1391,7 +1391,7 @@ export function CheckinView() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Check-Out Location Subtitle</label>
+                      <label className="text-[14px] font-bold text-slate-700 tracking-wide">Check-Out Location Subtitle</label>
                       <input
                         type="text"
                         placeholder="e.g. Front Desk"
@@ -1406,7 +1406,7 @@ export function CheckinView() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Working Hours Summary</label>
+                      <label className="text-[14px] font-bold text-slate-700 tracking-wide">Working Hours Summary</label>
                       <input
                         type="text"
                         placeholder="e.g. 8h 17m"
@@ -1419,7 +1419,7 @@ export function CheckinView() {
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Branch Code</label>
+                      <label className="text-[14px] font-bold text-slate-700 tracking-wide">Branch Code</label>
                       <select
                         className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white text-[14px] outline-none focus:border-[#7553FF] text-slate-800"
                         value={activeLog.location}
@@ -1436,7 +1436,7 @@ export function CheckinView() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Attendance Status</label>
+                    <label className="text-[14px] font-bold text-slate-700 tracking-wide">Attendance Status</label>
                     <select
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white text-[14px] outline-none focus:border-[#7553FF] cursor-pointer text-slate-800"
                       value={activeLog.status}
@@ -2691,7 +2691,7 @@ export function LeaveCalculatorView() {
                 <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                   
                   <div className="space-y-1.5">
-                    <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                    <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                       Select Staff Member
                     </label>
                     <select
@@ -2729,7 +2729,7 @@ export function LeaveCalculatorView() {
                       {/* Leave config */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             Leave Category
                           </label>
                           <select
@@ -2744,7 +2744,7 @@ export function LeaveCalculatorView() {
                           </select>
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             Estimated Days
                           </label>
                           <div className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-[14px] text-slate-600 font-mono">
@@ -2755,7 +2755,7 @@ export function LeaveCalculatorView() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             Start Date
                           </label>
                           <input
@@ -2766,7 +2766,7 @@ export function LeaveCalculatorView() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             End Date
                           </label>
                           <input
@@ -2779,7 +2779,7 @@ export function LeaveCalculatorView() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                        <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                           Reason description
                         </label>
                         <textarea
@@ -2795,7 +2795,7 @@ export function LeaveCalculatorView() {
                     <>
                       {/* Flextime config */}
                       <div className="space-y-1.5">
-                        <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                        <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                           Arrangement Type
                         </label>
                         <select
@@ -2819,7 +2819,7 @@ export function LeaveCalculatorView() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                        <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                           Arrangement Details
                         </label>
                         <input
@@ -2833,7 +2833,7 @@ export function LeaveCalculatorView() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             Active Days
                           </label>
                           <select
@@ -2848,7 +2848,7 @@ export function LeaveCalculatorView() {
                           </select>
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             Working Span
                           </label>
                           <div className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[14px] text-slate-600 font-semibold">
@@ -2859,7 +2859,7 @@ export function LeaveCalculatorView() {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             Start Date
                           </label>
                           <input
@@ -2870,7 +2870,7 @@ export function LeaveCalculatorView() {
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                          <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                             End Date
                           </label>
                           <input
@@ -3839,8 +3839,8 @@ export function BookTableView({
                   <div className="absolute right-0 mt-1.5 w-64 bg-white border border-slate-100 rounded-xl shadow-lg z-50 p-4 space-y-4">
                     {/* Status Choice */}
                     <div className="space-y-1.5">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block">
-                        STATUS
+                      <label className="text-[14px] font-bold text-slate-700 tracking-widest block">
+                        Status
                       </label>
                       <div className="grid grid-cols-2 gap-1.5">
                         {["All", "Confirmed", "Pending", "Cancelled"].map(
@@ -3866,8 +3866,8 @@ export function BookTableView({
 
                     {/* Source Choice */}
                     <div className="space-y-1.5">
-                      <label className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block">
-                        BOOKING SOURCE
+                      <label className="text-[14px] font-bold text-slate-700 tracking-widest block">
+                        Booking Source
                       </label>
                       <select
                         value={sourceFilter}
@@ -3888,8 +3888,8 @@ export function BookTableView({
                     {/* Date filter shown only in Daily tab inside dropdown */}
                     {bookingCategory === "daily" && (
                       <div className="space-y-1.5 border-t border-slate-100 pt-3">
-                        <label className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block">
-                          DATE FILTER
+                        <label className="text-[14px] font-bold text-slate-700 tracking-widest block">
+                          Date Filter
                         </label>
                         <input
                           type="date"
@@ -6458,7 +6458,7 @@ export function BookTableView({
 
                               <div className="space-y-3.5">
                                 <div className="space-y-1">
-                                  <label className="text-[12px] font-medium text-[#1C1814]/60 uppercase tracking-wider block">
+                                  <label className="text-[12px] font-medium text-[#1C1814]/60 tracking-wider block">
                                     Bot Token
                                   </label>
                                   <input
@@ -6471,7 +6471,7 @@ export function BookTableView({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[12px] font-medium text-[#1C1814]/60 uppercase tracking-wider block">
+                                  <label className="text-[12px] font-medium text-[#1C1814]/60 tracking-wider block">
                                     Chat ID
                                   </label>
                                   <input
@@ -6501,7 +6501,7 @@ export function BookTableView({
 
                               <div className="space-y-3.5">
                                 <div className="space-y-1">
-                                  <label className="text-[12px] font-medium text-[#1C1814]/60 uppercase tracking-wider block">
+                                  <label className="text-[12px] font-medium text-[#1C1814]/60 tracking-wider block">
                                     Phone Number
                                   </label>
                                   <input
@@ -6514,7 +6514,7 @@ export function BookTableView({
                                 </div>
 
                                 <div className="space-y-1">
-                                  <label className="text-[12px] font-medium text-[#1C1814]/60 uppercase tracking-wider block">
+                                  <label className="text-[12px] font-medium text-[#1C1814]/60 tracking-wider block">
                                     Phone ID
                                   </label>
                                   <input
@@ -10187,7 +10187,7 @@ export function QrMenuView() {
 
                 {/* Menu link custom layout element */}
                 <div className="space-y-1.5 text-left font-sans">
-                  <label className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider block">
+                  <label className="text-[14px] font-bold text-[#1C1814] tracking-wider block">
                     Menu Link
                   </label>
                   <div className="flex items-center gap-1 bg-slate-50 border border-[#1C1814]/10 p-1 rounded-xl">
@@ -10624,12 +10624,12 @@ export function QrMenuView() {
                         <div className="absolute inset-0 bg-yellow-600/10" />
                       </div>
 
-                      {/* Accent Xin Chào */}
+                      {/* Accent Welcome */}
                       <span
                         className="text-[10px] font-extrabold tracking-widest uppercase opacity-85"
                         style={{ color: textColor }}
                       >
-                        Xin Chào
+                        Welcome
                       </span>
 
                       {/* Diner/Restaurant name responding to dynamic text sizing selection */}
@@ -11377,7 +11377,7 @@ export function SocialPostView() {
     setTimeout(() => {
       setIsGeneratingAI(false);
       setCaption(
-        "✨ Gặp gỡ tinh hoa ẩm thực tại John's Bistro! 🌟 Đĩa Wagyu Beef Sliders siêu mọng nước hòa quyện hoàn hảo cùng sốt Truffle Aioli béo ngậy nồng nàn. Hương vị bùng nổ trong từng giác quan! 🍔🤤",
+        "✨ Meet culinary perfection at John's Bistro! 🌟 Super juicy Wagyu Beef Sliders paired flawlessly with rich and fragrant Truffle Aioli sauce. An explosion of flavors in every bite! 🍔🤤",
       );
       setHashtags(
         "#WagyuPremium #TruffleBurger #JohnsBistro #SignatureDish #HanoiEats #SaigonFoodie",
@@ -11432,7 +11432,7 @@ export function SocialPostView() {
             {/* Caption Card */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                   Caption
                 </label>
               </div>
@@ -11462,7 +11462,7 @@ export function SocialPostView() {
             {/* Hashtags Input bar */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">
+                <label className="text-[14px] font-bold text-slate-700 tracking-wide">
                   Hashtags
                 </label>
                 <span className="text-[14px] text-slate-700 font-medium font-mono">
@@ -11480,7 +11480,7 @@ export function SocialPostView() {
 
             {/* Media Image Grid component */}
             <div className="space-y-1.5">
-              <label className="text-[14px] font-bold text-slate-700 uppercase tracking-wide block">
+              <label className="text-[14px] font-bold text-slate-700 tracking-wide block">
                 Media
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -11928,7 +11928,7 @@ export function SeoOptViewUnified() {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider block">
+                <label className="text-[14px] font-bold text-[#1C1814] tracking-wider block">
                   Website URL <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -11942,7 +11942,7 @@ export function SeoOptViewUnified() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider block">
+                <label className="text-[14px] font-bold text-[#1C1814] tracking-wider block">
                   Business Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -12775,7 +12775,7 @@ export function SeoOptViewLegacyUnused() {
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-slate-505 uppercase tracking-wider block">
+                <label className="text-[11px] font-extrabold text-slate-505 tracking-wider block">
                   Website URL <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -12789,7 +12789,7 @@ export function SeoOptViewLegacyUnused() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-extrabold text-slate-505 uppercase tracking-wider block">
+                <label className="text-[11px] font-extrabold text-slate-505 tracking-wider block">
                   Business Name <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -14533,7 +14533,7 @@ export function MarketingSettingView() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-1.5">
-              <label className="text-[14px] font-bold text-[#1C1814]/50 uppercase tracking-wide">
+              <label className="text-[14px] font-bold text-[#1C1814]/50 tracking-wide">
                 Standard Discount Percent
               </label>
               <input
@@ -14546,7 +14546,7 @@ export function MarketingSettingView() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[14px] font-bold text-[#1C1814]/50 uppercase tracking-wide">
+              <label className="text-[14px] font-bold text-[#1C1814]/50 tracking-wide">
                 Loyal Coupon Token
               </label>
               <input
@@ -14885,7 +14885,7 @@ export function CateringInquiriesView() {
             Catering & Banquet Inquiries is Coming Soon!
           </h1>
           <p className="text-[15px] text-slate-700 leading-relaxed font-normal max-w-lg mx-auto">
-            Chúng tôi đang hoàn thiện một công cụ tuyệt vời để giúp bạn quản lý các yêu cầu đặt tiệc lớn. Hãy đón chờ nhé!
+            We are putting the final touches on an amazing tool to help you seamlessly manage and quote large party & catering requests. Stay tuned!
           </p>
         </div>
 

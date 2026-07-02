@@ -31,6 +31,7 @@ import {
   Phone, 
   Check, 
   AlertCircle,
+  AlertTriangle,
   Search,
   Eye,
   Download,
@@ -49,6 +50,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import Payroll from './Payroll';
 import DatePicker from './DatePicker';
+import { SmartBulkOnboardingModal } from './SmartBulkOnboardingModal';
 
 interface StaffMember {
   id: string;
@@ -63,18 +65,27 @@ interface StaffMember {
   isActive?: boolean;
   department?: string;
   branch?: string;
+  fwhaBalance?: number;
 
   // New detailed professional profiles
   address?: string;
   dob?: string;
   gender?: string;
+  nationality?: string;
 
   // Employment info
   systemAccessLevel?: 'Super Admin' | 'Manager' | 'Employee';
   systemPermissions?: string[];
   assignedStores?: string[];
   startDate?: string;
+  exitDate?: string;
   employmentType?: 'Full-time' | 'Part-time' | 'Minijob';
+  contractHours?: number;
+  grossAgreement?: number;
+  annualLeaveEntitlement?: number;
+  contractPreparationStatus?: 'tbd' | 'yes' | 'no';
+  contractSigningStatus?: 'tbd' | 'yes' | 'no';
+  sundayOffCountOfYear?: number;
 
   // Salary & compensation
   salaryType?: 'Hourly' | 'Fixed Monthly';
@@ -84,6 +95,16 @@ interface StaffMember {
   effectiveDate?: string;
   compensationNotes?: string;
   includeInPayroll?: boolean;
+
+  // Tax & insurance info
+  taxClass?: string;
+  socialSecurityNumber?: string;
+  personalTaxId?: string;
+  healthInsuranceProvider?: string;
+  insuranceSepa?: 'yes' | 'no';
+  idWithResidencePermit?: 'yes' | 'no';
+  residencePermitExpiryDate?: string;
+  dependentAllowance?: string;
 }
 
 interface RoleItem {
@@ -96,16 +117,16 @@ interface RoleItem {
 }
 
 const initialStaff: StaffMember[] = [
-  { id: '1', name: 'Nguyen An', role: 'Operation', status: 'Full-time', email: 'nguyen.an@johnsbistro.com', phone: '090-111-2222', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&q=80', hourlyRate: 35, availableHours: '24/7 On call', isActive: true, department: 'Operation', branch: 'HCM 1' },
-  { id: '2', name: 'Tran Binh', role: 'HR', status: 'Full-time', email: 'tran.binh@johnsbistro.com', phone: '090-333-4444', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80', hourlyRate: 20, availableHours: '9:00 - 17:00', isActive: true, department: 'HR', branch: 'HQ' },
-  { id: '3', name: 'Le Chi', role: 'Sales', status: 'Full-time', email: 'le.chi@johnsbistro.com', phone: '090-555-6666', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=85', hourlyRate: 25, availableHours: 'Mon-Fri 8:00 - 16:00', isActive: true, department: 'Sales', branch: 'HN 1' },
-  { id: '4', name: 'Pham Dung', role: 'Operation', status: 'Part-time', email: 'pham.dung@johnsbistro.com', phone: '090-777-8888', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a65c6?w=100&h=100&fit=crop&q=80', hourlyRate: 22, availableHours: 'Flexible check-in', isActive: false, department: 'Operation', branch: 'HCM 2' },
-  { id: '5', name: 'Hoang Em', role: 'Kitchen', status: 'Full-time', email: 'hoang.em@johnsbistro.com', phone: '090-999-0000', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80', hourlyRate: 18, availableHours: 'Mornings daily', isActive: true, department: 'Kitchen', branch: 'HCM 1' },
-  { id: '6', name: 'Vu Giang', role: 'Bar', status: 'Part-time', email: 'vu.giang@johnsbistro.com', phone: '090-123-5555', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80', hourlyRate: 16, availableHours: 'Flexible check-in', isActive: true, department: 'Bar', branch: 'HCM 2' },
-  { id: '7', name: 'Doan Trang', role: 'HR', status: 'Full-time', email: 'doan.trang@johnsbistro.com', phone: '090-555-5555', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&q=80', hourlyRate: 22, availableHours: 'Mornings daily', isActive: true, department: 'HR', branch: 'HQ' },
-  { id: '8', name: 'Tran Long', role: 'Sales', status: 'Part-time', email: 'tran.long@johnsbistro.com', phone: '090-666-6666', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&q=80', hourlyRate: 19, availableHours: 'Flexible check-in', isActive: true, department: 'Sales', branch: 'HN 1' },
-  { id: '9', name: 'Vo Hoang', role: 'Operation', status: 'Full-time', email: 'vo.hoang@johnsbistro.com', phone: '090-777-1111', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&q=80', hourlyRate: 21, availableHours: 'Flexible check-in', isActive: true, department: 'Operation', branch: 'HCM 1' },
-  { id: '10', name: 'Ngo Quynh', role: 'Kitchen', status: 'Part-time', email: 'ngo.quynh@johnsbistro.com', phone: '090-888-2222', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&q=80', hourlyRate: 17, availableHours: 'Mornings daily', isActive: true, department: 'Kitchen', branch: 'HCM 1' },
+  { id: '1', name: 'Nguyen An', role: 'Operation', status: 'Full-time', email: 'nguyen.an@johnsbistro.com', phone: '090-111-2222', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&q=80', hourlyRate: 35, availableHours: '24/7 On call', isActive: true, department: 'Operation', branch: 'HCM 1', fwhaBalance: 12.5 },
+  { id: '2', name: 'Tran Binh', role: 'HR', status: 'Full-time', email: 'tran.binh@johnsbistro.com', phone: '090-333-4444', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&q=80', hourlyRate: 20, availableHours: '9:00 - 17:00', isActive: true, department: 'HR', branch: 'HQ', fwhaBalance: -4.0 },
+  { id: '3', name: 'Le Chi', role: 'Sales', status: 'Full-time', email: 'le.chi@johnsbistro.com', phone: '090-555-6666', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&q=85', hourlyRate: 25, availableHours: 'Mon-Fri 8:00 - 16:00', isActive: true, department: 'Sales', branch: 'HN 1', fwhaBalance: 8.0 },
+  { id: '4', name: 'Pham Dung', role: 'Operation', status: 'Part-time', email: 'pham.dung@johnsbistro.com', phone: '090-777-8888', avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a65c6?w=100&h=100&fit=crop&q=80', hourlyRate: 22, availableHours: 'Flexible check-in', isActive: false, department: 'Operation', branch: 'HCM 2', fwhaBalance: 0.0 },
+  { id: '5', name: 'Hoang Em', role: 'Kitchen', status: 'Full-time', email: 'hoang.em@johnsbistro.com', phone: '090-999-0000', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&q=80', hourlyRate: 18, availableHours: 'Mornings daily', isActive: true, department: 'Kitchen', branch: 'HCM 1', fwhaBalance: -2.5 },
+  { id: '6', name: 'Vu Giang', role: 'Bar', status: 'Part-time', email: 'vu.giang@johnsbistro.com', phone: '090-123-5555', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&q=80', hourlyRate: 16, availableHours: 'Flexible check-in', isActive: true, department: 'Bar', branch: 'HCM 2', fwhaBalance: 5.0 },
+  { id: '7', name: 'Doan Trang', role: 'HR', status: 'Full-time', email: 'doan.trang@johnsbistro.com', phone: '090-555-5555', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop&q=80', hourlyRate: 22, availableHours: 'Mornings daily', isActive: true, department: 'HR', branch: 'HQ', fwhaBalance: 0.0 },
+  { id: '8', name: 'Tran Long', role: 'Sales', status: 'Part-time', email: 'tran.long@johnsbistro.com', phone: '090-666-6666', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop&q=80', hourlyRate: 19, availableHours: 'Flexible check-in', isActive: true, department: 'Sales', branch: 'HN 1', fwhaBalance: -1.5 },
+  { id: '9', name: 'Vo Hoang', role: 'Operation', status: 'Full-time', email: 'vo.hoang@johnsbistro.com', phone: '090-777-1111', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&q=80', hourlyRate: 21, availableHours: 'Flexible check-in', isActive: true, department: 'Operation', branch: 'HCM 1', fwhaBalance: 15.0 },
+  { id: '10', name: 'Ngo Quynh', role: 'Kitchen', status: 'Part-time', email: 'ngo.quynh@johnsbistro.com', phone: '090-888-2222', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop&q=80', hourlyRate: 17, availableHours: 'Mornings daily', isActive: true, department: 'Kitchen', branch: 'HCM 1', fwhaBalance: -6.0 },
 ];
 
 const initialRoles: RoleItem[] = [
@@ -234,6 +255,32 @@ const isUnder18 = (dobString: string): boolean => {
   return false;
 };
 
+const isPermitExpired = (member: any): boolean => {
+  if (!member || !member.residencePermitExpiryDate) return false;
+  const nationality = member.nationality || '';
+  const isNonEU = nationality && !['german', 'german/eu', 'bulgarian', 'french', 'polish', 'eu', 'germany', 'bulgaria'].includes(nationality.toLowerCase().trim());
+  if (!isNonEU) return false;
+  
+  const expiryDate = new Date(member.residencePermitExpiryDate);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  return expiryDate < today;
+};
+
+const isPermitExpiringSoon = (member: any): boolean => {
+  if (!member || !member.residencePermitExpiryDate) return false;
+  const nationality = member.nationality || '';
+  const isNonEU = nationality && !['german', 'german/eu', 'bulgarian', 'french', 'polish', 'eu', 'germany', 'bulgaria'].includes(nationality.toLowerCase().trim());
+  if (!isNonEU) return false;
+  
+  const expiryDate = new Date(member.residencePermitExpiryDate);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diffTime = expiryDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays >= 0 && diffDays <= 7;
+};
+
 function MultiSelectDropdown({ 
   label, 
   options, 
@@ -274,11 +321,11 @@ function MultiSelectDropdown({
 
   return (
     <div className="space-y-1 relative font-sans" ref={containerRef}>
-      <label className="text-[12px] font-semibold text-slate-600 block">{label}</label>
+      <label className="text-[14px] font-semibold text-slate-700 block">{label}</label>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] rounded-xl text-xs text-slate-800 flex items-center justify-between shadow-3xs cursor-pointer hover:border-slate-300 transition-colors"
+        className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] rounded-xl text-[14px] text-slate-800 flex items-center justify-between shadow-3xs cursor-pointer hover:border-slate-300 transition-colors"
       >
         <span className="truncate pr-4 text-slate-700">{displayText}</span>
         <ChevronDown className={`w-4 h-4 text-slate-700 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -291,7 +338,7 @@ function MultiSelectDropdown({
             return (
               <label
                 key={opt.value}
-                className="flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-xs text-slate-700 font-medium select-none transition-colors"
+                className="flex items-center gap-2 px-2.5 py-1.5 hover:bg-slate-50 rounded-lg cursor-pointer text-[14px] text-slate-700 font-medium select-none transition-colors"
               >
                 <input
                   type="checkbox"
@@ -309,6 +356,23 @@ function MultiSelectDropdown({
   );
 }
 
+const getProportionalLeave = (user: any) => {
+  if (!user || !user.startDate) return null;
+  const d = new Date(user.startDate);
+  if (isNaN(d.getTime())) return null;
+  
+  const year = d.getFullYear();
+  const currentYear = new Date().getFullYear();
+  
+  if (year === currentYear) {
+    const month = d.getMonth() + 1; // 1-indexed (Jan = 1, Dec = 12)
+    const remainingMonths = 12 - month + 1;
+    const annual = user.annualLeaveEntitlement || 24;
+    return parseFloat(((annual / 12) * remainingMonths).toFixed(1));
+  }
+  return null;
+};
+
 interface ShiftPlannerProps {
   initialSubTab?: 'schedule' | 'staff' | 'payroll' | 'settings';
   staff?: any[];
@@ -323,6 +387,73 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
     setActiveSubTab(initialSubTab);
   }, [initialSubTab]);
   const [schedule, setSchedule] = useState<Record<string, string[]>>(initialSchedule);
+
+  // Rule: Employee Access & Branch limitations (PRD-002)
+  const userStores = React.useMemo(() => {
+    const roleName = simulatedUser?.role || 'Staff';
+    if (roleName.toLowerCase() === 'owner' || simulatedUser?.systemAccessLevel === 'Admin') {
+      return ['HCM 1', 'HCM 2', 'HN 1', 'HQ'];
+    }
+    try {
+      const customRolesStr = localStorage.getItem('gastro_custom_roles');
+      if (customRolesStr) {
+        const customRoles = JSON.parse(customRolesStr);
+        const matched = customRoles.find((r: any) => r.name.toLowerCase() === roleName.toLowerCase());
+        if (matched) {
+          if (matched.dataScope === 'Brand-wide') {
+            return ['HCM 1', 'HCM 2', 'HN 1', 'HQ'];
+          } else {
+            return simulatedUser?.assignedStores || (simulatedUser?.branch ? [simulatedUser.branch] : ['HCM 1']);
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return simulatedUser?.assignedStores || (simulatedUser?.branch ? [simulatedUser.branch] : ['HCM 1']);
+  }, [simulatedUser]);
+
+  const [specialRetroBypass, setSpecialRetroBypass] = useState(false);
+
+  const isSuperAdmin = React.useMemo(() => {
+    if (specialRetroBypass) return true;
+    const roleName = simulatedUser?.role || 'Staff';
+    if (roleName.toLowerCase() === 'owner' || simulatedUser?.systemAccessLevel === 'Admin') {
+      return true;
+    }
+    try {
+      const customRolesStr = localStorage.getItem('gastro_custom_roles');
+      if (customRolesStr) {
+        const customRoles = JSON.parse(customRolesStr);
+        const matched = customRoles.find((r: any) => r.name.toLowerCase() === roleName.toLowerCase());
+        if (matched && matched.dataScope === 'Brand-wide') {
+          return true;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return false;
+  }, [simulatedUser, specialRetroBypass]);
+
+  const [activePlanningBranch, setActivePlanningBranch] = useState<string>(() => {
+    if (simulatedUser) {
+      const stores = simulatedUser.assignedStores || (simulatedUser.branch ? [simulatedUser.branch] : []);
+      if (stores.length > 0) return stores[0];
+    }
+    return 'HCM 1'; // default fallback
+  });
+
+  useEffect(() => {
+    if (userStores && userStores.length > 0) {
+      if (!userStores.includes(activePlanningBranch)) {
+        setActivePlanningBranch(userStores[0]);
+      }
+    }
+  }, [userStores, activePlanningBranch]);
+
+  const [retroToast, setRetroToast] = useState<{ show: boolean; message: string } | null>(null);
+  const [showRetroactiveModal, setShowRetroactiveModal] = useState<{ shift: 'morning' | 'evening'; dept: string; day: string } | null>(null);
   const [activeDay, setActiveDay] = useState<string>('Mon');
   const [scheduleViewMode, setScheduleViewMode] = useState<'week' | 'month'>('week');
   const [selectedMonthDay, setSelectedMonthDay] = useState<CalendarDay>({ dayNumber: 25, month: 'current', weekday: 'Sun', isToday: true });
@@ -351,6 +482,15 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   const [assignSuccess, setAssignSuccess] = useState(false);
   const [savePlanSuccess, setSavePlanSuccess] = useState(false);
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0); // For dynamic date swapping demo
+
+  const isPastDay = (day: string) => {
+    if (currentWeekIndex < 0) return true;
+    if (currentWeekIndex > 0) return false;
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const currentDayIndex = 3; // Wednesday is today
+    const dayIndex = dayNames.indexOf(day);
+    return dayIndex < currentDayIndex;
+  };
 
   // Dynamic filter states for the Shift Planner main view
   const [scheduleDepartmentFilter, setScheduleDepartmentFilter] = useState<string>('All');
@@ -584,7 +724,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   // Alert for closed dates
   const [closureAlert, setClosureAlert] = useState<string | null>(null);
 
-  // Helper: check if a day is closed
+  // Helper: check if a day is closed as a Whole Day
   const isDayClosed = (dayName: string) => {
     const dayMapping: Record<string, string> = {
       'Sun': 'Sunday',
@@ -595,17 +735,96 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
       'Fri': 'Friday',
       'Sat': 'Saturday'
     };
-    const fullDayName = dayMapping[dayName];
+    const fullDayName = dayMapping[dayName] || dayName;
     const weeklyOff = weeklyDaysOff.find(wd => wd.day === fullDayName);
-    if (weeklyOff && weeklyOff.isOff) return true;
+    if (weeklyOff && weeklyOff.isOff && (!weeklyOff.timeframe || weeklyOff.timeframe.trim() === '')) {
+      return true;
+    }
 
-    const hasFlexOff = flexibleDaysOff.some(fd => fd.date.includes(`(${dayName})`));
-    if (hasFlexOff) return true;
+    const hasFlexOffWholeDay = flexibleDaysOff.some(fd => 
+      (fd.date.includes(`(${dayName})`) || fd.date.includes(fullDayName)) && 
+      (!fd.timeframe || fd.timeframe.trim() === '')
+    );
+    if (hasFlexOffWholeDay) return true;
 
     return false;
   };
 
-  // Automated effect: clear shifts on days marked as closed
+  // Helper functions for parsing shift/day-off timeframes and checking overlaps (PRD-002)
+  const parseTimeRange = (range: string) => {
+    if (!range) return null;
+    const parts = range.split('-');
+    if (parts.length !== 2) return null;
+    const parseTime = (t: string) => {
+      let clean = t.trim();
+      if (clean.includes('(+1)')) {
+        clean = clean.replace('(+1)', '').trim();
+        const [h, m] = clean.split(':').map(Number);
+        return (h + 24) * 60 + (m || 0);
+      }
+      const [h, m] = clean.split(':').map(Number);
+      return h * 60 + (m || 0);
+    };
+    let start = parseTime(parts[0]);
+    let end = parseTime(parts[1]);
+    if (end < start) {
+      end += 24 * 60; // crossovers midnight
+    }
+    return { start, end };
+  };
+
+  const isShiftOverlappingWithDayOff = (shiftTimeRange: string, dayOffTimeRange: string | undefined) => {
+    if (!dayOffTimeRange || dayOffTimeRange.trim() === '') return true; // Whole Day
+    const shiftRange = parseTimeRange(shiftTimeRange);
+    const offRange = parseTimeRange(dayOffTimeRange);
+    if (!shiftRange || !offRange) return false;
+    return shiftRange.start < offRange.end && offRange.start < shiftRange.end;
+  };
+
+  const getShiftTimeRange = (shiftName: string): string => {
+    const st = shiftTypes.find(s => s.name.toLowerCase() === shiftName.toLowerCase());
+    return st ? st.time : '';
+  };
+
+  const isShiftClosed = (dayName: string, shiftName: string) => {
+    const dayMapping: Record<string, string> = {
+      'Sun': 'Sunday',
+      'Mon': 'Monday',
+      'Tue': 'Tuesday',
+      'Wed': 'Wednesday',
+      'Thu': 'Thursday',
+      'Fri': 'Friday',
+      'Sat': 'Saturday'
+    };
+    const fullDayName = dayMapping[dayName] || dayName;
+    const shiftTime = getShiftTimeRange(shiftName);
+
+    // 1. Check Weekly Days Off (Recurring)
+    const weeklyOff = weeklyDaysOff.find(wd => wd.day === fullDayName);
+    if (weeklyOff && weeklyOff.isOff) {
+      if (!weeklyOff.timeframe || weeklyOff.timeframe.trim() === '') {
+        return true; // Whole day off
+      }
+      if (shiftTime && isShiftOverlappingWithDayOff(shiftTime, weeklyOff.timeframe)) {
+        return true; // Overlaps with timeframe
+      }
+    }
+
+    // 2. Check Flexible Days Off (One-off)
+    const flexOffs = flexibleDaysOff.filter(fd => fd.date.includes(`(${dayName})`) || fd.date.includes(fullDayName));
+    for (const fd of flexOffs) {
+      if (!fd.timeframe || fd.timeframe.trim() === '') {
+        return true; // Whole day off
+      }
+      if (shiftTime && isShiftOverlappingWithDayOff(shiftTime, fd.timeframe)) {
+        return true; // Overlaps with timeframe
+      }
+    }
+
+    return false;
+  };
+
+  // Automated effect: clear shifts on days marked as closed or overlapping timeframe (PRD-002)
   useEffect(() => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     let scheduleChanged = false;
@@ -613,10 +832,26 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
     
     days.forEach(day => {
       if (isDayClosed(day)) {
+        // Clear whole day
         Object.keys(updatedSchedule).forEach(key => {
-          if (key.endsWith(`-${day}`) && updatedSchedule[key] && updatedSchedule[key].length > 0) {
-            updatedSchedule[key] = [];
-            scheduleChanged = true;
+          if (key.endsWith(`-${day}`) || key.endsWith(`-${day}-${activePlanningBranch}`)) {
+            if (updatedSchedule[key] && updatedSchedule[key].length > 0) {
+              updatedSchedule[key] = [];
+              scheduleChanged = true;
+            }
+          }
+        });
+      } else {
+        // Clear only overlapping timeframe shifts
+        Object.keys(updatedSchedule).forEach(key => {
+          const parts = key.split('-'); // shift-dept-day or shift-dept-day-branch
+          const shiftName = parts[0];
+          const dayName = parts[2];
+          if (dayName === day && isShiftClosed(day, shiftName)) {
+            if (updatedSchedule[key] && updatedSchedule[key].length > 0) {
+              updatedSchedule[key] = [];
+              scheduleChanged = true;
+            }
           }
         });
       }
@@ -625,7 +860,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
     if (scheduleChanged) {
       setSchedule(updatedSchedule);
     }
-  }, [weeklyDaysOff, flexibleDaysOff]);
+  }, [weeklyDaysOff, flexibleDaysOff, activePlanningBranch]);
   
   // Mobile Demo / QR Kiosk Modal Toggle
   const [showEmulator, setShowEmulator] = useState(false);
@@ -636,6 +871,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   // Staff list filters and user creation state
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddingUser, setIsAddingUser] = useState(false);
+  const [isSmartImportOpen, setIsSmartImportOpen] = useState(false);
   const [selectedUserForView, setSelectedUserForView] = useState<StaffMember | null>(null);
   const [staffInnerTab, setStaffInnerTab] = useState<'staff' | 'roles'>('staff');
   const [roleFilter, setRoleFilter] = useState('All');
@@ -643,6 +879,12 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   const [statusFilter, setStatusFilter] = useState('All');
   const [staffPage, setStaffPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedStaffIds, setSelectedStaffIds] = useState<string[]>([]);
+  const [bulkStoreDropdownOpen, setBulkStoreDropdownOpen] = useState(false);
+  const [bulkContractDropdownOpen, setBulkContractDropdownOpen] = useState(false);
+  const [bulkJobRoleDropdownOpen, setBulkJobRoleDropdownOpen] = useState(false);
+  const [bulkStatusDropdownOpen, setBulkStatusDropdownOpen] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
@@ -669,7 +911,26 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
     phonePrefix: '+1',
     systemAccessLevel: 'Employee' as 'Super Admin' | 'Manager' | 'Employee',
     systemPermissions: [] as string[],
-    assignedStores: ['HCM 1'] as string[]
+    assignedStores: ['HCM 1'] as string[],
+    nationality: '',
+    exitDate: '',
+    contractHours: 40,
+    grossAgreement: 2500,
+    annualLeaveEntitlement: 24,
+    contractPreparationStatus: 'tbd' as 'tbd' | 'yes' | 'no',
+    contractSigningStatus: 'tbd' as 'tbd' | 'yes' | 'no',
+    sundayOffCountOfYear: 0,
+    taxClass: '1',
+    socialSecurityNumber: '',
+    personalTaxId: '',
+    healthInsuranceProvider: '',
+    insuranceSepa: 'no' as 'yes' | 'no',
+    idWithResidencePermit: 'no' as 'yes' | 'no',
+    residencePermitExpiryDate: '',
+    dependentAllowance: '0.0',
+    workingDaysPerWeek: 5,
+    probationPeriodMonths: 0,
+    probationEndDate: ''
   });
 
   // Roles subtab specific states
@@ -742,6 +1003,14 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
           }
         }
       }
+    }
+
+    // 2.1 German statutory minimum leave validation check
+    const workingDays = updatedMember.workingDaysPerWeek || 5;
+    const minLeave = workingDays * 4;
+    if (updatedMember.annualLeaveEntitlement < minLeave) {
+      alert(`Error: Annual Leave Entitlement cannot be less than the German statutory minimum of ${minLeave} days (${workingDays} working days/week * 4).`);
+      return false;
     }
 
     // 3. Cascading logic when changing Active -> Inactive
@@ -1001,9 +1270,12 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
       hoursMap[name] = 0;
     });
     Object.keys(schedule).forEach((key) => {
-      (schedule[key] || []).forEach((name) => {
-        hoursMap[name] = (hoursMap[name] || 0) + 8;
-      });
+      const parts = key.split('-');
+      if (parts.length >= 3) {
+        (schedule[key] || []).forEach((name) => {
+          hoursMap[name] = (hoursMap[name] || 0) + 8;
+        });
+      }
     });
     return hoursMap;
   }, [schedule, allNames]);
@@ -1017,10 +1289,12 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   const leaveConflictsCount = React.useMemo(() => {
     let count = 0;
     Object.keys(schedule).forEach((key) => {
-      const parts = key.split('-'); // shift-dept-day
+      const parts = key.split('-'); // shift-dept-day-branch or shift-dept-day
       if (parts.length < 3) return;
       const shift = parts[0] as 'morning' | 'evening';
       const day = parts[2];
+      const branch = parts[3] || 'HCM 1';
+      if (branch !== activePlanningBranch) return;
       const names = schedule[key] || [];
       names.forEach((name) => {
         const hasLeave = getApprovedLeaveForStaff(name, day, shift);
@@ -1030,7 +1304,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
       });
     });
     return count;
-  }, [schedule, leaveLedger]);
+  }, [schedule, leaveLedger, activePlanningBranch]);
 
   const warningsList = React.useMemo(() => {
     const list: { title: string; desc: string; type: 'gap' | 'leave' | 'overtime' }[] = [];
@@ -1046,19 +1320,23 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
       'Sat': 'Saturday'
     };
 
-    // 1. Headcount Gaps
+    // 1. Headcount Gaps for activePlanningBranch
     dayNames.forEach((day) => {
       const morningMin = shiftTypes.find(st => st.id === 'st-1' || st.name.toLowerCase() === 'morning')?.minStaff || 3;
       let morningCount = 0;
       ['Service', 'Kitchen', 'Bar', 'Management'].forEach((dept) => {
-        morningCount += (schedule[`morning-${dept}-${day}`] || []).length;
+        // Look up either with branch key or legacy key (if active branch is HCM 1)
+        const keyWithBranch = `morning-${dept}-${day}-${activePlanningBranch}`;
+        const keyLegacy = `morning-${dept}-${day}`;
+        const names = schedule[keyWithBranch] || (activePlanningBranch === 'HCM 1' ? schedule[keyLegacy] : []) || [];
+        morningCount += names.length;
       });
       
-      if (!isDayClosed(day) && morningCount < morningMin) {
+      if (!isShiftClosed(day, 'morning') && morningCount < morningMin) {
         const missing = morningMin - morningCount;
         list.push({
-          title: `${dayFullNameMapping[day]} Morning Shift Gap`,
-          desc: `${dayFullNameMapping[day]} Morning Shift is under-staffed by ${missing} employee${missing > 1 ? 's' : ''}.`,
+          title: `${dayFullNameMapping[day]} Morning Shift Gap (${activePlanningBranch})`,
+          desc: `${dayFullNameMapping[day]} Morning Shift in ${activePlanningBranch} is under-staffed by ${missing} employee${missing > 1 ? 's' : ''}.`,
           type: 'gap'
         });
       }
@@ -1066,33 +1344,38 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
       const eveningMin = shiftTypes.find(st => st.id === 'st-3' || st.name.toLowerCase() === 'evening')?.minStaff || 3;
       let eveningCount = 0;
       ['Service', 'Kitchen', 'Bar', 'Management'].forEach((dept) => {
-        eveningCount += (schedule[`evening-${dept}-${day}`] || []).length;
+        const keyWithBranch = `evening-${dept}-${day}-${activePlanningBranch}`;
+        const keyLegacy = `evening-${dept}-${day}`;
+        const names = schedule[keyWithBranch] || (activePlanningBranch === 'HCM 1' ? schedule[keyLegacy] : []) || [];
+        eveningCount += names.length;
       });
 
-      if (!isDayClosed(day) && eveningCount < eveningMin) {
+      if (!isShiftClosed(day, 'evening') && eveningCount < eveningMin) {
         const missing = eveningMin - eveningCount;
         list.push({
-          title: `${dayFullNameMapping[day]} Evening Shift Gap`,
-          desc: `${dayFullNameMapping[day]} Evening Shift is under-staffed by ${missing} employee${missing > 1 ? 's' : ''}.`,
+          title: `${dayFullNameMapping[day]} Evening Shift Gap (${activePlanningBranch})`,
+          desc: `${dayFullNameMapping[day]} Evening Shift in ${activePlanningBranch} is under-staffed by ${missing} employee${missing > 1 ? 's' : ''}.`,
           type: 'gap'
         });
       }
     });
 
-    // 2. Leave Conflicts
+    // 2. Leave Conflicts for activePlanningBranch
     Object.keys(schedule).forEach((key) => {
-      const parts = key.split('-'); // shift-dept-day
+      const parts = key.split('-'); // shift-dept-day or shift-dept-day-branch
       if (parts.length < 3) return;
       const shift = parts[0] as 'morning' | 'evening';
       const dept = parts[1];
       const day = parts[2];
+      const branch = parts[3] || 'HCM 1';
+      if (branch !== activePlanningBranch) return;
       const names = schedule[key] || [];
 
       names.forEach((name) => {
         const hasLeave = getApprovedLeaveForStaff(name, day, shift);
         if (hasLeave) {
           list.push({
-            title: `Leave Conflict: ${name}`,
+            title: `Leave Conflict: ${name} (${branch})`,
             desc: `${name} is assigned to ${dept} (${shift} shift) on ${dayFullNameMapping[day]} but has approved leave.`,
             type: 'leave'
           });
@@ -1100,7 +1383,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
       });
     });
 
-    // 3. Overtime Warnings
+    // 3. Overtime Warnings (Filtered or styled beautifully)
     (Object.entries(staffWeeklyHours) as [string, number][]).forEach(([name, hours]) => {
       if (hours > 40) {
         list.push({
@@ -1112,7 +1395,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
     });
 
     return list;
-  }, [schedule, shiftTypes, leaveLedger, staffWeeklyHours, weeklyDaysOff, flexibleDaysOff]);
+  }, [schedule, shiftTypes, leaveLedger, staffWeeklyHours, weeklyDaysOff, flexibleDaysOff, activePlanningBranch]);
 
   // Compute stats dynamically based on current schedule states
   const totalSlotsCount = Object.keys(schedule).reduce((acc, key) => acc + (schedule[key]?.length || 0), 0);
@@ -1164,7 +1447,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
   const handleSaveCellAssign = (selectedNames: string[]) => {
     if (!editingCell) return;
-    const key = `${editingCell.shift}-${editingCell.dept}-${editingCell.day}`;
+    const key = `${editingCell.shift}-${editingCell.dept}-${editingCell.day}-${activePlanningBranch}`;
     setSchedule({
       ...schedule,
       [key]: selectedNames
@@ -1404,33 +1687,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
             exit={{ opacity: 0, y: -10 }}
             className="flex flex-col gap-6 w-full"
           >
-            {/* PENDING REQUESTS ALERTS SECTION CARD */}
-            {pendingRequests.length > 0 && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="w-full bg-amber-50/50 border border-amber-100 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 text-left select-none shadow-xs"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-2.5 bg-amber-100/60 border border-amber-200/50 rounded-lg flex items-center justify-center shrink-0">
-                    <Clock className="w-6 h-6 text-amber-700 animate-pulse" />
-                  </div>
-                  <div className="space-y-1">
-                    <h4 className="text-[16px] font-bold text-amber-800 font-display">You have {pendingRequests.length} pending staff requests requiring your review</h4>
-                    <p className="text-[14px] text-amber-900/70 font-sans leading-relaxed">
-                      Our intelligent AI scheduling engine has analyzed all shift swaps & time off requests. Substituted personnel are fully optimized with zero guidance conflicts!
-                    </p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setShowPendingRequestsModal(true)}
-                  className="px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold text-[14px] rounded-lg transition-all shadow-xs flex items-center gap-1.5 shrink-0 self-start md:self-center border-none cursor-pointer"
-                >
-                  <span>Review & Auto-Resolve</span>
-                  <ChevronRight className="w-4 h-4 text-white" />
-                </button>
-              </motion.div>
-            )}
+
 
             {/* TOP METRICS HORIZONTAL ROW DISPLAYED ABOVE TABLE */}
             {showMetrics && (
@@ -1749,6 +2006,34 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       <ChevronDown className="w-3.5 h-3.5" />
                     </div>
                   </div>
+
+                  {/* Active Planning Branch Selector (PRD-002) */}
+                  <div className="relative">
+                    <select
+                      value={activePlanningBranch}
+                      disabled={userStores.length === 1 && !isSuperAdmin}
+                      onChange={(e) => setActivePlanningBranch(e.target.value)}
+                      className="appearance-none pl-3 pr-8 py-1.5 bg-white border border-slate-200 hover:border-slate-300 disabled:opacity-75 disabled:cursor-not-allowed text-[#7553FF] text-xs font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7553FF]/10 focus:border-[#7553FF] transition-all cursor-pointer min-w-[140px] border-[#7553FF]/35 shadow-3xs"
+                    >
+                      {isSuperAdmin ? (
+                        <>
+                          <option value="HCM 1">📍 HCM 1 Branch</option>
+                          <option value="HCM 2">📍 HCM 2 Branch</option>
+                          <option value="HN 1">📍 HN 1 Branch</option>
+                          <option value="HQ">📍 HQ Store (Main)</option>
+                        </>
+                      ) : (
+                        userStores.map(store => (
+                          <option key={store} value={store}>
+                            📍 {store} Branch
+                          </option>
+                        ))
+                      )}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
+                      <ChevronDown className="w-3.5 h-3.5 text-[#7553FF]" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1764,6 +2049,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </th>
                         {weekdays.map((day, ix) => {
                           const isActive = day === activeDay;
+                          const isClosedDay = isDayClosed(day);
                           return (
                             <th 
                               key={day} 
@@ -1773,7 +2059,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                               }`}
                             >
                               <div className="flex flex-col items-center gap-1.5">
-                                <span className={`text-[14px] uppercase font-bold tracking-wide font-sans transition-colors ${
+                                <span className={`text-[14px] font-bold tracking-wide font-sans transition-colors ${
                                   isActive ? 'text-[#7553FF]' : 'text-[#1C1814]'
                                 }`}>{day}</span>
                                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-bold transition-all ${
@@ -1783,6 +2069,11 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                 }`}>
                                   {dayNumbers[ix]}
                                 </div>
+                                {isClosedDay && (
+                                  <span className="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100" id={`header-closed-${day}`}>
+                                    Closed
+                                  </span>
+                                )}
                               </div>
                             </th>
                           );
@@ -1795,31 +2086,32 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       {/* 1. MORNING SHIFT SECTION */}
                       {(scheduleShiftFilter === 'All' || scheduleShiftFilter === 'Morning') && (
                         <>
-                          <tr className="bg-[#FAF9F7]/70 border-b border-[#EAE4DC]">
-                            <td className="px-5 py-4 text-xs font-bold text-slate-600 border border-[#EAE4DC] text-left">
+                          <tr className="bg-amber-50/35 border-b border-[#EAE4DC]">
+                            <td className="px-5 py-4 text-xs font-bold text-amber-800 border border-[#EAE4DC] bg-amber-50/20 text-left">
                               <div className="flex items-center gap-2 p-0.5">
                                 <Sun className="w-4 h-4 text-amber-500 fill-amber-100" />
-                                <span className="font-display text-sm font-semibold text-slate-700">Morning Shift</span>
+                                <span className="font-display text-sm font-semibold text-amber-900">Morning Shift</span>
                               </div>
                             </td>
                             {weekdays.map((day) => {
                               const minRequired = shiftTypes.find(st => st.id === 'st-1' || st.name.toLowerCase() === 'morning')?.minStaff || 3;
                               let assignedCount = 0;
                               ['Service', 'Kitchen', 'Bar', 'Management'].forEach((dept) => {
-                                assignedCount += (schedule[`morning-${dept}-${day}`] || []).length;
+                                const keyWithBranch = `morning-${dept}-${day}-${activePlanningBranch}`;
+                                const keyLegacy = `morning-${dept}-${day}`;
+                                const names = schedule[keyWithBranch] || (activePlanningBranch === 'HCM 1' ? schedule[keyLegacy] : []) || [];
+                                assignedCount += names.length;
                               });
                               const gap = minRequired - assignedCount;
-                              const isClosed = isDayClosed(day);
+                              const isClosed = isShiftClosed(day, 'morning');
 
                               return (
-                                <td key={day} className="px-2 py-3 text-center border border-[#EAE4DC] select-none bg-[#FAF9F7]/30">
-                                  {isClosed ? (
-                                    <span className="text-[11px] font-medium text-slate-700">CLOSED</span>
-                                  ) : (
+                                <td key={day} className={`px-2 py-3 text-center border border-[#EAE4DC] select-none ${isClosed ? 'bg-slate-100/50' : 'bg-amber-50/10'}`}>
+                                  {isClosed ? null : (
                                     <div className="flex flex-col items-center justify-center gap-0.5">
-                                      <span className="text-[11px] text-slate-700 font-sans">{assignedCount} / {minRequired} staff</span>
+                                      <span className="text-[11px] text-amber-900/80 font-sans font-medium">{assignedCount} / {minRequired} staff</span>
                                       {gap > 0 && (
-                                        <span className="inline-flex items-center text-[#B45309] font-medium text-[11px] bg-[#FFFBEB] border border-amber-100 px-1.5 py-px rounded-[2px]" id={`gap-badge-morning-${day}`}>
+                                        <span className="inline-flex items-center text-rose-600 font-medium text-[11px] bg-rose-50 border border-rose-100 px-1.5 py-px rounded-[2px]" id={`gap-badge-morning-${day}`}>
                                           Gap: {gap}
                                         </span>
                                       )}
@@ -1833,17 +2125,20 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           {['Service', 'Kitchen', 'Bar', 'Management']
                             .filter((dept) => scheduleDepartmentFilter === 'All' || dept === scheduleDepartmentFilter)
                             .map((dept) => (
-                              <tr key={`morning-${dept}`} className="border-b border-[#EAE4DC] hover:bg-slate-50/20 group">
-                                <td className="px-5 py-5.5 border border-[#EAE4DC] text-left bg-white">
+                              <tr key={`morning-${dept}`} className="border-b border-[#EAE4DC] hover:bg-amber-50/20 group">
+                                <td className="px-5 py-5.5 border border-[#EAE4DC] text-left bg-amber-50/5">
                                   <div className="flex items-center gap-2.5">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-[#7553FF] shadow-none" />
-                                    <span className="text-xs font-normal text-slate-600 font-display">{dept}</span>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-none" />
+                                    <span className="text-xs font-semibold text-[#1C1814] font-display">{dept}</span>
                                   </div>
                                 </td>
                                 {weekdays.map((day) => {
-                                  const key = `morning-${dept}-${day}`;
-                                  const team = schedule[key] || [];
-                                  const isClosed = isDayClosed(day);
+                                  const key = `morning-${dept}-${day}-${activePlanningBranch}`;
+                                  const keyLegacy = `morning-${dept}-${day}`;
+                                  const team = schedule[key] || (activePlanningBranch === 'HCM 1' ? schedule[keyLegacy] : []) || [];
+                                  const optKey = `${key}-opt`;
+                                  const optTeam = schedule[optKey] || [];
+                                  const isClosed = isShiftClosed(day, 'morning');
                                   const isLocked = isCellLockedByPendingRequest('morning', dept, day);
 
                                   return (
@@ -1851,28 +2146,33 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                       key={day} 
                                       onClick={() => {
                                         if (isClosed) {
-                                          setClosureAlert(`Cannot edit schedule. Monday/Tuesday or flexible holidays are marked as CLOSED branch-wide.`);
+                                          setClosureAlert(`Cannot edit schedule. This shift is closed due to a branch day off or flexible holiday timeframe!`);
                                           return;
                                         }
                                         if (isLocked) {
                                           alert(`Cannot edit schedule cell. This cell is locked because there is a pending Shift Swap request involving these staff members.`);
                                           return;
                                         }
+                                        if (isPastDay(day)) {
+                                          if (!isSuperAdmin) {
+                                            setShowRetroactiveModal({ shift: 'morning', dept, day });
+                                            return;
+                                          } else {
+                                            setRetroToast({ show: true, message: `Super Admin Override: Modifying a retroactive past shift (${day}).` });
+                                            setTimeout(() => setRetroToast(null), 3000);
+                                          }
+                                        }
                                         setEditingCell({ shift: 'morning', dept, day });
                                       }}
                                       className={`px-2 py-4.5 text-center cursor-pointer transition-all border border-[#EAE4DC] relative ${
                                         isClosed 
-                                          ? 'bg-slate-50/40 hover:bg-slate-50/50 cursor-not-allowed select-none' 
+                                          ? 'bg-slate-100/50 cursor-not-allowed select-none' 
                                           : isLocked
                                             ? 'bg-amber-50/40 hover:bg-amber-50/50 cursor-not-allowed'
-                                            : 'hover:bg-[#7553FF]/10 hover:border-[#7553FF]/30 bg-white'
+                                            : 'hover:bg-amber-500/10 hover:border-amber-500/30 bg-[#FDFBF7]'
                                       }`}
                                     >
-                                      {isClosed ? (
-                                        <div className="flex flex-col items-center justify-center py-2 select-none">
-                                          <span className="text-[11px] font-medium text-slate-700 tracking-wider">CLOSED</span>
-                                        </div>
-                                      ) : isLocked ? (
+                                      {isClosed ? null : isLocked ? (
                                         <div className="flex flex-col items-center justify-center gap-1 select-none py-1">
                                           <div className="flex items-center gap-1 text-[11px] font-medium text-amber-700">
                                             <Clock className="w-3.5 h-3.5 text-amber-600" />
@@ -1880,7 +2180,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                           </div>
                                           <span className="text-[10px] text-slate-700 leading-none">Swap Pending</span>
                                         </div>
-                                      ) : team.length > 0 ? (
+                                      ) : (team.length > 0 || optTeam.length > 0) ? (
                                         <div className="space-y-1">
                                           {team.map((name, i) => {
                                             const hasLeave = getApprovedLeaveForStaff(name, day, 'morning');
@@ -1890,12 +2190,12 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                             return (
                                               <div 
                                                 key={i} 
-                                                className={`text-[12px] font-medium py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
+                                                className={`text-[12px] font-semibold py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
                                                   hasLeave 
                                                     ? 'text-sky-750' 
                                                     : isOT 
                                                       ? 'text-[#7553FF]' 
-                                                      : 'text-slate-800'
+                                                      : 'text-amber-950'
                                                 } hover:text-[#7553FF]`}
                                                 title={`${name} (${weeklyHours}h this week${isOT ? ' - Overtime' : ''}${hasLeave ? ' - Approved Leave' : ''})`}
                                               >
@@ -1913,9 +2213,25 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                               </div>
                                             );
                                           })}
+                                          {optTeam.map((name, i) => {
+                                            const hasLeave = getApprovedLeaveForStaff(name, day, 'morning');
+                                            const weeklyHours = staffWeeklyHours[name] || 0;
+                                            return (
+                                              <div 
+                                                key={`opt-${i}`} 
+                                                className="text-[11px] py-1 px-1.5 bg-amber-50/20 border border-amber-100 rounded-[4px] block truncate max-w-[120px] mx-auto text-center text-amber-800/70 italic font-sans"
+                                                title={`${name} (Optional Stand-by: ${weeklyHours}h this week)`}
+                                              >
+                                                <div className="flex items-center justify-center gap-1">
+                                                  <span className="text-[9px] bg-amber-100 text-amber-800 px-1 py-0.2 rounded font-bold shrink-0">Opt</span>
+                                                  <span className="truncate">{name}</span>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
                                         </div>
                                       ) : (
-                                        <span className="text-sm text-slate-700 font-medium font-sans hover:text-[#7553FF] transition-colors inline-block px-1.5 py-0.5 hover:scale-110">+</span>
+                                        <span className="text-sm text-amber-700/80 font-bold font-sans hover:text-amber-600 transition-colors inline-block px-1.5 py-0.5 hover:scale-110">+</span>
                                       )}
                                     </td>
                                   );
@@ -1928,31 +2244,32 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       {/* 2. EVENING SHIFT SECTION */}
                       {(scheduleShiftFilter === 'All' || scheduleShiftFilter === 'Evening') && (
                         <>
-                          <tr className="bg-[#FAF9F7]/70 border-b border-[#EAE4DC]">
-                            <td className="px-5 py-4 text-xs font-bold text-slate-600 border border-[#EAE4DC] text-left">
+                          <tr className="bg-purple-50/35 border-b border-[#EAE4DC]">
+                            <td className="px-5 py-4 text-xs font-bold text-[#7553FF] border border-[#EAE4DC] bg-purple-50/20 text-left">
                               <div className="flex items-center gap-2 p-0.5">
                                 <Moon className="w-4 h-4 text-[#7553FF] fill-[#7553FF]/10" />
-                                <span className="font-display text-sm font-semibold text-slate-700">Evening Shift</span>
+                                <span className="font-display text-sm font-semibold text-[#5438C2]">Evening Shift</span>
                               </div>
                             </td>
                             {weekdays.map((day) => {
                               const minRequired = shiftTypes.find(st => st.id === 'st-3' || st.name.toLowerCase() === 'evening')?.minStaff || 3;
                               let assignedCount = 0;
                               ['Service', 'Kitchen', 'Bar', 'Management'].forEach((dept) => {
-                                assignedCount += (schedule[`evening-${dept}-${day}`] || []).length;
+                                const keyWithBranch = `evening-${dept}-${day}-${activePlanningBranch}`;
+                                const keyLegacy = `evening-${dept}-${day}`;
+                                const names = schedule[keyWithBranch] || (activePlanningBranch === 'HCM 1' ? schedule[keyLegacy] : []) || [];
+                                assignedCount += names.length;
                               });
                               const gap = minRequired - assignedCount;
-                              const isClosed = isDayClosed(day);
+                              const isClosed = isShiftClosed(day, 'evening');
 
                               return (
-                                <td key={day} className="px-2 py-3 text-center border border-[#EAE4DC] select-none bg-[#FAF9F7]/30">
-                                  {isClosed ? (
-                                    <span className="text-[11px] font-medium text-slate-700">CLOSED</span>
-                                  ) : (
+                                <td key={day} className={`px-2 py-3 text-center border border-[#EAE4DC] select-none ${isClosed ? 'bg-slate-100/50' : 'bg-purple-50/10'}`}>
+                                  {isClosed ? null : (
                                     <div className="flex flex-col items-center justify-center gap-0.5">
-                                      <span className="text-[11px] text-slate-700 font-sans">{assignedCount} / {minRequired} staff</span>
+                                      <span className="text-[11px] text-[#5438C2]/85 font-sans font-medium">{assignedCount} / {minRequired} staff</span>
                                       {gap > 0 && (
-                                        <span className="inline-flex items-center text-[#B45309] font-medium text-[11px] bg-[#FFFBEB] border border-amber-100 px-1.5 py-px rounded-[2px]" id={`gap-badge-evening-${day}`}>
+                                        <span className="inline-flex items-center text-rose-600 font-medium text-[11px] bg-rose-50 border border-rose-100 px-1.5 py-px rounded-[2px]" id={`gap-badge-evening-${day}`}>
                                           Gap: {gap}
                                         </span>
                                       )}
@@ -1966,17 +2283,20 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           {['Service', 'Kitchen', 'Bar', 'Management']
                             .filter((dept) => scheduleDepartmentFilter === 'All' || dept === scheduleDepartmentFilter)
                             .map((dept) => (
-                              <tr key={`evening-${dept}`} className="border-b border-[#EAE4DC] hover:bg-slate-50/20 group">
-                                <td className="px-5 py-5.5 border border-[#EAE4DC] text-left bg-white">
+                              <tr key={`evening-${dept}`} className="border-b border-[#EAE4DC] hover:bg-purple-50/20 group">
+                                <td className="px-5 py-5.5 border border-[#EAE4DC] text-left bg-purple-50/5">
                                   <div className="flex items-center gap-2.5">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6] shadow-none" />
-                                    <span className="text-xs font-normal text-slate-600 font-display">{dept}</span>
+                                    <div className="w-2.5 h-2.5 rounded-full bg-[#7553FF] shadow-none" />
+                                    <span className="text-xs font-semibold text-[#1C1814] font-display">{dept}</span>
                                   </div>
                                 </td>
                                 {weekdays.map((day) => {
-                                  const key = `evening-${dept}-${day}`;
-                                  const team = schedule[key] || [];
-                                  const isClosed = isDayClosed(day);
+                                  const key = `evening-${dept}-${day}-${activePlanningBranch}`;
+                                  const keyLegacy = `evening-${dept}-${day}`;
+                                  const team = schedule[key] || (activePlanningBranch === 'HCM 1' ? schedule[keyLegacy] : []) || [];
+                                  const optKey = `${key}-opt`;
+                                  const optTeam = schedule[optKey] || [];
+                                  const isClosed = isShiftClosed(day, 'evening');
                                   const isLocked = isCellLockedByPendingRequest('evening', dept, day);
 
                                   return (
@@ -1984,28 +2304,33 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                       key={day} 
                                       onClick={() => {
                                         if (isClosed) {
-                                          setClosureAlert(`Cannot edit schedule. Monday/Tuesday or flexible holidays are marked as CLOSED branch-wide.`);
+                                          setClosureAlert(`Cannot edit schedule. This shift is closed due to a branch day off or flexible holiday timeframe!`);
                                           return;
                                         }
                                         if (isLocked) {
                                           alert(`Cannot edit schedule cell. This cell is locked because there is a pending Shift Swap request involving these staff members.`);
                                           return;
                                         }
+                                        if (isPastDay(day)) {
+                                          if (!isSuperAdmin) {
+                                            setShowRetroactiveModal({ shift: 'evening', dept, day });
+                                            return;
+                                          } else {
+                                            setRetroToast({ show: true, message: `Super Admin Override: Modifying a retroactive past shift (${day}).` });
+                                            setTimeout(() => setRetroToast(null), 3000);
+                                          }
+                                        }
                                         setEditingCell({ shift: 'evening', dept, day });
                                       }}
                                       className={`px-2 py-4.5 text-center cursor-pointer transition-all border border-[#EAE4DC] relative ${
                                         isClosed 
-                                          ? 'bg-slate-50/40 hover:bg-slate-50/50 cursor-not-allowed select-none' 
+                                          ? 'bg-slate-100/50 cursor-not-allowed select-none' 
                                           : isLocked
                                             ? 'bg-amber-50/40 hover:bg-amber-50/50 cursor-not-allowed'
-                                            : 'hover:bg-[#7553FF]/10 hover:border-[#7553FF]/30 bg-white'
+                                            : 'hover:bg-[#7553FF]/10 hover:border-[#7553FF]/30 bg-[#FAF9FF]'
                                       }`}
                                     >
-                                      {isClosed ? (
-                                        <div className="flex flex-col items-center justify-center py-2 select-none">
-                                          <span className="text-[11px] font-medium text-slate-700 tracking-wider">CLOSED</span>
-                                        </div>
-                                      ) : isLocked ? (
+                                      {isClosed ? null : isLocked ? (
                                         <div className="flex flex-col items-center justify-center gap-1 select-none py-1">
                                           <div className="flex items-center gap-1 text-[11px] font-medium text-amber-700">
                                             <Clock className="w-3.5 h-3.5 text-amber-600" />
@@ -2013,7 +2338,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                           </div>
                                           <span className="text-[10px] text-slate-700 leading-none">Swap Pending</span>
                                         </div>
-                                      ) : team.length > 0 ? (
+                                      ) : (team.length > 0 || optTeam.length > 0) ? (
                                         <div className="space-y-1">
                                           {team.map((name, i) => {
                                             const hasLeave = getApprovedLeaveForStaff(name, day, 'evening');
@@ -2023,12 +2348,12 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                             return (
                                               <div 
                                                 key={i} 
-                                                className={`text-[12px] font-medium py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
+                                                className={`text-[12px] font-semibold py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
                                                   hasLeave 
                                                     ? 'text-sky-755' 
                                                     : isOT 
                                                       ? 'text-[#7553FF]' 
-                                                      : 'text-slate-800'
+                                                      : 'text-purple-950'
                                                 } hover:text-[#7553FF]`}
                                                 title={`${name} (${weeklyHours}h this week${isOT ? ' - Overtime' : ''}${hasLeave ? ' - Approved Leave' : ''})`}
                                               >
@@ -2046,9 +2371,25 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                               </div>
                                             );
                                           })}
+                                          {optTeam.map((name, i) => {
+                                            const hasLeave = getApprovedLeaveForStaff(name, day, 'evening');
+                                            const weeklyHours = staffWeeklyHours[name] || 0;
+                                            return (
+                                              <div 
+                                                key={`opt-${i}`} 
+                                                className="text-[11px] py-1 px-1.5 bg-purple-50/20 border border-purple-100 rounded-[4px] block truncate max-w-[120px] mx-auto text-center text-[#7553FF]/70 italic font-sans"
+                                                title={`${name} (Optional Stand-by: ${weeklyHours}h this week)`}
+                                              >
+                                                <div className="flex items-center justify-center gap-1">
+                                                  <span className="text-[9px] bg-purple-100 text-[#7553FF] px-1 py-0.2 rounded font-bold shrink-0">Opt</span>
+                                                  <span className="truncate">{name}</span>
+                                                </div>
+                                              </div>
+                                            );
+                                          })}
                                         </div>
                                       ) : (
-                                        <span className="text-sm text-slate-700 font-medium font-sans hover:text-[#7553FF] transition-colors inline-block px-1.5 py-0.5 hover:scale-110">+</span>
+                                        <span className="text-sm text-[#7553FF] font-bold font-sans hover:text-[#623EE2] transition-colors inline-block px-1.5 py-0.5 hover:scale-110">+</span>
                                       )}
                                     </td>
                                   );
@@ -2209,19 +2550,15 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
               {/* Staff layout: standard Controls (Import and + Add Staff) */}
               <div className="flex items-center gap-2.5 pb-2.5">
-                <button 
-                  onClick={() => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = '.csv,.xlsx';
-                    input.onchange = () => alert('Mock Import: File loaded successfully into system!');
-                    input.click();
-                  }}
-                  className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[#7553FF] font-semibold text-[14px] h-10 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-3xs"
-                >
-                  <Upload className="w-4 h-4 text-[#7553FF]" />
-                  <span>Import</span>
-                </button>
+                {staffInnerTab !== 'roles' && (
+                  <button 
+                    onClick={() => setIsSmartImportOpen(true)}
+                    className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[#7553FF] font-semibold text-[14px] h-10 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-3xs"
+                  >
+                    <Upload className="w-4 h-4 text-[#7553FF]" />
+                    <span>Import</span>
+                  </button>
+                )}
                 <button 
                   onClick={() => {
                     if (staffInnerTab === 'staff') {
@@ -2238,18 +2575,60 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
               </div>
             </div>
 
-            {staffInnerTab === 'staff' ? (
-              <>
-                {/* 3 Stats Cards Row */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
-                  {/* Card 1: Total Staff */}
-                  <div className="bg-white border border-slate-100 rounded-2xl p-6 flex items-center gap-4 shadow-3xs text-left">
-                    <div className="p-3.5 bg-[#EEF2FF] rounded-[14px] flex items-center justify-center">
-                      <Users className="w-5 h-5 text-[#7553FF]" />
-                    </div>
-                    <div className="space-y-0.5 leading-none">
-                      <span className="text-[14px] font-medium text-slate-700 block mb-1">Total Staff</span>
-                      <span className="text-3xl font-extrabold text-slate-800 font-display block">120</span>
+            {staffInnerTab === 'staff' ? (() => {
+              const filteredStaff = staff.filter(member => {
+                const term = searchQuery.toLowerCase().trim();
+                if (term) {
+                  const matchName = member.name.toLowerCase().includes(term);
+                  const matchEmail = member.email.toLowerCase().includes(term);
+                  const matchDept = member.department?.toLowerCase().includes(term) || member.role.toLowerCase().includes(term);
+                  const matchBranch = member.branch?.toLowerCase().includes(term);
+                  if (!matchName && !matchEmail && !matchDept && !matchBranch) return false;
+                }
+                if (roleFilter !== 'All') {
+                  const deptName = member.department || member.role;
+                  if (deptName.toLowerCase() !== roleFilter.toLowerCase()) return false;
+                }
+                if (branchFilter !== 'All') {
+                  if (member.branch?.toLowerCase() !== branchFilter.toLowerCase()) return false;
+                }
+                if (statusFilter !== 'All') {
+                  const isAct = statusFilter === 'Active';
+                  if (member.isActive !== isAct) return false;
+                }
+                return true;
+              });
+
+              const totalStaffEntries = filteredStaff.length;
+              const showStart = totalStaffEntries === 0 ? 0 : (staffPage - 1) * itemsPerPage + 1;
+              const showEnd = Math.min(staffPage * itemsPerPage, totalStaffEntries);
+              const paginatedStaff = filteredStaff.slice((staffPage - 1) * itemsPerPage, Math.min((staffPage - 1) * itemsPerPage + itemsPerPage, totalStaffEntries));
+
+              const isAllFilteredSelected = filteredStaff.length > 0 && filteredStaff.every(member => selectedStaffIds.includes(member.id));
+              const handleSelectAll = () => {
+                if (isAllFilteredSelected) {
+                  const filteredIds = filteredStaff.map(m => m.id);
+                  setSelectedStaffIds(prev => prev.filter(id => !filteredIds.includes(id)));
+                } else {
+                  const filteredIds = filteredStaff.map(m => m.id);
+                  setSelectedStaffIds(prev => Array.from(new Set([...prev, ...filteredIds])));
+                }
+              };
+
+              const totalPages = Math.max(1, Math.ceil(totalStaffEntries / itemsPerPage));
+
+              return (
+                <>
+                  {/* 3 Stats Cards Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
+                    {/* Card 1: Total Staff */}
+                    <div className="bg-white border border-slate-100 rounded-2xl p-6 flex items-center gap-4 shadow-3xs text-left">
+                      <div className="p-3.5 bg-[#EEF2FF] rounded-[14px] flex items-center justify-center">
+                        <Users className="w-5 h-5 text-[#7553FF]" />
+                      </div>
+                      <div className="space-y-0.5 leading-none">
+                        <span className="text-[14px] font-medium text-slate-700 block mb-1">Total Staff</span>
+                        <span className="text-3xl font-extrabold text-slate-800 font-display block">{staff.length}</span>
                       <span className="text-[13px] text-slate-700 block pt-1">All locations</span>
                     </div>
                   </div>
@@ -2376,6 +2755,225 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   </div>
                 </div>
 
+                {/* BULK ACTIONS BANNER */}
+                {selectedStaffIds.length > 0 && (
+                  <div className="mb-4 p-4 bg-[#7553FF]/5 border border-[#7553FF]/15 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn relative">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-full bg-[#7553FF] text-white flex items-center justify-center text-xs font-bold">
+                        {selectedStaffIds.length}
+                      </div>
+                      <span className="text-[14px] text-slate-700 font-medium">
+                        staff members selected
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Change Status Dropdown */}
+                      <div className="relative inline-block">
+                        <button
+                          onClick={() => {
+                            setBulkStatusDropdownOpen(!bulkStatusDropdownOpen);
+                            setBulkStoreDropdownOpen(false);
+                            setBulkContractDropdownOpen(false);
+                            setBulkJobRoleDropdownOpen(false);
+                          }}
+                          className="h-[38px] px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-[14px] rounded-lg transition-all cursor-pointer shadow-3xs flex items-center gap-1.5"
+                        >
+                          <span>Change Status</span>
+                          <ChevronDown className="w-4 h-4 text-slate-700" />
+                        </button>
+                        {bulkStatusDropdownOpen && (
+                          <>
+                            <div className="fixed inset-0 z-30" onClick={() => setBulkStatusDropdownOpen(false)} />
+                            <div className="absolute right-0 mt-1.5 w-40 bg-white border border-slate-200 rounded-lg shadow-dropdown py-1 z-40 animate-fadeIn">
+                              <button
+                                onClick={() => {
+                                  setStaff((prev: any[]) => prev.map(s => selectedStaffIds.includes(s.id) ? { ...s, isActive: true } : s));
+                                  alert(`Successfully set ${selectedStaffIds.length} selected staff profiles as ACTIVE.`);
+                                  setBulkStatusDropdownOpen(false);
+                                }}
+                                className="w-full text-left px-4 py-2 hover:bg-[#7553FF]/5 hover:text-[#7553FF] text-[14px] font-sans text-emerald-600 font-medium transition-colors border-none bg-transparent cursor-pointer"
+                              >
+                                Active
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setStaff((prev: any[]) => prev.map(s => selectedStaffIds.includes(s.id) ? { ...s, isActive: false } : s));
+                                  alert(`Successfully set ${selectedStaffIds.length} selected staff profiles as INACTIVE.`);
+                                  setBulkStatusDropdownOpen(false);
+                                }}
+                                className="w-full text-left px-4 py-2 hover:bg-[#7553FF]/5 hover:text-[#7553FF] text-[14px] font-sans text-rose-600 font-medium transition-colors border-none bg-transparent cursor-pointer"
+                              >
+                                Inactive
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Change Store Dropdown */}
+                      <div className="relative inline-block">
+                        <button
+                          onClick={() => {
+                            setBulkStoreDropdownOpen(!bulkStoreDropdownOpen);
+                            setBulkStatusDropdownOpen(false);
+                            setBulkContractDropdownOpen(false);
+                            setBulkJobRoleDropdownOpen(false);
+                          }}
+                          className="h-[38px] px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-[14px] rounded-lg transition-all cursor-pointer shadow-3xs flex items-center gap-1.5"
+                        >
+                          <span>Change Store</span>
+                          <ChevronDown className="w-4 h-4 text-slate-700" />
+                        </button>
+                        {bulkStoreDropdownOpen && (
+                          <>
+                            <div className="fixed inset-0 z-30" onClick={() => setBulkStoreDropdownOpen(false)} />
+                            <div className="absolute right-0 mt-1.5 w-44 bg-white border border-slate-200 rounded-lg shadow-dropdown py-1 z-40 animate-fadeIn">
+                              {['HCM 1', 'HCM 2', 'HN 1', 'HQ'].map((store) => (
+                                <button
+                                  key={store}
+                                  onClick={() => {
+                                    setStaff((prev: any[]) => prev.map(s => selectedStaffIds.includes(s.id) ? { ...s, branch: store } : s));
+                                    alert(`Successfully moved ${selectedStaffIds.length} selected staff to ${store}.`);
+                                    setBulkStoreDropdownOpen(false);
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-[#7553FF]/5 hover:text-[#7553FF] text-[14px] font-sans text-slate-700 transition-colors border-none bg-transparent cursor-pointer"
+                                >
+                                  {store}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Change Contract Type Dropdown */}
+                      <div className="relative inline-block">
+                        <button
+                          onClick={() => {
+                            setBulkContractDropdownOpen(!bulkContractDropdownOpen);
+                            setBulkStatusDropdownOpen(false);
+                            setBulkStoreDropdownOpen(false);
+                            setBulkJobRoleDropdownOpen(false);
+                          }}
+                          className="h-[38px] px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-[14px] rounded-lg transition-all cursor-pointer shadow-3xs flex items-center gap-1.5"
+                        >
+                          <span>Change Contract type</span>
+                          <ChevronDown className="w-4 h-4 text-slate-700" />
+                        </button>
+                        {bulkContractDropdownOpen && (
+                          <>
+                            <div className="fixed inset-0 z-30" onClick={() => setBulkContractDropdownOpen(false)} />
+                            <div className="absolute right-0 mt-1.5 w-48 bg-white border border-slate-200 rounded-lg shadow-dropdown py-1 z-40 animate-fadeIn">
+                              {['Full-time', 'Part-time', 'Minijob'].map((type) => (
+                                <button
+                                  key={type}
+                                  onClick={() => {
+                                    setStaff((prev: any[]) => prev.map(s => selectedStaffIds.includes(s.id) ? { ...s, status: type } : s));
+                                    alert(`Successfully updated contract type to ${type} for ${selectedStaffIds.length} selected staff.`);
+                                    setBulkContractDropdownOpen(false);
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-[#7553FF]/5 hover:text-[#7553FF] text-[14px] font-sans text-slate-700 transition-colors border-none bg-transparent cursor-pointer"
+                                >
+                                  {type}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Change Job Role Dropdown */}
+                      <div className="relative inline-block">
+                        <button
+                          onClick={() => {
+                            setBulkJobRoleDropdownOpen(!bulkJobRoleDropdownOpen);
+                            setBulkStatusDropdownOpen(false);
+                            setBulkStoreDropdownOpen(false);
+                            setBulkContractDropdownOpen(false);
+                          }}
+                          className="h-[38px] px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-[14px] rounded-lg transition-all cursor-pointer shadow-3xs flex items-center gap-1.5"
+                        >
+                          <span>Change job role</span>
+                          <ChevronDown className="w-4 h-4 text-slate-700" />
+                        </button>
+                        {bulkJobRoleDropdownOpen && (
+                          <>
+                            <div className="fixed inset-0 z-30" onClick={() => setBulkJobRoleDropdownOpen(false)} />
+                            <div className="absolute right-0 mt-1.5 w-48 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-lg shadow-dropdown py-1 z-40 animate-fadeIn">
+                              {(roles.length > 0 ? roles.map(r => r.name) : ['Barista', 'Server', 'Chef', 'Host', 'Kitchen Assistant', 'Manager']).map((roleName) => (
+                                <button
+                                  key={roleName}
+                                  onClick={() => {
+                                    setStaff((prev: any[]) => prev.map(s => selectedStaffIds.includes(s.id) ? { ...s, role: roleName, department: roleName } : s));
+                                    alert(`Successfully updated job role to ${roleName} for ${selectedStaffIds.length} selected staff.`);
+                                    setBulkJobRoleDropdownOpen(false);
+                                  }}
+                                  className="w-full text-left px-4 py-2 hover:bg-[#7553FF]/5 hover:text-[#7553FF] text-[14px] font-sans text-slate-700 transition-colors border-none bg-transparent cursor-pointer"
+                                >
+                                  {roleName}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Delete Staff Button */}
+                      <button
+                        onClick={() => {
+                          setBulkStatusDropdownOpen(false);
+                          setBulkStoreDropdownOpen(false);
+                          setBulkContractDropdownOpen(false);
+                          setBulkJobRoleDropdownOpen(false);
+                          setShowBulkDeleteConfirm(true);
+                        }}
+                        className="h-[38px] px-3 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 font-semibold text-[14px] rounded-lg transition-all cursor-pointer shadow-3xs flex items-center gap-1.5"
+                      >
+                        <X className="w-4 h-4 text-rose-700" />
+                        <span>Delete staff</span>
+                      </button>
+
+                    </div>
+
+                    {/* Delete Confirmation Modal Popup */}
+                    {showBulkDeleteConfirm && (
+                      <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 w-full max-w-[440px] text-left font-sans space-y-4"
+                        >
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-bold text-slate-800">Confirm Deletion</h3>
+                            <p className="text-[14px] text-slate-700 leading-relaxed">
+                              Are you sure you want to permanently delete <strong className="text-[#7553FF]">{selectedStaffIds.length}</strong> selected staff member(s)? This action cannot be undone.
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-end gap-3 pt-2">
+                            <button
+                              onClick={() => setShowBulkDeleteConfirm(false)}
+                              className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-[14px] rounded-lg cursor-pointer transition-all border-none"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => {
+                                setStaff((prev: any[]) => prev.filter(s => !selectedStaffIds.includes(s.id)));
+                                setSelectedStaffIds([]);
+                                setShowBulkDeleteConfirm(false);
+                                alert("Successfully deleted selected staff members.");
+                              }}
+                              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-[14px] rounded-lg cursor-pointer transition-all border-none shadow-sm"
+                            >
+                              Confirm Delete
+                            </button>
+                          </div>
+                        </motion.div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* STAFF DATA TABLE COMPLYING WITH DESIGN.MD STANDARDS */}
                 <div className="bg-white border border-slate-100 rounded-2xl shadow-3xs overflow-hidden">
                   <div className="overflow-x-auto">
@@ -2386,21 +2984,21 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             <input 
                               type="checkbox" 
                               className="rounded-[4px] border-slate-300 text-[#7553FF] focus:ring-[#7553FF] w-4 h-4 cursor-pointer transition-all" 
-                              defaultChecked 
-                              onChange={() => {}}
+                              checked={isAllFilteredSelected}
+                              onChange={handleSelectAll}
                             />
                           </th>
                           <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
                             Name
                           </th>
                           <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
-                            Department
+                            Job roles
                           </th>
                           <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
                             Branch
                           </th>
                           <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
-                            Employment Type
+                            Contract Type
                           </th>
                           <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
                             Status
@@ -2411,48 +3009,17 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {(() => {
-                          const filtered = staff.filter(member => {
-                            const term = searchQuery.toLowerCase().trim();
-                            if (term) {
-                              const matchName = member.name.toLowerCase().includes(term);
-                              const matchEmail = member.email.toLowerCase().includes(term);
-                              const matchDept = member.department?.toLowerCase().includes(term) || member.role.toLowerCase().includes(term);
-                              const matchBranch = member.branch?.toLowerCase().includes(term);
-                              if (!matchName && !matchEmail && !matchDept && !matchBranch) return false;
-                            }
-                            if (roleFilter !== 'All') {
-                              const deptName = member.department || member.role;
-                              if (deptName.toLowerCase() !== roleFilter.toLowerCase()) return false;
-                            }
-                            if (branchFilter !== 'All') {
-                              if (member.branch?.toLowerCase() !== branchFilter.toLowerCase()) return false;
-                            }
-                            if (statusFilter !== 'All') {
-                              const isAct = statusFilter === 'Active';
-                              if (member.isActive !== isAct) return false;
-                            }
-                            return true;
-                          });
-
-                          const totalStaffEntries = filtered.length;
-                          const showStart = (staffPage - 1) * itemsPerPage;
-                          const showEnd = Math.min(showStart + itemsPerPage, totalStaffEntries);
-                          const paginated = filtered.slice(showStart, showEnd);
-
-                          if (paginated.length === 0) {
-                            return (
-                              <tr>
-                                <td colSpan={7} className="px-6 py-10 text-center text-[14px] text-slate-700 font-sans">
-                                  No compatible staff found matching active search criteria.
-                                </td>
-                              </tr>
-                            );
-                          }
-
-                          return paginated.map((member) => {
+                        {paginatedStaff.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="px-6 py-10 text-center text-[14px] text-slate-700 font-sans">
+                              No compatible staff found matching active search criteria.
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedStaff.map((member) => {
                             const department = member.department || member.role;
                             const branch = member.branch || 'HCM 1';
+                            const isChecked = selectedStaffIds.includes(member.id);
                             
                             return (
                               <tr key={member.id} className="hover:bg-slate-50/20 transition-colors">
@@ -2461,8 +3028,14 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                   <input 
                                     type="checkbox" 
                                     className="rounded-[4px] border-slate-300 text-[#7553FF] focus:ring-[#7553FF] w-4 h-4 cursor-pointer transition-all" 
-                                    defaultChecked
-                                    onChange={() => {}}
+                                    checked={isChecked}
+                                    onChange={() => {
+                                      setSelectedStaffIds(prev => 
+                                        prev.includes(member.id) 
+                                          ? prev.filter(id => id !== member.id) 
+                                          : [...prev, member.id]
+                                      );
+                                    }}
                                   />
                                 </td>
 
@@ -2482,8 +3055,20 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                       />
                                     </div>
                                     <div className="text-left leading-snug">
-                                      <p className="text-[14px] font-semibold text-slate-800 font-sans hover:text-[#7553FF] cursor-pointer transition-colors" onClick={() => setSelectedUserForView(member)}>
-                                        {member.name}
+                                      <p className="text-[14px] font-semibold text-slate-800 font-sans hover:text-[#7553FF] cursor-pointer transition-colors flex items-center gap-1.5 flex-wrap" onClick={() => setSelectedUserForView(member)}>
+                                        <span>{member.name}</span>
+                                        {isPermitExpired(member) && (
+                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 rounded animate-pulse" title="Residence Permit Expired!">
+                                            <AlertCircle className="w-2.5 h-2.5 text-rose-500 shrink-0" />
+                                            <span>Expired Permit</span>
+                                          </span>
+                                        )}
+                                        {isPermitExpiringSoon(member) && (
+                                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 rounded" title="Residence Permit Expiring Soon (<= 7 days)">
+                                            <AlertTriangle className="w-2.5 h-2.5 text-amber-500 shrink-0" />
+                                            <span>Visa Expiring</span>
+                                          </span>
+                                        )}
                                       </p>
                                       <p className="text-[14px] text-slate-700 font-sans">
                                         {member.email}
@@ -2492,7 +3077,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                   </div>
                                 </td>
 
-                                {/* Department Cell */}
+                                {/* Job roles Cell */}
                                 <td className="px-5 py-4 text-[14px] text-slate-700 font-sans text-left">
                                   {department}
                                 </td>
@@ -2502,7 +3087,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                   {branch}
                                 </td>
 
-                                {/* Employment Type Cell */}
+                                {/* Contract Type Cell */}
                                 <td className="px-5 py-4 text-[14px] text-slate-700 font-sans text-left">
                                   {member.status}
                                 </td>
@@ -2543,96 +3128,75 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                 </td>
                               </tr>
                             );
-                          });
-                        })()}
+                          })
+                        )}
                       </tbody>
                     </table>
                   </div>
 
                   {/* Dynamic Footer with responsive dropup selector */}
-                  {(() => {
-                    const filteredList = staff.filter(member => {
-                      const term = searchQuery.toLowerCase().trim();
-                      if (term) {
-                        const matchName = member.name.toLowerCase().includes(term);
-                        const matchEmail = member.email.toLowerCase().includes(term);
-                        return matchName || matchEmail;
-                      }
-                      return true;
-                    });
-                    const totalStaffEntries = filteredList.length;
-                    const showStart = totalStaffEntries === 0 ? 0 : (staffPage - 1) * itemsPerPage + 1;
-                    const showEnd = Math.min(staffPage * itemsPerPage, totalStaffEntries);
+                  <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[14px] text-slate-700">
+                    <div className="flex items-center gap-2">
+                      <span>Show</span>
+                      <select 
+                        value={itemsPerPage}
+                        onChange={(e) => {
+                          setItemsPerPage(Number(e.target.value));
+                          setStaffPage(1);
+                        }}
+                        className="bg-white border border-slate-200 py-1 px-1.5 rounded-lg text-slate-800 font-medium text-[14px] cursor-pointer focus:ring-1 focus:ring-[#7553FF]"
+                      >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                      </select>
+                      <span>per page</span>
+                    </div>
 
-                    return (
-                      <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-[14px] text-slate-700">
-                        <div className="flex items-center gap-2">
-                          <span>Show</span>
-                          <select 
-                            value={itemsPerPage}
-                            onChange={(e) => {
-                              setItemsPerPage(Number(e.target.value));
-                              setStaffPage(1);
-                            }}
-                            className="bg-white border border-slate-200 py-1 px-1.5 rounded-lg text-slate-800 font-medium text-[14px] cursor-pointer focus:ring-1 focus:ring-[#7553FF]"
-                          >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                          </select>
-                          <span>per page</span>
-                        </div>
+                    <p className="font-sans text-left text-[14px]">
+                      {showStart} - {showEnd} of {totalStaffEntries}
+                    </p>
 
-                        <p className="font-sans text-left text-[14px]">
-                          1 - {showEnd} of 120
-                        </p>
+                    {/* Pagination controls mimicking screenshot beautifully */}
+                    <div className="flex items-center gap-1.5 self-end sm:self-auto select-none">
+                      <button 
+                        disabled={staffPage === 1}
+                        onClick={() => setStaffPage(prev => Math.max(prev - 1, 1))} 
+                        className={`w-8 h-8 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg cursor-pointer transition-colors ${staffPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
 
-                        {/* Pagination controls mimicking screenshot beautifully */}
-                        <div className="flex items-center gap-1.5 self-end sm:self-auto select-none">
+                      {Array.from({ length: totalPages }).map((_, index) => {
+                        const pageNum = index + 1;
+                        return (
                           <button 
-                            onClick={() => setStaffPage(prev => Math.max(prev - 1, 1))} 
-                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg cursor-pointer transition-colors"
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => setStaffPage(1)} 
+                            key={pageNum}
+                            onClick={() => setStaffPage(pageNum)} 
                             className={`w-8 h-8 flex items-center justify-center rounded-lg text-[14px] font-semibold cursor-pointer transition-all ${
-                              staffPage === 1 
+                              staffPage === pageNum 
                                 ? 'bg-[#7553FF]/10 text-[#7553FF] border border-[#7553FF]/20' 
                                 : 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-600'
                             }`}
                           >
-                            1
+                            {pageNum}
                           </button>
-                          <button 
-                            onClick={() => setStaffPage(2)} 
-                            className={`w-8 h-8 flex items-center justify-center rounded-lg text-[14px] font-semibold cursor-pointer transition-all ${
-                              staffPage === 2 
-                                ? 'bg-[#7553FF]/10 text-[#7553FF] border border-[#7553FF]/20' 
-                                : 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-600'
-                            }`}
-                          >
-                            2
-                          </button>
-                          <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-[14px] text-slate-700">3</button>
-                          <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-[14px] text-slate-700">4</button>
-                          <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-[14px] text-slate-700">5</button>
-                          <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-[14px] text-slate-700">...</button>
-                          <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-[14px] text-slate-700">12</button>
-                          <button 
-                            onClick={() => setStaffPage(prev => Math.min(prev + 1, 2))} 
-                            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg cursor-pointer transition-colors"
-                          >
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })()}
+                        );
+                      })}
+
+                      <button 
+                        disabled={staffPage === totalPages}
+                        onClick={() => setStaffPage(prev => Math.min(prev + 1, totalPages))} 
+                        className={`w-8 h-8 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg cursor-pointer transition-colors ${staffPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </>
-            ) : (
+            );
+          })() : (
               /* ROLES VIEW - SEAMLESSLY RENDERED IN INNER SUB-TAB */
               <div className="space-y-6">
                 {/* FILTERS & SEARCH ROW EXTREMELY HIGH FIDELITY TO SCREENSHOT */}
@@ -3126,6 +3690,14 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           }
                         }
                       }
+
+                      // 3. German statutory minimum leave validation check
+                      const workingDays = newUser.workingDaysPerWeek || 5;
+                      const minLeave = workingDays * 4;
+                      if (newUser.annualLeaveEntitlement < minLeave) {
+                        alert(`Error: Annual Leave Entitlement cannot be less than the German statutory minimum of ${minLeave} days (${workingDays} working days/week * 4).`);
+                        return;
+                      }
                       
                       setStaff([...staff, {
                         id: String(staff.length + 1),
@@ -3154,7 +3726,27 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         payFrequency: newUser.payFrequency as any,
                         effectiveDate: newUser.effectiveFrom,
                         compensationNotes: newUser.notes,
-                        includeInPayroll: newUser.includeInPayroll
+                        includeInPayroll: newUser.includeInPayroll,
+                        nationality: newUser.nationality,
+                        exitDate: newUser.exitDate,
+                        contractHours: Number(newUser.contractHours) || 40,
+                        grossAgreement: Number(newUser.grossAgreement) || 2500,
+                        annualLeaveEntitlement: Number(newUser.annualLeaveEntitlement) || 24,
+                        contractPreparationStatus: newUser.contractPreparationStatus,
+                        contractSigningStatus: newUser.contractSigningStatus,
+                        sundayOffCountOfYear: Number(newUser.sundayOffCountOfYear) || 0,
+                        taxClass: newUser.taxClass,
+                        socialSecurityNumber: newUser.socialSecurityNumber,
+                        personalTaxId: newUser.personalTaxId,
+                        healthInsuranceProvider: newUser.healthInsuranceProvider,
+                        insuranceSepa: newUser.insuranceSepa,
+                        idWithResidencePermit: newUser.idWithResidencePermit,
+                        residencePermitExpiryDate: newUser.residencePermitExpiryDate,
+                        dependentAllowance: newUser.dependentAllowance,
+                        workingDaysPerWeek: newUser.workingDaysPerWeek,
+                        probationPeriodMonths: newUser.probationPeriodMonths,
+                        probationEndDate: newUser.probationEndDate,
+                        fwhaBalance: 0.0 // Default accrued hours
                       }]);
 
                       setNewUser({
@@ -3183,7 +3775,26 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         phonePrefix: '+1',
                         systemAccessLevel: 'Employee',
                         systemPermissions: [],
-                        assignedStores: ['HCM 1']
+                        assignedStores: ['HCM 1'],
+                        nationality: '',
+                        exitDate: '',
+                        contractHours: 40,
+                        grossAgreement: 2500,
+                        annualLeaveEntitlement: 24,
+                        contractPreparationStatus: 'tbd',
+                        contractSigningStatus: 'tbd',
+                        sundayOffCountOfYear: 0,
+                        taxClass: '1',
+                        socialSecurityNumber: '',
+                        personalTaxId: '',
+                        healthInsuranceProvider: '',
+                        insuranceSepa: 'no',
+                        idWithResidencePermit: 'no',
+                        residencePermitExpiryDate: '',
+                        dependentAllowance: '0.0',
+                        workingDaysPerWeek: 5,
+                        probationPeriodMonths: 0,
+                        probationEndDate: ''
                       });
                       setIsAddingUser(false);
                       alert(`Successfully added new staff member: ${newUser.name}`);
@@ -3194,153 +3805,160 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     {/* Section 1: Personal Information */}
                     <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
                       <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Personal Information</h4>
-                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                        {/* Left block for text fields */}
-                        <div className="lg:col-span-3 space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Full Name <span className="text-red-500">*</span></label>
-                              <input 
-                                type="text" 
-                                required
-                                value={newUser.name}
-                                onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                                placeholder="Enter full name"
-                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Email <span className="text-red-500">*</span></label>
-                              <input 
-                                type="email" 
-                                required
-                                value={newUser.email}
-                                onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                                placeholder="Enter email address"
-                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                              />
-                            </div>
-
-                            {/* Phone prefix + input */}
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Phone Number</label>
-                              <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
-                                <div className="flex items-center gap-1 px-2.5 bg-slate-50 border-r border-slate-200 h-full select-none text-xs">
-                                  <span className="text-sm">🇺🇸</span>
-                                  <ChevronDown className="w-3 h-3 text-slate-700" />
-                                </div>
-                                <input 
-                                  type="text" 
-                                  value={newUser.phone}
-                                  onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
-                                  placeholder="+1 (555) 123-4567"
-                                  className="w-full px-3 py-1 bg-transparent text-xs text-slate-800 outline-hidden border-none"
-                                />
-                              </div>
-                            </div>
-
-                            {/* Date of Birth */}
-                            <div className="space-y-1">
-                              <DatePicker
-                                label="Date of Birth"
-                                value={newUser.dob}
-                                onChange={(date) => setNewUser({...newUser, dob: date})}
-                                placeholder="Select birth date"
-                                error={newUser.dob ? isUnder18(newUser.dob) : false}
-                                maxYear={new Date().getFullYear()}
-                              />
-                              {newUser.dob && isUnder18(newUser.dob) && (
-                                <p className="text-[11px] text-rose-500 font-regular mt-1 leading-snug">
-                                 Invalid birth date. Staff must be at least 18 years old.
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Gender */}
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Gender</label>
-                              <select 
-                                value={newUser.gender}
-                                onChange={(e) => setNewUser({...newUser, gender: e.target.value})}
-                                className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                      
+                      {/* Photo Upload aligned top-center */}
+                      <div className="flex flex-col items-center justify-center pb-5 border-b border-slate-100/80 mb-5">
+                        <div className="relative w-28 h-28 border-2 border-dashed border-slate-200 hover:border-[#7553FF]/50 rounded-full flex flex-col items-center justify-center bg-slate-50/55 hover:bg-[#7553FF]/5 cursor-pointer transition-all overflow-hidden shadow-3xs group select-none">
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                const file = e.target.files[0];
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setNewUser(prev => ({ ...prev, photo: reader.result as string }));
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                          />
+                          {newUser.photo ? (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <img src={newUser.photo} alt="Avatar Preview" className="w-full h-full object-cover" />
+                              <button 
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setNewUser(prev => ({ ...prev, photo: '' }));
+                                }}
+                                className="absolute top-1.5 right-1.5 bg-slate-900/60 p-1 text-white hover:bg-slate-900 rounded-full cursor-pointer z-20 border-none"
                               >
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                              </select>
+                                <X className="w-3 h-3" />
+                              </button>
                             </div>
+                          ) : (
+                            <div className="flex flex-col items-center justify-center text-center p-2 text-slate-500 gap-1">
+                              <div className="p-2 bg-white rounded-full border border-slate-100 shadow-3xs text-[#7553FF]">
+                                <Upload className="w-4 h-4" />
+                              </div>
+                              <span className="text-[11px] font-bold text-slate-700">Upload Photo</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
 
-                            {/* Address */}
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Address</label>
-                              <input 
-                                type="text" 
-                                value={newUser.address}
-                                onChange={(e) => setNewUser({...newUser, address: e.target.value})}
-                                placeholder="Enter address"
-                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                              />
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Full Name <span className="text-red-500">*</span></label>
+                          <input 
+                            type="text" 
+                            required
+                            value={newUser.name}
+                            onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                            placeholder="Enter full name"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Email <span className="text-red-500">*</span></label>
+                          <input 
+                            type="email" 
+                            required
+                            value={newUser.email}
+                            onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                            placeholder="Enter email address"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Phone prefix + input */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Phone Number</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <div className="flex items-center gap-1 px-2.5 bg-slate-50 border-r border-slate-200 h-full select-none text-xs">
+                              <span className="text-sm">🇺🇸</span>
+                              <ChevronDown className="w-3 h-3 text-slate-700" />
                             </div>
+                            <input 
+                              type="text" 
+                              value={newUser.phone}
+                              onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                              placeholder="+1 (555) 123-4567"
+                              className="w-full px-3 py-1 bg-transparent text-xs text-slate-800 outline-hidden border-none"
+                            />
                           </div>
                         </div>
 
-                        {/* Right block for Photo Upload */}
-                        <div className="lg:col-span-1 flex flex-col justify-end">
-                          <div className="w-full h-[154px] border-2 border-dashed border-slate-200 hover:border-[#7553FF]/50 rounded-2xl flex flex-col items-center justify-center p-3 bg-slate-50/55 hover:bg-[#7553FF]/5 cursor-pointer transition-all gap-1.5 relative shadow-3xs select-none">
-                            <input 
-                              type="file" 
-                              accept="image/*"
-                              onChange={(e) => {
-                                if (e.target.files && e.target.files[0]) {
-                                  const file = e.target.files[0];
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    setNewUser(prev => ({ ...prev, photo: reader.result as string }));
-                                  };
-                                  reader.readAsDataURL(file);
-                                }
-                              }}
-                              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-                            />
-                            {newUser.photo ? (
-                              <div className="absolute inset-0 p-1 flex items-center justify-center">
-                                <img src={newUser.photo} alt="Avatar Preview" className="w-full h-full object-cover rounded-xl" />
-                                <button 
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setNewUser(prev => ({ ...prev, photo: '' }));
-                                  }}
-                                  className="absolute top-2 right-2 bg-slate-900/60 p-1 text-white hover:bg-slate-900 rounded-full cursor-pointer z-20 border-none"
-                                >
-                                  <X className="w-3 h-3" />
-                                </button>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="p-2.5 bg-white rounded-xl border border-slate-100 shadow-3xs text-[#7553FF]">
-                                  <Upload className="w-4 h-4" />
-                                </div>
-                                <span className="text-xs font-bold text-slate-700">Upload photo</span>
-                                <span className="text-[10px] text-slate-700 text-center">JPG, PNG up to 2MB</span>
-                              </>
-                            )}
-                          </div>
+                        {/* Date of Birth */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Date of Birth"
+                            value={newUser.dob}
+                            onChange={(date) => setNewUser({...newUser, dob: date})}
+                            placeholder="Select birth date"
+                            error={newUser.dob ? isUnder18(newUser.dob) : false}
+                            maxYear={new Date().getFullYear()}
+                          />
+                          {newUser.dob && isUnder18(newUser.dob) && (
+                            <p className="text-[11px] text-rose-500 font-regular mt-1 leading-snug">
+                             Invalid birth date. Staff must be at least 18 years old.
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Gender */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Gender</label>
+                          <select 
+                            value={newUser.gender}
+                            onChange={(e) => setNewUser({...newUser, gender: e.target.value})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+
+                        {/* Nationality */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Nationality</label>
+                          <input 
+                            type="text" 
+                            value={newUser.nationality}
+                            onChange={(e) => setNewUser({...newUser, nationality: e.target.value})}
+                            placeholder="e.g. German, Vietnamese"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Address */}
+                        <div className="space-y-1 lg:col-span-3">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Address</label>
+                          <input 
+                            type="text" 
+                            value={newUser.address}
+                            onChange={(e) => setNewUser({...newUser, address: e.target.value})}
+                            placeholder="Enter address"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
                         </div>
                       </div>
                     </div>
 
                     {/* Section 2: Job Information */}
                     <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Job & Employment Information</h4>
+                      <h4 className="text-[14px] font-bold text-slate-800 uppercase tracking-wider font-sans">Job & Employment Information</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Role selection */}
                         <div className="space-y-1">
-                          <label className="text-[12px] font-semibold text-slate-600 block">Job Role <span className="text-red-500">*</span></label>
+                          <label className="text-[14px] font-semibold text-slate-700 block">Job Role <span className="text-red-500">*</span></label>
                           <select 
                             value={newUser.role}
                             onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
                           >
                             {roles.map((r) => (
                               <option key={r.id} value={r.name}>{r.name}</option>
@@ -3359,27 +3977,27 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           />
                         </div>
 
-                        {/* Employment type */}
+                        {/* Contract type */}
                         <div className="space-y-1">
-                          <label className="text-[12px] font-semibold text-slate-600 block">Employment Type</label>
+                          <label className="text-[14px] font-semibold text-slate-700 block">Contract Type</label>
                           <select 
                             value={newUser.status}
                             onChange={(e) => setNewUser({...newUser, status: e.target.value as any})}
-                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
                           >
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Minijob">Minijob</option>
+                            <option value="Full-time font-medium">Full-time</option>
+                            <option value="Part-time font-medium">Part-time</option>
+                            <option value="Minijob font-medium">Minijob</option>
                           </select>
                         </div>
 
                         {/* Employment status */}
                         <div className="space-y-1">
-                          <label className="text-[12px] font-semibold text-slate-600 block">Employment Status</label>
+                          <label className="text-[14px] font-semibold text-slate-700 block">Employment Status</label>
                           <select 
                             value={newUser.employmentStatus}
                             onChange={(e) => setNewUser({...newUser, employmentStatus: e.target.value})}
-                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
                           >
                             <option value="Active">Active</option>
                             <option value="Probation">Probation</option>
@@ -3422,6 +4040,185 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           }}
                           placeholder="Select system permissions"
                         />
+
+                        {/* Exit Date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Exit Date"
+                            value={newUser.exitDate}
+                            onChange={(date) => setNewUser({...newUser, exitDate: date})}
+                            placeholder="Select exit date"
+                            maxYear={new Date().getFullYear() + 10}
+                          />
+                        </div>
+
+                        {/* Weekly contract hours */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Weekly Contract Hours</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <input 
+                              type="number" 
+                              value={newUser.contractHours}
+                              onChange={(e) => setNewUser({...newUser, contractHours: Number(e.target.value) || 0})}
+                              placeholder="e.g. 40"
+                              className="w-full h-full pl-3.5 pr-28 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              hours / week
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Gross salary agreement */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Gross Salary Agreement</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <span className="pl-3.5 pr-2.5 border-r border-slate-200 text-[14px] font-bold text-slate-700 bg-slate-50/50 h-full flex items-center select-none">
+                              €
+                            </span>
+                            <input 
+                              type="number" 
+                              value={newUser.grossAgreement}
+                              onChange={(e) => setNewUser({...newUser, grossAgreement: Number(e.target.value) || 0})}
+                              placeholder="e.g. 2500"
+                              className="w-full h-full pl-3.5 pr-18 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              / month
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Working days per week */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Working Days Per Week</label>
+                          <select 
+                            value={newUser.workingDaysPerWeek}
+                            onChange={(e) => {
+                              const workingDays = Number(e.target.value) || 5;
+                              const minLeave = workingDays * 4;
+                              setNewUser({
+                                ...newUser, 
+                                workingDaysPerWeek: workingDays,
+                                annualLeaveEntitlement: Math.max(newUser.annualLeaveEntitlement, minLeave)
+                              });
+                            }}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="1">1 day / week</option>
+                            <option value="2">2 days / week</option>
+                            <option value="3">3 days / week</option>
+                            <option value="4">4 days / week</option>
+                            <option value="5">5 days / week</option>
+                            <option value="6">6 days / week</option>
+                          </select>
+                        </div>
+
+                        {/* Probation period (months) */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Probation Period</label>
+                          <select 
+                            value={newUser.probationPeriodMonths}
+                            onChange={(e) => {
+                              const months = Number(e.target.value) || 0;
+                              let pDate = '';
+                              if (newUser.startDate) {
+                                const d = new Date(newUser.startDate);
+                                if (!isNaN(d.getTime())) {
+                                  d.setMonth(d.getMonth() + months);
+                                  pDate = d.toISOString().split('T')[0];
+                                }
+                              }
+                              setNewUser({
+                                ...newUser, 
+                                probationPeriodMonths: months, 
+                                probationEndDate: pDate
+                              });
+                            }}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="0">No probation (0 months)</option>
+                            <option value="1">1 month</option>
+                            <option value="2">2 months</option>
+                            <option value="3">3 months</option>
+                            <option value="4">4 months</option>
+                            <option value="5">5 months</option>
+                            <option value="6">6 months (Max legal limit)</option>
+                          </select>
+                        </div>
+
+                        {/* Probation end date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Probation end date"
+                            value={newUser.probationEndDate}
+                            onChange={(date) => setNewUser({...newUser, probationEndDate: date})}
+                            placeholder="Probation end date"
+                            maxYear={new Date().getFullYear() + 5}
+                          />
+                        </div>
+
+                        {/* Annual leave entitlement */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Annual Leave Entitlement</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <input 
+                              type="number" 
+                              value={newUser.annualLeaveEntitlement}
+                              onChange={(e) => setNewUser({...newUser, annualLeaveEntitlement: Number(e.target.value) || 0})}
+                              placeholder="e.g. 24"
+                              className="w-full h-full pl-3.5 pr-24 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              days / year
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Sunday offs per year */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Sunday Offs Per Year</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <input 
+                              type="number" 
+                              value={newUser.sundayOffCountOfYear}
+                              onChange={(e) => setNewUser({...newUser, sundayOffCountOfYear: Number(e.target.value) || 0})}
+                              placeholder="e.g. 15"
+                              className="w-full h-full pl-3.5 pr-28 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              sundays / year
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Contract Preparation Status */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Contract Preparation</label>
+                          <select 
+                            value={newUser.contractPreparationStatus}
+                            onChange={(e) => setNewUser({...newUser, contractPreparationStatus: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="tbd">To Be Decided (TBD)</option>
+                            <option value="yes">Prepared / Yes</option>
+                            <option value="no">Not Prepared / No</option>
+                          </select>
+                        </div>
+
+                        {/* Contract Signing Status */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Contract Signing</label>
+                          <select 
+                            value={newUser.contractSigningStatus}
+                            onChange={(e) => setNewUser({...newUser, contractSigningStatus: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="tbd">To Be Decided (TBD)</option>
+                            <option value="yes">Signed / Yes</option>
+                            <option value="no">Not Signed / No</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -3513,6 +4310,121 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                       </div>
                     </div>
+
+                    {/* Section 4: Tax, Insurance & Residency Information */}
+                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
+                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Tax, Insurance & Residency Info</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Tax Class */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Tax Class</label>
+                          <select 
+                            value={newUser.taxClass}
+                            onChange={(e) => setNewUser({...newUser, taxClass: e.target.value})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="1">Class 1 (Single / Divorced)</option>
+                            <option value="2">Class 2 (Single Parent)</option>
+                            <option value="3">Class 3 (Married - Higher Income)</option>
+                            <option value="4">Class 4 (Married - Equal Income)</option>
+                            <option value="5">Class 5 (Married - Lower Income)</option>
+                            <option value="6">Class 6 (Second Job / Secondary)</option>
+                          </select>
+                        </div>
+
+                        {/* Social Security Number */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Social Security Number</label>
+                          <input 
+                            type="text" 
+                            value={newUser.socialSecurityNumber}
+                            onChange={(e) => setNewUser({...newUser, socialSecurityNumber: e.target.value})}
+                            placeholder="e.g. 12 150784 M 043"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Personal Tax ID */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Personal Tax ID</label>
+                          <input 
+                            type="text" 
+                            value={newUser.personalTaxId}
+                            onChange={(e) => setNewUser({...newUser, personalTaxId: e.target.value})}
+                            placeholder="e.g. 12345678901"
+                            maxLength={11}
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Health Insurance Provider */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Health Insurance Provider</label>
+                          <input 
+                            type="text" 
+                            value={newUser.healthInsuranceProvider}
+                            onChange={(e) => setNewUser({...newUser, healthInsuranceProvider: e.target.value})}
+                            placeholder="e.g. TK, AOK, Barmer"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Insurance SEPA */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Insurance SEPA Mandate</label>
+                          <select 
+                            value={newUser.insuranceSepa}
+                            onChange={(e) => setNewUser({...newUser, insuranceSepa: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="no">No Mandate</option>
+                            <option value="yes">Yes (Signed SEPA Mandate)</option>
+                          </select>
+                        </div>
+
+                        {/* Dependent Allowance */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Dependent Allowance</label>
+                          <select 
+                            value={newUser.dependentAllowance}
+                            onChange={(e) => setNewUser({...newUser, dependentAllowance: e.target.value})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="0.0">0.0 (No Dependents)</option>
+                            <option value="0.5">0.5</option>
+                            <option value="1.0">1.0</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2.0">2.0</option>
+                            <option value="2.5">2.5</option>
+                            <option value="3.0">3.0 (or more)</option>
+                          </select>
+                        </div>
+
+                        {/* ID with Residence Permit */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">ID with Residence Permit</label>
+                          <select 
+                            value={newUser.idWithResidencePermit}
+                            onChange={(e) => setNewUser({...newUser, idWithResidencePermit: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="no">No</option>
+                            <option value="yes">Yes (Requires Residence Permit)</option>
+                          </select>
+                        </div>
+
+                        {/* Residence Permit Expiry Date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Residence Permit Expiry"
+                            value={newUser.residencePermitExpiryDate}
+                            onChange={(date) => setNewUser({...newUser, residencePermitExpiryDate: date})}
+                            placeholder="Select expiry date"
+                            maxYear={new Date().getFullYear() + 10}
+                          />
+                        </div>
+                      </div>
+                    </div>
                     </div>
 
                     {/* Action buttons */}
@@ -3536,6 +4448,14 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                 </motion.div>
               </div>
             )}
+
+            {/* SMART BULK ONBOARDING STEPPER MODAL */}
+            <SmartBulkOnboardingModal 
+              isOpen={isSmartImportOpen}
+              onClose={() => setIsSmartImportOpen(false)}
+              staff={staff}
+              setStaff={setStaff}
+            />
 
             {/* VIEW DETAILS DRAWER / popover */}
             {selectedUserForView && (
@@ -3617,7 +4537,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.startDate || 'N/A'}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-700 text-[14px]">Employment Type</span>
+                          <span className="text-slate-700 text-[14px]">Contract Type</span>
                           <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.status || 'N/A'}</span>
                         </div>
                         <div className="flex items-center justify-between">
@@ -3638,6 +4558,127 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                   {p === 'schedule_view' ? 'View Schedule' : p === 'schedule_edit' ? 'Edit Schedule' : p === 'payroll_view' ? 'View Payroll' : 'Manage Payroll'}
                                 </span>
                               ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Contract Details Segment */}
+                    <div className="bg-slate-50/50 p-5 rounded-xl space-y-4 border border-slate-100">
+                      <p className="font-medium text-[14px] text-[#7553FF] uppercase tracking-wider font-sans">Contractual Details</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Exit Date</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.exitDate || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Weekly Contract Hours</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.contractHours || 0} hrs</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Gross Salary Agreement</span>
+                          <span className="font-medium text-slate-800 text-[14px]">€{selectedUserForView.grossAgreement || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Working Days per Week</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.workingDaysPerWeek || 5} days</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Probation Period</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.probationPeriodMonths || 0} months</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Probation End Date</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.probationEndDate || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Annual Leave Entitlement</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.annualLeaveEntitlement || 0} Days</span>
+                        </div>
+                        {getProportionalLeave(selectedUserForView) !== null && (
+                          <div className="flex items-center justify-between col-span-1 md:col-span-2 text-purple-700 bg-purple-50/50 p-2 rounded-lg border border-purple-100">
+                            <span className="text-[13px] font-medium">Proportional leave (mid-year joiner)</span>
+                            <span className="font-mono text-[13px] font-medium">{getProportionalLeave(selectedUserForView)} Days ({12 - new Date(selectedUserForView.startDate).getMonth()} months remaining)</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Sunday Offs per Year</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.sundayOffCountOfYear || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Contract Preparation</span>
+                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded uppercase font-semibold ${
+                            selectedUserForView.contractPreparationStatus === 'yes' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            selectedUserForView.contractPreparationStatus === 'no' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}>
+                            {selectedUserForView.contractPreparationStatus || 'TBD'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Contract Signing</span>
+                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded uppercase font-semibold ${
+                            selectedUserForView.contractSigningStatus === 'yes' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            selectedUserForView.contractSigningStatus === 'no' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          }`}>
+                            {selectedUserForView.contractSigningStatus || 'TBD'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tax & Residency Segment */}
+                    <div className="bg-slate-50/50 p-5 rounded-xl space-y-4 border border-slate-100">
+                      <p className="font-medium text-[14px] text-[#7553FF] uppercase tracking-wider font-sans">Tax, Insurance & Residency Information</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Nationality</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.nationality || 'German'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Tax Class</span>
+                          <span className="font-medium text-slate-700 text-[14px]">Class {selectedUserForView.taxClass || '1'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Social Security Number</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.socialSecurityNumber || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Personal Tax ID</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.personalTaxId || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Health Insurance Provider</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.healthInsuranceProvider || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Insurance SEPA Mandate</span>
+                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded uppercase font-semibold ${
+                            selectedUserForView.insuranceSepa === 'yes' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'
+                          }`}>
+                            {selectedUserForView.insuranceSepa === 'yes' ? 'Mandate Signed' : 'No Mandate'}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Dependent Allowance</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.dependentAllowance || '0.0'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-700 text-[14px]">Residence Permit Required</span>
+                          <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.idWithResidencePermit === 'yes' ? 'Yes' : 'No'}</span>
+                        </div>
+                        {selectedUserForView.idWithResidencePermit === 'yes' && (
+                          <div className="flex items-center justify-between md:col-span-2 p-3 bg-slate-100/50 rounded-lg border border-slate-200">
+                            <span className="text-slate-700 text-[14px] font-medium">Residence Permit Expiry</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-800 text-[14px]">{selectedUserForView.residencePermitExpiryDate || 'N/A'}</span>
+                              {isPermitExpired(selectedUserForView) ? (
+                                <span className="bg-red-50 text-red-700 border border-red-200 font-bold px-2 py-0.5 rounded text-[11px] uppercase animate-pulse">⚠️ EXPIRED</span>
+                              ) : isPermitExpiringSoon(selectedUserForView) ? (
+                                <span className="bg-amber-50 text-amber-700 border border-amber-200 font-bold px-2 py-0.5 rounded text-[11px] uppercase animate-pulse font-semibold">⚠️ EXPIRING SOON</span>
+                              ) : (
+                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded text-[11px] uppercase font-semibold">Valid</span>
+                              )}
                             </div>
                           </div>
                         )}
@@ -3740,89 +4781,125 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     {/* Section 1: Personal Information */}
                     <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
                       <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Personal Information</h4>
-                      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-                        <div className="lg:col-span-3 space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Full Name <span className="text-red-500">*</span></label>
-                              <input 
-                                type="text" 
-                                required
-                                value={editingStaffMember.name}
-                                onChange={(e) => setEditingStaffMember({...editingStaffMember, name: e.target.value})}
-                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                              />
+                      
+                      {/* Photo Upload aligned top-center */}
+                      <div className="flex flex-col items-center justify-center pb-5 border-b border-slate-100/80 mb-5">
+                        <div className="relative w-28 h-28 border-2 border-dashed border-slate-200 hover:border-[#7553FF]/50 rounded-full flex flex-col items-center justify-center bg-slate-50/55 hover:bg-[#7553FF]/5 cursor-pointer transition-all overflow-hidden shadow-3xs group select-none">
+                          <input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={(e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                const file = e.target.files[0];
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setEditingStaffMember(prev => prev ? ({ ...prev, avatar: reader.result as string }) : null);
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                          />
+                          {editingStaffMember.avatar ? (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <img src={editingStaffMember.avatar} alt="Avatar Preview" className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all z-20">
+                                <span className="text-[10px] text-white font-semibold">Change Photo</span>
+                              </div>
                             </div>
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Email <span className="text-red-500">*</span></label>
-                              <input 
-                                type="email" 
-                                required
-                                value={editingStaffMember.email}
-                                onChange={(e) => setEditingStaffMember({...editingStaffMember, email: e.target.value})}
-                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                              />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center text-center p-2 text-slate-500 gap-1">
+                              <div className="p-2 bg-white rounded-full border border-slate-100 shadow-3xs text-[#7553FF]">
+                                <Upload className="w-4 h-4" />
+                              </div>
+                              <span className="text-[11px] font-bold text-slate-700">Upload Photo</span>
                             </div>
+                          )}
+                        </div>
+                      </div>
 
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Phone Number</label>
-                              <input 
-                                type="text" 
-                                value={editingStaffMember.phone || ''}
-                                onChange={(e) => setEditingStaffMember({...editingStaffMember, phone: e.target.value})}
-                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <DatePicker
-                                label="Date of Birth"
-                                value={editingStaffMember.dob || ''}
-                                onChange={(date) => setEditingStaffMember({...editingStaffMember, dob: date})}
-                                placeholder="Select birth date"
-                                error={editingStaffMember.dob ? isUnder18(editingStaffMember.dob) : false}
-                                maxYear={new Date().getFullYear()}
-                              />
-                              {editingStaffMember.dob && isUnder18(editingStaffMember.dob) && (
-                                <p className="text-[11px] text-rose-500 font-regular mt-1 leading-snug">
-                                  Invalid birth date. Staff must be at least 18 years old.
-                                </p>
-                              )}
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Gender</label>
-                              <select 
-                                value={editingStaffMember.gender || 'Male'}
-                                onChange={(e) => setEditingStaffMember({...editingStaffMember, gender: e.target.value})}
-                                className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
-                              >
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                              </select>
-                            </div>
-
-                            {/* Address */}
-                            <div className="space-y-1">
-                              <label className="text-[12px] font-semibold text-slate-600 block">Address</label>
-                              <input 
-                                type="text" 
-                                value={editingStaffMember.address || ''}
-                                onChange={(e) => setEditingStaffMember({...editingStaffMember, address: e.target.value})}
-                                placeholder="Enter address"
-                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                              />
-                            </div>
-                          </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Full Name <span className="text-red-500">*</span></label>
+                          <input 
+                            type="text" 
+                            required
+                            value={editingStaffMember.name}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, name: e.target.value})}
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Email <span className="text-red-500">*</span></label>
+                          <input 
+                            type="email" 
+                            required
+                            value={editingStaffMember.email}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, email: e.target.value})}
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
                         </div>
 
-                        <div className="lg:col-span-1 flex flex-col justify-end">
-                          <img 
-                            src={editingStaffMember.avatar} 
-                            alt={editingStaffMember.name} 
-                            className="w-full h-[154px] rounded-2xl object-cover border border-slate-200"
-                            referrerPolicy="no-referrer"
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Phone Number</label>
+                          <input 
+                            type="text" 
+                            value={editingStaffMember.phone || ''}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, phone: e.target.value})}
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Date of Birth"
+                            value={editingStaffMember.dob || ''}
+                            onChange={(date) => setEditingStaffMember({...editingStaffMember, dob: date})}
+                            placeholder="Select birth date"
+                            error={editingStaffMember.dob ? isUnder18(editingStaffMember.dob) : false}
+                            maxYear={new Date().getFullYear()}
+                          />
+                          {editingStaffMember.dob && isUnder18(editingStaffMember.dob) && (
+                            <p className="text-[11px] text-rose-500 font-regular mt-1 leading-snug">
+                              Invalid birth date. Staff must be at least 18 years old.
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Gender</label>
+                          <select 
+                            value={editingStaffMember.gender || 'Male'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, gender: e.target.value})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+
+                        {/* Nationality */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Nationality</label>
+                          <input 
+                            type="text" 
+                            value={editingStaffMember.nationality || ''}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, nationality: e.target.value})}
+                            placeholder="e.g. German, Vietnamese"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Address */}
+                        <div className="space-y-1 lg:col-span-3">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Address</label>
+                          <input 
+                            type="text" 
+                            value={editingStaffMember.address || ''}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, address: e.target.value})}
+                            placeholder="Enter address"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
                           />
                         </div>
                       </div>
@@ -3830,15 +4907,15 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                     {/* Section 2: Job Information */}
                     <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Job & Employment Information</h4>
+                      <h4 className="text-[14px] font-bold text-slate-800 uppercase tracking-wider font-sans">Job & Employment Information</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Job Role */}
                         <div className="space-y-1">
-                          <label className="text-[12px] font-semibold text-slate-600 block">Job Role <span className="text-red-500">*</span></label>
+                          <label className="text-[14px] font-semibold text-slate-700 block">Job Role <span className="text-red-500">*</span></label>
                           <select 
                             value={editingStaffMember.role}
                             onChange={(e) => setEditingStaffMember({...editingStaffMember, role: e.target.value, department: e.target.value})}
-                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
                           >
                             {roles.map((r) => (
                               <option key={r.id} value={r.name}>{r.name}</option>
@@ -3857,13 +4934,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           />
                         </div>
 
-                        {/* Employment type */}
+                        {/* Contract type */}
                         <div className="space-y-1">
-                          <label className="text-[12px] font-semibold text-slate-600 block">Employment Type</label>
+                          <label className="text-[14px] font-semibold text-slate-700 block">Contract Type</label>
                           <select 
                             value={editingStaffMember.status}
                             onChange={(e) => setEditingStaffMember({...editingStaffMember, status: e.target.value as any})}
-                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
                           >
                             <option value="Full-time">Full-time</option>
                             <option value="Part-time">Part-time</option>
@@ -3873,14 +4950,14 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                         {/* Working status / labor status */}
                         <div className="space-y-1">
-                          <label className="text-[12px] font-semibold text-slate-600 block">Labor Status</label>
+                          <label className="text-[14px] font-semibold text-slate-700 block">Labor Status</label>
                           <select 
                             value={editingStaffMember.isActive ? 'Active' : 'Inactive'}
                             onChange={(e) => setEditingStaffMember({
                               ...editingStaffMember, 
                               isActive: e.target.value === 'Active'
                             })}
-                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
                           >
                             <option value="Active">Active</option>
                             <option value="Inactive">Inactive</option>
@@ -3921,6 +4998,185 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           }}
                           placeholder="Select system permissions"
                         />
+
+                        {/* Exit Date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Exit Date"
+                            value={editingStaffMember.exitDate || ''}
+                            onChange={(date) => setEditingStaffMember({...editingStaffMember, exitDate: date})}
+                            placeholder="Select exit date"
+                            maxYear={new Date().getFullYear() + 10}
+                          />
+                        </div>
+
+                        {/* Weekly contract hours */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Weekly Contract Hours</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <input 
+                              type="number" 
+                              value={editingStaffMember.contractHours || 0}
+                              onChange={(e) => setEditingStaffMember({...editingStaffMember, contractHours: Number(e.target.value) || 0})}
+                              placeholder="e.g. 40"
+                              className="w-full h-full pl-3.5 pr-28 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              hours / week
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Gross salary agreement */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Gross Salary Agreement</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <span className="pl-3.5 pr-2.5 border-r border-slate-200 text-[14px] font-bold text-slate-700 bg-slate-50/50 h-full flex items-center select-none">
+                              €
+                            </span>
+                            <input 
+                              type="number" 
+                              value={editingStaffMember.grossAgreement || 0}
+                              onChange={(e) => setEditingStaffMember({...editingStaffMember, grossAgreement: Number(e.target.value) || 0})}
+                              placeholder="e.g. 2500"
+                              className="w-full h-full pl-3.5 pr-18 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              / month
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Working days per week */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Working Days Per Week</label>
+                          <select 
+                            value={editingStaffMember.workingDaysPerWeek || 5}
+                            onChange={(e) => {
+                              const workingDays = Number(e.target.value) || 5;
+                              const minLeave = workingDays * 4;
+                              setEditingStaffMember({
+                                ...editingStaffMember, 
+                                workingDaysPerWeek: workingDays,
+                                annualLeaveEntitlement: Math.max(editingStaffMember.annualLeaveEntitlement || 0, minLeave)
+                              });
+                            }}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="1">1 day / week</option>
+                            <option value="2">2 days / week</option>
+                            <option value="3">3 days / week</option>
+                            <option value="4">4 days / week</option>
+                            <option value="5">5 days / week</option>
+                            <option value="6">6 days / week</option>
+                          </select>
+                        </div>
+
+                        {/* Probation period (months) */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Probation Period</label>
+                          <select 
+                            value={editingStaffMember.probationPeriodMonths || 0}
+                            onChange={(e) => {
+                              const months = Number(e.target.value) || 0;
+                              let pDate = '';
+                              if (editingStaffMember.startDate) {
+                                const d = new Date(editingStaffMember.startDate);
+                                if (!isNaN(d.getTime())) {
+                                  d.setMonth(d.getMonth() + months);
+                                  pDate = d.toISOString().split('T')[0];
+                                }
+                              }
+                              setEditingStaffMember({
+                                ...editingStaffMember, 
+                                probationPeriodMonths: months, 
+                                probationEndDate: pDate
+                              });
+                            }}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="0">No probation (0 months)</option>
+                            <option value="1">1 month</option>
+                            <option value="2">2 months</option>
+                            <option value="3">3 months</option>
+                            <option value="4">4 months</option>
+                            <option value="5">5 months</option>
+                            <option value="6">6 months (Max legal limit)</option>
+                          </select>
+                        </div>
+
+                        {/* Probation end date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Probation end date"
+                            value={editingStaffMember.probationEndDate || ''}
+                            onChange={(date) => setEditingStaffMember({...editingStaffMember, probationEndDate: date})}
+                            placeholder="Probation end date"
+                            maxYear={new Date().getFullYear() + 5}
+                          />
+                        </div>
+
+                        {/* Annual leave entitlement */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Annual Leave Entitlement</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <input 
+                              type="number" 
+                              value={editingStaffMember.annualLeaveEntitlement || 0}
+                              onChange={(e) => setEditingStaffMember({...editingStaffMember, annualLeaveEntitlement: Number(e.target.value) || 0})}
+                              placeholder="e.g. 24"
+                              className="w-full h-full pl-3.5 pr-24 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              days / year
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Sunday offs per year */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Sunday Offs Per Year</label>
+                          <div className="relative flex items-center h-10 border border-slate-200 focus-within:border-[#7553FF] focus-within:ring-1 focus-within:ring-[#7553FF] rounded-xl bg-white overflow-hidden shadow-3xs">
+                            <input 
+                              type="number" 
+                              value={editingStaffMember.sundayOffCountOfYear || 0}
+                              onChange={(e) => setEditingStaffMember({...editingStaffMember, sundayOffCountOfYear: Number(e.target.value) || 0})}
+                              placeholder="e.g. 15"
+                              className="w-full h-full pl-3.5 pr-28 py-1.5 bg-transparent text-[14px] text-slate-800 outline-hidden border-none"
+                            />
+                            <span className="absolute right-3.5 text-[14px] font-semibold text-slate-700 select-none pointer-events-none">
+                              sundays / year
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Contract Preparation Status */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Contract Preparation</label>
+                          <select 
+                            value={editingStaffMember.contractPreparationStatus || 'tbd'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, contractPreparationStatus: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="tbd">To Be Decided (TBD)</option>
+                            <option value="yes">Prepared / Yes</option>
+                            <option value="no">Not Prepared / No</option>
+                          </select>
+                        </div>
+
+                        {/* Contract Signing Status */}
+                        <div className="space-y-1">
+                          <label className="text-[14px] font-semibold text-slate-700 block">Contract Signing</label>
+                          <select 
+                            value={editingStaffMember.contractSigningStatus || 'tbd'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, contractSigningStatus: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-[14px] text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="tbd">To Be Decided (TBD)</option>
+                            <option value="yes">Signed / Yes</option>
+                            <option value="no">Not Signed / No</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -4028,28 +5284,121 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                       </div>
 
-                      {/* Include in Payroll panel */}
-                      <div className="p-3 bg-[#F0ECFF] rounded-xl flex items-center justify-between border border-[#7553FF]/15">
-                        <div className="space-y-0.5 text-left">
-                          <p className="text-xs font-bold text-slate-800">Include in Payroll</p>
-                          <p className="text-[11px] text-[#7553FF]/80">Automatically calculate monthly payroll for this employee</p>
+
+                    </div>
+
+                    {/* Section 4: Tax, Insurance & Residency Information */}
+                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
+                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Tax, Insurance & Residency Info</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Tax Class */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Tax Class</label>
+                          <select 
+                            value={editingStaffMember.taxClass || '1'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, taxClass: e.target.value})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="1">Class 1 (Single / Divorced)</option>
+                            <option value="2">Class 2 (Single Parent)</option>
+                            <option value="3">Class 3 (Married - Higher Income)</option>
+                            <option value="4">Class 4 (Married - Equal Income)</option>
+                            <option value="5">Class 5 (Married - Lower Income)</option>
+                            <option value="6">Class 6 (Second Job / Secondary)</option>
+                          </select>
                         </div>
-                        {/* Toggle Switch */}
-                        <button 
-                          type="button"
-                          disabled={simulatedUser && simulatedUser.systemAccessLevel !== 'Admin'}
-                          onClick={() => setEditingStaffMember(prev => prev ? ({ 
-                            ...prev, 
-                            includeInPayroll: prev.includeInPayroll === undefined ? false : !prev.includeInPayroll 
-                          }) : null)}
-                          className={`w-10 h-5.5 rounded-full transition-colors relative cursor-pointer outline-hidden border-none ${
-                            editingStaffMember.includeInPayroll !== false ? 'bg-[#7553FF]' : 'bg-slate-300'
-                          }`}
-                        >
-                          <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-1 left-1 transition-transform ${
-                            editingStaffMember.includeInPayroll !== false ? 'translate-x-4.5' : ''
-                          }`} />
-                        </button>
+
+                        {/* Social Security Number */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Social Security Number</label>
+                          <input 
+                            type="text" 
+                            value={editingStaffMember.socialSecurityNumber || ''}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, socialSecurityNumber: e.target.value})}
+                            placeholder="e.g. 12 150784 M 043"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Personal Tax ID */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Personal Tax ID</label>
+                          <input 
+                            type="text" 
+                            value={editingStaffMember.personalTaxId || ''}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, personalTaxId: e.target.value})}
+                            placeholder="e.g. 12345678901"
+                            maxLength={11}
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Health Insurance Provider */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Health Insurance Provider</label>
+                          <input 
+                            type="text" 
+                            value={editingStaffMember.healthInsuranceProvider || ''}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, healthInsuranceProvider: e.target.value})}
+                            placeholder="e.g. TK, AOK, Barmer"
+                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                          />
+                        </div>
+
+                        {/* Insurance SEPA */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Insurance SEPA Mandate</label>
+                          <select 
+                            value={editingStaffMember.insuranceSepa || 'no'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, insuranceSepa: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="no">No Mandate</option>
+                            <option value="yes">Yes (Signed SEPA Mandate)</option>
+                          </select>
+                        </div>
+
+                        {/* Dependent Allowance */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">Dependent Allowance</label>
+                          <select 
+                            value={editingStaffMember.dependentAllowance || '0.0'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, dependentAllowance: e.target.value})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="0.0">0.0 (No Dependents)</option>
+                            <option value="0.5">0.5</option>
+                            <option value="1.0">1.0</option>
+                            <option value="1.5">1.5</option>
+                            <option value="2.0">2.0</option>
+                            <option value="2.5">2.5</option>
+                            <option value="3.0">3.0 (or more)</option>
+                          </select>
+                        </div>
+
+                        {/* ID with Residence Permit */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">ID with Residence Permit</label>
+                          <select 
+                            value={editingStaffMember.idWithResidencePermit || 'no'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, idWithResidencePermit: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer"
+                          >
+                            <option value="no">No</option>
+                            <option value="yes">Yes (Requires Residence Permit)</option>
+                          </select>
+                        </div>
+
+                        {/* Residence Permit Expiry Date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Residence Permit Expiry"
+                            value={editingStaffMember.residencePermitExpiryDate || ''}
+                            onChange={(date) => setEditingStaffMember({...editingStaffMember, residencePermitExpiryDate: date})}
+                            placeholder="Select expiry date"
+                            maxYear={new Date().getFullYear() + 10}
+                          />
+                        </div>
                       </div>
                     </div>
                     </div>
@@ -4807,15 +6156,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* DATE */}
                     <div className="md:col-span-2 space-y-1.5 relative">
-                      <label className="text-[14px] font-bold text-slate-700 tracking-wider block">Date</label>
-                      <div className="relative">
-                        <input 
-                          type="date"
-                          value={newHolidayDate}
-                          onChange={(e) => setNewHolidayDate(e.target.value)}
-                          className="w-full pl-3.5 pr-8 py-2.5 border border-slate-200 rounded-xl text-xs placeholder:text-slate-700 focus:outline-none focus:ring-1 focus:ring-[#7553FF] focus:border-[#7553FF] bg-white"
-                        />
-                      </div>
+                      <DatePicker
+                        label="Date"
+                        value={newHolidayDate}
+                        onChange={(date) => setNewHolidayDate(date)}
+                        placeholder="Select holiday date"
+                        maxYear={new Date().getFullYear() + 5}
+                      />
                     </div>
 
                     {/* PAY MULTIPLIER MULTIPLEX */}
@@ -5122,19 +6469,29 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
               {/* Staff choices */}
               <div className="space-y-2 border-t border-b border-slate-50 py-3 max-h-[220px] overflow-y-auto pr-1">
                 {staff.map((member) => {
-                  const key = `${editingCell.shift}-${editingCell.dept}-${editingCell.day}`;
-                  const currentList = schedule[key] || [];
+                  const key = `${editingCell.shift}-${editingCell.dept}-${editingCell.day}-${activePlanningBranch}`;
+                  const keyLegacy = `${editingCell.shift}-${editingCell.dept}-${editingCell.day}`;
+                  const currentList = schedule[key] || (activePlanningBranch === 'HCM 1' ? schedule[keyLegacy] : []) || [];
                   const isChecked = currentList.includes(member.name);
+                  const optKey = `${key}-opt`;
+                  const optList = schedule[optKey] || [];
+                  const isOptChecked = optList.includes(member.name);
                   const hasLeave = getApprovedLeaveForStaff(member.name, editingCell.day, editingCell.shift);
                   
+                  // Compute dynamic OT risk
+                  const currentHours = staffWeeklyHours[member.name] || 0;
+                  const isAlreadyScheduled = isChecked;
+                  const futureHours = isAlreadyScheduled ? currentHours : currentHours + 8;
+                  const willCauseOvertime = futureHours > 40;
+
                   return (
-                    <label 
+                    <div 
                       key={member.id} 
                       className={`flex items-center justify-between p-2.5 rounded-xl text-xs ${
-                        hasLeave ? 'bg-red-50/50 cursor-not-allowed opacity-70' : 'hover:bg-slate-50 cursor-pointer'
+                        hasLeave ? 'bg-red-50/50 opacity-70' : 'hover:bg-slate-50/50'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-7 h-7 rounded-full bg-[#7553FF]/10 text-[#7553FF] font-bold text-[11px] flex items-center justify-center shrink-0 border border-[#7553FF]/20 relative overflow-hidden select-none">
                           {getInitials(member.name)}
                           <img 
@@ -5147,14 +6504,26 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             referrerPolicy="no-referrer" 
                           />
                         </div>
-                        <div className="text-left">
-                          <p className="font-bold text-slate-700 font-display">{member.name}</p>
-                          <p className="text-[11px] text-slate-500 uppercase font-bold flex items-center gap-1">
-                            <span>{member.role}</span>
+                        <div className="text-left min-w-0">
+                          <p className="font-bold text-slate-700 font-display truncate">{member.name}</p>
+                          <div className="text-[11px] text-slate-500 font-bold flex flex-wrap items-center gap-1.5">
+                            <span className="font-sans font-normal">{member.role}</span>
                             {hasLeave && (
-                              <span className="text-red-600 font-bold ml-1 font-sans">(Leave)</span>
+                              <span className="text-red-600 font-bold font-sans">(Leave)</span>
                             )}
-                          </p>
+                            <span className={`px-1 py-0.2 text-[9px] rounded font-mono font-bold ${
+                              (member.fwhaBalance ?? 0) >= 0 
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' 
+                                : 'bg-rose-50 text-rose-600 border border-rose-100'
+                            }`} title="Flexible Working Hours Account Balance">
+                              FWHA: {(member.fwhaBalance ?? 0) > 0 ? `+${member.fwhaBalance}` : member.fwhaBalance}h
+                            </span>
+                            {willCauseOvertime && !hasLeave && (
+                              <span className="text-amber-600 font-bold text-[9px]" title="Exceeds 40h compliance limit!">
+                                ⚠️ OT ({futureHours}h)
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                       {hasLeave ? (
@@ -5162,22 +6531,61 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           Unavailable
                         </span>
                       ) : (
-                        <input 
-                          type="checkbox" 
-                          checked={isChecked}
-                          onChange={(e) => {
-                            const updated = e.target.checked 
-                              ? [...currentList, member.name]
-                              : currentList.filter(n => n !== member.name);
-                            setSchedule({
-                              ...schedule,
-                              [key]: updated
-                            });
-                          }}
-                          className="w-4 h-4 text-[#7553FF] accent-[#7553FF] cursor-pointer"
-                        />
+                        <div className="flex items-center gap-1.5 shrink-0 select-none">
+                          {/* Standard Assign Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isChecked) {
+                                setSchedule({
+                                  ...schedule,
+                                  [key]: currentList.filter(n => n !== member.name)
+                                });
+                              } else {
+                                setSchedule({
+                                  ...schedule,
+                                  [key]: [...currentList, member.name],
+                                  [optKey]: optList.filter(n => n !== member.name)
+                                });
+                              }
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                              isChecked
+                                ? 'bg-[#7553FF] text-white border-[#7553FF] shadow-xs'
+                                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            Assign
+                          </button>
+
+                          {/* Optional (Opt) stand-by Button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (isOptChecked) {
+                                setSchedule({
+                                  ...schedule,
+                                  [optKey]: optList.filter(n => n !== member.name)
+                                });
+                              } else {
+                                setSchedule({
+                                  ...schedule,
+                                  [optKey]: [...optList, member.name],
+                                  [key]: currentList.filter(n => n !== member.name)
+                                });
+                              }
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
+                              isOptChecked
+                                ? 'bg-amber-500 text-white border-amber-500 shadow-xs'
+                                : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+                            }`}
+                          >
+                            Opt
+                          </button>
+                        </div>
                       )}
-                    </label>
+                    </div>
                   );
                 })}
               </div>
@@ -5200,6 +6608,69 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
           </div>
         )}
       </AnimatePresence>
+
+      {/* RETROACTIVE EDIT MODAL & TOAST (PRD-002) */}
+      <AnimatePresence>
+        {showRetroactiveModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fadeIn font-sans">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative space-y-4 text-center">
+              <button 
+                onClick={() => setShowRetroactiveModal(null)}
+                className="absolute top-4 right-4 p-1 rounded-lg text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold border border-rose-105">
+                ⚠️
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-slate-800 font-display">Past Schedule Change Restricted</h3>
+                <p className="text-xs text-slate-600 leading-relaxed px-1">
+                  You are attempting a <strong className="text-slate-700">Retroactive Edit</strong> to a shift in the past on <strong className="text-[#7553FF]">{showRetroactiveModal.day} ({showRetroactiveModal.shift} shift)</strong>. Retroactive schedule edits are locked to protect payroll audit trails and prevent compliance violations.
+                </p>
+              </div>
+
+              <div className="p-3 bg-rose-50/50 rounded-xl border border-rose-100/50 text-left text-[11px] text-slate-755 space-y-1">
+                <p className="font-semibold text-rose-800">🔒 Policy Restriction:</p>
+                <p>Only branch managers with active Super Admin override privileges or pre-approved special justifications may proceed.</p>
+              </div>
+
+              <div className="flex flex-col gap-2 pt-1">
+                <button 
+                  onClick={() => {
+                    setSpecialRetroBypass(true);
+                    setShowRetroactiveModal(null);
+                    setRetroToast({ show: true, message: "Special Authorization Bypass Granted. Retroactive editing enabled!" });
+                    setTimeout(() => setRetroToast(null), 4000);
+                  }}
+                  className="w-full py-2 bg-[#7553FF] hover:bg-[#623EE2] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Simulate Special Explanation</span>
+                </button>
+                <button 
+                  onClick={() => setShowRetroactiveModal(null)}
+                  className="w-full py-2 border border-slate-200 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all cursor-pointer"
+                >
+                  Cancel Edit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {retroToast?.show && (
+        <div className="fixed bottom-5 right-5 z-[100] bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 animate-slideUp border border-slate-800 text-xs font-semibold">
+          <CheckCircle className="w-4 h-4 text-[#7553FF]" />
+          <span>{retroToast.message}</span>
+          <button onClick={() => setRetroToast(null)} className="ml-1 text-slate-400 hover:text-white cursor-pointer">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
 
       {/* MODAL B: UPGRADE PREMIUM BILLING PLANS */}
       <AnimatePresence>

@@ -493,7 +493,7 @@ export default function MenuTranslator() {
             
             {/* SOURCE LANGUAGE SELECT CARD */}
             <div className="space-y-1 text-left">
-              <label className="text-[11px] font-bold text-slate-700 uppercase tracking-widest block font-sans">
+              <label className="text-[11px] font-bold text-slate-700 tracking-widest block font-sans">
                 Source Language
               </label>
               <div className="relative">
@@ -516,7 +516,7 @@ export default function MenuTranslator() {
 
             {/* TARGET LANGUAGE SELECT CARD */}
             <div className="space-y-1 text-left">
-              <label className="text-[11px] font-bold text-slate-700 uppercase tracking-widest block font-sans">
+              <label className="text-[11px] font-bold text-slate-700 tracking-widest block font-sans">
                 Target Language
               </label>
               <div className="relative">
@@ -1087,14 +1087,14 @@ export default function MenuTranslator() {
 
                 {/* Dictionary add glossary item entry form */}
                 <form onSubmit={handleAddTerm} className="p-5 bg-[#FAF9F7] border border-[#1C1814]/15 rounded-[8px] space-y-4 text-left">
-                  <h4 className="text-[14px] font-bold text-[#1C1814] flex items-center gap-1.5 uppercase tracking-wide">
+                  <h4 className="text-[14px] font-bold text-[#1C1814] flex items-center gap-1.5 tracking-wide">
                     <Plus className="w-5 h-5 text-[#7553FF]" />
                     Add Term to Dictionary Database
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-sans text-[14px]">
                     <div className="space-y-1.5 animate-fadeIn">
-                       <label className="text-[12px] font-semibold text-[#5C534C] uppercase tracking-wider block">Vietnamese Keyword</label>
+                       <label className="text-[12px] font-semibold text-[#5C534C] tracking-wider block">Vietnamese Keyword</label>
                       <input 
                         type="text" 
                         placeholder="e.g. Banh xeo"
@@ -1105,7 +1105,7 @@ export default function MenuTranslator() {
                       />
                     </div>
                     <div className="space-y-1.5 animate-fadeIn">
-                       <label className="text-[12px] font-semibold text-[#5C534C] uppercase tracking-wider block">Standard Translation</label>
+                       <label className="text-[12px] font-semibold text-[#5C534C] tracking-wider block">Standard Translation</label>
                       <input 
                         type="text" 
                         placeholder="e.g. Crispy Savory Crepe"
@@ -1118,7 +1118,7 @@ export default function MenuTranslator() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[12px] font-semibold text-[#5C534C] uppercase tracking-wider block">Context / Culinary Explanations</label>
+                    <label className="text-[12px] font-semibold text-[#5C534C] tracking-wider block">Context / Culinary Explanations</label>
                     <textarea 
                       placeholder="e.g. Crispy pancake containing pork, bean sprouts, served wrapped in seasonal leaves..."
                       value={newCultureNote}

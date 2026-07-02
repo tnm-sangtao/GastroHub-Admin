@@ -92,8 +92,8 @@ export const initialEmployees: EmployeeShift[] = [
 ];
 
 export const initialPayroll: PayDetail[] = [
-  { id: 'pay-1', name: 'Phan Minh Tuấn', role: 'Head Chef', regularHours: 40, otHours: 6, multiplier: 1.5, tips: 1200000, adjustment: 0, locked: false },
-  { id: 'pay-2', name: 'Trần Thị Thảo', role: 'Cashier', regularHours: 35, otHours: 2, multiplier: 1.5, tips: 800000, adjustment: -150000, locked: false },
-  { id: 'pay-3', name: 'Nguyễn Văn Đạt', role: 'Server', regularHours: 32, otHours: 0, multiplier: 1.5, tips: 1540000, adjustment: 100000, locked: false },
-  { id: 'pay-4', name: 'Lê Kiều Mỹ', role: 'Bartender', regularHours: 38, otHours: 4, multiplier: 1.5, tips: 1100000, adjustment: 0, locked: false },
+  { id: 'pay-1', name: 'Tuan Phan', role: 'Head Chef', regularHours: 40, otHours: 6, multiplier: 1.5, tips: 120, adjustment: 0, locked: false },
+  { id: 'pay-2', name: 'Thao Tran', role: 'Cashier', regularHours: 35, otHours: 2, multiplier: 1.5, tips: 80, adjustment: -15, locked: false },
+  { id: 'pay-3', name: 'Alex Nguyen', role: 'Server', regularHours: 32, otHours: 0, multiplier: 1.5, tips: 154, adjustment: 10, locked: false },
+  { id: 'pay-4', name: 'My Le', role: 'Bartender', regularHours: 38, otHours: 4, multiplier: 1.5, tips: 110, adjustment: 0, locked: false },
 ];

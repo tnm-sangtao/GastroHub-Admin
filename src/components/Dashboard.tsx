@@ -155,58 +155,9 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
         </div>
 
         {/* ========================================================== */}
-        {/* II. FOUR KPI CARDS VIEW */}
+        {/* II. THREE KPI CARDS VIEW */}
         {/* ========================================================== */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1: Total Tools Used */}
-          <div className="bg-white border border-[#EAE4DC]/50 hover:border-[#7553FF]/20 rounded-lg p-5 transition-all flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-3 border-none bg-transparent p-0">
-                <span className="text-[14px] font-semibold text-[#5C534C] tracking-tight">Most Used Tool</span>
-                <div className="w-9 h-9 rounded-lg bg-[#F0ECFF] text-[#7553FF] flex items-center justify-center">
-                  <Activity className="w-5 h-5" />
-                </div>
-              </div>
-              <h2 className="text-[20px] font-bold text-[#1C1814] tracking-tight">Menu Translator</h2>
-              <div className="flex items-center justify-between gap-2 mt-2">
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <span className="text-[14px] font-semibold text-[#15803D]">↑ 18.6%</span>
-                  <span className="text-[14px] text-[#7C7267]">vs yesterday</span>
-                </div>
-                <div className="h-7 w-20 bg-purple-50/50 rounded px-1 flex items-center justify-center shrink-0">
-                  <svg className="w-full h-full overflow-visible" viewBox="0 0 100 30" preserveAspectRatio="none">
-                    <defs>
-                      <linearGradient id="grad-unlogged-1" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#7553FF" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#7553FF" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M 0,25 Q 20,5 40,20 T 80,10 T 100,5 L 100,30 L 0,30 Z"
-                      fill="url(#grad-unlogged-1)"
-                    />
-                    <path
-                      d="M 0,25 Q 20,5 40,20 T 80,10 T 100,5"
-                      fill="none"
-                      stroke="#7553FF"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </div>
-            {/* SVG graph and link line */}
-            <div className="mt-4 pt-2 border-t border-dashed border-[#EAE4DC]/30 flex items-center justify-end">
-              <button 
-                onClick={onLogin}
-                className="text-sm font-bold text-[#7553FF] hover:text-[#623EE2] flex items-center gap-0.5 transition-colors cursor-pointer bg-transparent border-none"
-              >
-                <span>Try tool</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
           {/* Card 2: Tasks Completed */}
           <div className="bg-white border border-[#EAE4DC]/50 hover:border-[#7553FF]/20 rounded-lg p-5 transition-all flex flex-col justify-between">
@@ -564,10 +515,10 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
         {/* ========================================================== */}
         {/* IV. BOTTOM SECTION (COMMUNITY JOIN & Q&A) */}
         {/* ========================================================== */}
-        <div id="community-qa-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+        <div id="community-qa-section" className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-0 pl-[1px]" style={{ borderColor: '#e2e8f0' }}>
           
           {/* Join Community Panel (col-span-4) */}
-          <div className="lg:col-span-4 bg-white border border-[#EAE4DC]/50 rounded-lg p-6 flex flex-col justify-between">
+          <div className="lg:col-span-4 bg-white border border-[#EAE4DC]/15 rounded-lg p-6 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="space-y-1">
                 <h3 className="text-md font-semibold text-[#1C1814] tracking-tight leading-none">
@@ -579,7 +530,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
               </div>
 
               {/* Connected users portraits diagram */}
-              <div className="bg-[#FAF9F7] border border-[#EAE4DC]/40 rounded-lg p-4 flex flex-col items-center text-center relative overflow-hidden">
+              <div className="bg-[#FAF9F7] border border-[#EAE4DC]/10 rounded-lg p-4 flex flex-col items-center text-center relative overflow-hidden">
                 <div className="flex items-center -space-x-3 mb-2 pt-1.5">
                   <img
                     src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
@@ -619,7 +570,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                   const BulletIcon = item.icon;
                   return (
                     <div key={idx} className="flex gap-3 items-start text-left">
-                      <div className="w-7 h-7 rounded-md bg-[#FAF9F7] text-[#7553FF] flex items-center justify-center shrink-0 mt-0.5 border border-[#EAE4DC]/40">
+                      <div className="w-7 h-7 rounded-md bg-[#FAF9F7] text-[#7553FF] flex items-center justify-center shrink-0 mt-0.5 border border-[#EAE4DC]/15">
                         <BulletIcon className="w-3.5 h-3.5" />
                       </div>
                       <div className="min-w-0">
@@ -638,14 +589,14 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
 
             <button 
               onClick={onLogin}
-              className="mt-6 w-full py-2.5 border border-[#EAE4DC]/40 hover:border-[#7553FF]/60 bg-[#FAF9F7] hover:bg-white text-[#5C534C] hover:text-[#7553FF] font-black text-sm rounded-lg text-center transition-all cursor-pointer h-10 flex items-center justify-center"
+              className="mt-6 w-full py-2.5 border border-[#EAE4DC]/15 hover:border-[#7553FF]/60 bg-[#FAF9F7] hover:bg-white text-[#5C534C] hover:text-[#7553FF] font-black text-sm rounded-lg text-center transition-all cursor-pointer h-10 flex items-center justify-center"
             >
               View Community →
             </button>
           </div>
 
           {/* Q&A Panel (col-span-8) */}
-          <div className="lg:col-span-8 bg-white border border-[#EAE4DC]/50 rounded-lg p-6 flex flex-col justify-between">
+          <div className="lg:col-span-8 bg-white border border-[#EAE4DC]/15 rounded-lg p-6 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
@@ -658,7 +609,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                 </div>
                 {/* Secondary Pill Navigation */}
                 <div className="flex items-center gap-2 self-start sm:self-auto shrink-0 select-none">
-                  <div className="flex p-0.5 bg-[#FAF9F7] border border-[#EAE4DC]/40 rounded-md">
+                  <div className="flex p-0.5 bg-[#FAF9F7] border border-[#EAE4DC]/15 rounded-md">
                     {[
                       { id: 'popular', label: 'Popular' },
                       { id: 'recent', label: 'Recent' },
@@ -695,7 +646,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                     placeholder="Search questions..."
                     value={qaSearch}
                     onChange={(e) => setQaSearch(e.target.value)}
-                    className="w-full pl-3.5 pr-10 py-2.5 bg-[#FAF9F7] border border-[#EAE4DC]/40 focus:outline-none focus:border-[#7553FF]/60 focus:bg-white rounded-lg text-sm font-medium placeholder-gray-400 transition-all font-sans"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-[#FAF9F7] border border-[#EAE4DC]/15 focus:outline-none focus:border-[#7553FF]/60 focus:bg-white rounded-lg text-sm font-medium placeholder-gray-400 transition-all font-sans"
                   />
                   <Search className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7C7267] pointer-events-none" />
                 </div>
@@ -703,7 +654,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                 <div className="relative shrink-0 select-none">
                   <button
                     onClick={onLogin}
-                    className="px-3 py-2.5 bg-[#FAF9F7] hover:bg-white border border-[#EAE4DC]/40 text-sm font-bold text-[#5C534C] hover:text-[#7553FF] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer h-10"
+                    className="px-3 py-2.5 bg-[#FAF9F7] hover:bg-white border border-[#EAE4DC]/15 text-sm font-bold text-[#5C534C] hover:text-[#7553FF] rounded-lg transition-colors flex items-center gap-1.5 cursor-pointer h-10"
                   >
                     <span>English</span>
                     <ChevronDown className="w-3.5 h-3.5 text-[#5C534C]" />
@@ -788,13 +739,13 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                     <div
                       key={idx}
                       onClick={onLogin}
-                      className="p-3.5 bg-[#FAF9F7] border border-[#EAE4DC]/40 hover:border-[#7553FF]/20 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 group cursor-pointer transition-all hover:bg-white text-left"
+                      className="p-3.5 bg-[#FAF9F7] border border-[#EAE4DC]/15 hover:border-[#7553FF]/20 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 group cursor-pointer transition-all hover:bg-white text-left"
                     >
                       <div className="flex gap-3.5 items-start min-w-0">
                         <img
                           src={qa.avatar}
                           alt={qa.author}
-                          className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5 border border-[#EAE4DC]/20"
+                          className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5 border border-[#EAE4DC]/10"
                         />
                         <div className="space-y-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">
@@ -833,7 +784,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
 
             <button 
               onClick={onLogin}
-              className="mt-6 w-full py-2.5 border border-[#EAE4DC]/40 hover:border-[#7553FF]/60 text-[#5C534C] hover:text-[#7553FF] bg-[#FAF9F7] hover:bg-white font-bold text-sm rounded-lg text-center transition-all cursor-pointer h-10 flex items-center justify-center"
+              className="mt-6 w-full py-2.5 border border-[#EAE4DC]/15 hover:border-[#7553FF]/60 text-[#5C534C] hover:text-[#7553FF] bg-[#FAF9F7] hover:bg-white font-bold text-sm rounded-lg text-center transition-all cursor-pointer h-10 flex items-center justify-center"
             >
               View all questions →
             </button>
@@ -872,37 +823,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
       </div>
 
       {/* 1.5 KPI METRICS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Card 1: Bookings */}
-        <div className="bg-white border border-[#EAE4DC]/50 hover:border-[#7553FF]/20 rounded-2xl p-5 hover:scale-[1.01] transition-all duration-300 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-2 border-none bg-transparent p-0">
-              <span className="text-[14px] font-semibold text-[#5C534C] tracking-tight">Bookings</span>
-              <div className="w-8 h-8 rounded-lg bg-[#F0ECFF] text-[#7553FF] flex items-center justify-center shrink-0">
-                <Calendar className="w-4 h-4" />
-              </div>
-            </div>
-            <h2 className="text-[32px] font-bold text-[#1C1814] tracking-tight leading-none mt-1 font-sans">56</h2>
-            <div className="flex items-center justify-between gap-2 mt-4 pt-1">
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[14px] font-bold text-emerald-600">↑ 18.7%</span>
-                <span className="text-[14px] text-[#7C7267] whitespace-nowrap">vs last 7 days</span>
-              </div>
-              <div className="h-6 w-20 overflow-visible shrink-0 pb-0.5">
-                <svg className="w-full h-full overflow-visible" viewBox="0 0 100 20" preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id="grad-bookings" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#7553FF" stopOpacity="0.25" />
-                      <stop offset="100%" stopColor="#7553FF" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M 0,15 C 20,15 30,11 50,11 C 70,11 80,5 100,4 L 100,20 L 0,20 Z" fill="url(#grad-bookings)" />
-                  <path d="M 0,15 C 20,15 30,11 50,11 C 70,11 80,5 100,4" fill="none" stroke="#7553FF" strokeWidth="1.8" strokeLinecap="round" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
         {/* Card 2: Website Visitors */}
         <div className="bg-white border border-[#EAE4DC]/50 hover:border-[#7553FF]/20 rounded-2xl p-5 hover:scale-[1.01] transition-all duration-300 flex flex-col justify-between">
@@ -1237,10 +1158,10 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
       </div>
 
       {/* 3. BENTO GRID - ROW 2 */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8" style={{ borderColor: '#e2e8f0' }}>
         {/* Column 1: Recent Activity (xl:col-span-4) */}
         <div className="xl:col-span-4 flex flex-col gap-6">
-          <div className="bg-white border border-[#EAE4DC]/50 rounded-2xl p-5 flex flex-col justify-between h-full">
+          <div className="bg-white border border-[#EAE4DC]/15 rounded-2xl p-5 flex flex-col justify-between h-full">
             <div className="space-y-3.5 h-full flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between pb-1 mb-4">
@@ -1279,7 +1200,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#EAE4DC]/30 flex justify-center mt-4 shrink-0">
+              <div className="pt-4 border-t border-[#EAE4DC]/10 flex justify-center mt-4 shrink-0">
                 <button
                   onClick={() => onNavigate('menu-translator')}
                   className="text-sm font-medium text-[#7553FF] hover:text-[#623EE2] flex items-center bg-transparent border-none cursor-pointer"
@@ -1292,14 +1213,14 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
         </div>
 
         {/* Column 2: Top Performing Tools (xl:col-span-4) */}
-        <div className="xl:col-span-4 bg-white border border-[#EAE4DC]/50 rounded-2xl p-6 flex flex-col justify-between">
+        <div className="xl:col-span-4 bg-white border border-[#EAE4DC]/15 rounded-2xl p-6 flex flex-col justify-between">
           <div className="space-y-3.5 h-full flex flex-col justify-between">
             <div className="space-y-1">
               <h3 className="text-md font-semibold text-[#1C1814] tracking-tight">Top Performing Tools</h3>
               <p className="text-sm text-[#7C7267]">Your most impactful tools</p>
             </div>
 
-            <div className="min-w-full divide-y divide-[#EAE4DC]/30 mt-4 flex-1">
+            <div className="min-w-full divide-y divide-[#EAE4DC]/10 mt-4 flex-1">
               {/* Table Header */}
               <div className="flex items-center text-[14px] font-bold text-[#7C7267] uppercase tracking-wider pb-2">
                 <div className="w-1/2">Tool</div>
@@ -1308,7 +1229,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
               </div>
 
               {/* Rows */}
-              <div className="divide-y divide-[#EAE4DC]/20 font-sans">
+              <div className="divide-y divide-[#EAE4DC]/10 font-sans">
                 {[
                   { name: 'AI Food Images', icon: ImageIcon, uses: 42, score: '92%', color: 'from-[#7553FF] to-[#9275FF]' },
                   { name: 'Menu Translator', icon: Globe2, uses: 38, score: '88%', color: 'from-[#06B6D4] to-[#22E2FF]' },
@@ -1321,7 +1242,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                     <div key={idx} className="flex items-center py-3.5 text-[14px]">
                       {/* Tool Name with Icon */}
                       <div className="w-1/2 flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-md bg-[#FAF9F7] text-slate-700 border border-[#EAE4DC]/40 flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-md bg-[#FAF9F7] text-slate-700 border border-[#EAE4DC]/15 flex items-center justify-center shrink-0">
                           <ToolIcon className="w-3.5 h-3.5" />
                         </div>
                         <span className="font-semibold text-slate-800 truncate text-[14px] leading-tight">{tool.name}</span>
@@ -1348,7 +1269,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
               </div>
             </div>
 
-            <div className="pt-4 border-t border-[#EAE4DC]/30 flex justify-center mt-4 shrink-0">
+            <div className="pt-4 border-t border-[#EAE4DC]/10 flex justify-center mt-4 shrink-0">
               <button
                 onClick={() => onNavigate('menu-translator')}
                 className="text-sm font-medium text-[#7553FF] hover:text-[#623EE2] flex items-center bg-transparent border-none cursor-pointer"
@@ -1360,7 +1281,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
         </div>
 
         {/* Column 3: Tips & Recommendations (xl:col-span-4) */}
-        <div className="xl:col-span-4 bg-white border border-[#EAE4DC]/50 rounded-2xl p-6 flex flex-col justify-between">
+        <div className="xl:col-span-4 bg-white border border-[#EAE4DC]/15 rounded-2xl p-6 flex flex-col justify-between">
           <div className="space-y-3.5 h-full flex flex-col justify-between">
             <div className="space-y-1">
               <h3 className="text-md font-semibold text-[#1C1814] tracking-tight">Tips & Recommendations</h3>
@@ -1379,7 +1300,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                   <div 
                     key={idx}
                     onClick={() => onNavigate('menu-translator')}
-                    className={`p-3 bg-[#FAF9F7] border border-[#EAE4DC]/40 rounded-xl flex items-center justify-between gap-2.5 group transition-all hover:bg-white cursor-pointer ${tip.borderCol}`}
+                    className={`p-3 bg-[#FAF9F7] border border-[#EAE4DC]/15 rounded-xl flex items-center justify-between gap-2.5 group transition-all hover:bg-white cursor-pointer ${tip.borderCol}`}
                   >
                     <div className="flex items-start gap-2.5 min-w-0">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${tip.bg}`}>
@@ -1395,7 +1316,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
               })}
             </div>
 
-            <div className="pt-4 border-t border-[#EAE4DC]/30 flex justify-center mt-4 shrink-0">
+            <div className="pt-4 border-t border-[#EAE4DC]/10 flex justify-center mt-4 shrink-0">
               <button
                 onClick={() => onNavigate('menu-translator')}
                 className="text-sm font-medium text-[#7553FF] hover:text-[#623EE2] flex items-center bg-transparent border-none cursor-pointer"
