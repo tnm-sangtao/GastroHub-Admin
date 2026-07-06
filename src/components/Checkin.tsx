@@ -17,7 +17,8 @@ import {
   Filter,
   User,
   Coffee,
-  CheckSquare
+  CheckSquare,
+  Pencil
 } from "lucide-react";
 
 // Types for the Attendance Module
@@ -64,6 +65,164 @@ export interface SimulatedUser {
   email: string;
   role: 'Admin' | 'Manager' | 'Staff';
   assignedBranches: string[];
+}
+
+interface HistoricalLog {
+  date: string;
+  shiftName: string;
+  checkin: string;
+  checkout: string;
+  breakTime: string;
+  workHours: string;
+  status: string;
+}
+
+function getHistoricalLogsForEmployee(employeeId: string): HistoricalLog[] {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  if (employeeId === "emp-1") {
+    const fixedLogs: HistoricalLog[] = [
+      { date: "Jan 10, 2026", shiftName: "Morning (09:00 - 17:00)", checkin: "08:55 AM", checkout: "05:00 PM", breakTime: "1h 00m", workHours: "7h 05m", status: "ON TIME" },
+      { date: "Jan 18, 2026", shiftName: "Morning (09:00 - 17:00)", checkin: "09:18 AM", checkout: "05:00 PM", breakTime: "1h 00m", workHours: "6h 42m", status: "LATE (18M)" },
+      { date: "Jan 25, 2026", shiftName: "Morning (09:00 - 17:00)", checkin: "09:00 AM", checkout: "05:00 PM", breakTime: "1h 00m", workHours: "7h 00m", status: "COMPLETED" },
+      { date: "Feb 10, 2026", shiftName: "Morning (09:00 - 17:00)", checkin: "08:55 AM", checkout: "05:00 PM", breakTime: "1h 00m", workHours: "7h 05m", status: "ON TIME" },
+      { date: "Feb 18, 2026", shiftName: "Morning (09:00 - 17:00)", checkin: "08:57 AM", checkout: "05:00 PM", breakTime: "1h 00m", workHours: "7h 03m", status: "ON TIME" }
+    ];
+    
+    const logs: HistoricalLog[] = [...fixedLogs];
+    let lateAdded = 1; // Jan 18 is late
+    let dayCounter = 1;
+    
+    for (let m = 0; m < 12; m++) {
+      const monthStr = months[m];
+      const targetCount = 3; // 3 per month -> 36 total
+      
+      while (logs.filter(l => l.date.startsWith(monthStr)).length < targetCount) {
+        dayCounter = (dayCounter * 7 + 3) % 25 + 1;
+        const dateStr = `${monthStr} ${dayCounter}, 2026`;
+        
+        if (logs.some(l => l.date === dateStr)) continue;
+        
+        let isLate = false;
+        if (lateAdded < 4 && m > 1 && logs.filter(l => l.status.startsWith("LATE")).length < 4) {
+          isLate = true;
+          lateAdded++;
+        }
+        
+        const checkInMin = isLate ? (10 + (dayCounter % 15)) : (50 + (dayCounter % 10));
+        const checkInHour = isLate ? 9 : 8;
+        const checkInStr = `${checkInHour.toString().padStart(2, '0')}:${checkInMin.toString().padStart(2, '0')} AM`;
+        
+        const formattedWorkHours = isLate 
+          ? `6h ${(60 - checkInMin).toString().padStart(2, '0')}m`
+          : `7h ${(60 - (checkInMin >= 50 ? checkInMin - 50 : checkInMin)).toString().padStart(2, '0')}m`;
+          
+        logs.push({
+          date: dateStr,
+          shiftName: "Morning (09:00 - 17:00)",
+          checkin: checkInStr,
+          checkout: "05:00 PM",
+          breakTime: "1h 00m",
+          workHours: formattedWorkHours,
+          status: isLate ? `LATE (${checkInMin}M)` : (dayCounter % 2 === 0 ? "ON TIME" : "COMPLETED")
+        });
+      }
+    }
+    
+    return logs.sort((a, b) => {
+      const mA = months.indexOf(a.date.split(" ")[0]);
+      const mB = months.indexOf(b.date.split(" ")[0]);
+      if (mA !== mB) return mA - mB;
+      const dA = parseInt(a.date.split(" ")[1]);
+      const dB = parseInt(b.date.split(" ")[1]);
+      return dA - dB;
+    }).slice(0, 36);
+  }
+  
+  const empConfigs: Record<string, { total: number, late: number, shift: string, start: string, end: string, isPM: boolean, breakD: string }> = {
+    "emp-2": { total: 34, late: 5, shift: "Morning (09:00 - 17:00)", start: "09:00 AM", end: "05:00 PM", isPM: false, breakD: "1h 00m" },
+    "emp-3": { total: 30, late: 3, shift: "Afternoon (14:00 - 22:00)", start: "02:00 PM", end: "10:00 PM", isPM: true, breakD: "1h 00m" },
+    "emp-4": { total: 42, late: 2, shift: "Afternoon (14:00 - 22:00)", start: "02:00 PM", end: "10:00 PM", isPM: true, breakD: "1h 00m" },
+    "emp-5": { total: 28, late: 2, shift: "Morning (09:00 - 17:00)", start: "09:00 AM", end: "05:00 PM", isPM: false, breakD: "1h 00m" },
+    "emp-6": { total: 25, late: 8, shift: "Afternoon (14:00 - 22:00)", start: "02:00 PM", end: "10:00 PM", isPM: true, breakD: "1h 00m" },
+    "emp-7": { total: 48, late: 0, shift: "Overnight (19:00 - 03:00)", start: "07:00 PM", end: "03:00 AM", isPM: true, breakD: "1h 00m" }
+  };
+  
+  const config = empConfigs[employeeId];
+  if (!config) return [];
+  
+  const logs: HistoricalLog[] = [];
+  let latesAdded = 0;
+  let dayCounter = 5;
+  
+  for (let m = 0; m < 12; m++) {
+    const monthStr = months[m];
+    const targetCount = Math.ceil(config.total / 12);
+    
+    while (logs.filter(l => l.date.startsWith(monthStr)).length < targetCount && logs.length < config.total) {
+      dayCounter = (dayCounter * 7 + 11) % 25 + 1;
+      const dateStr = `${monthStr} ${dayCounter}, 2026`;
+      
+      if (logs.some(l => l.date === dateStr)) continue;
+      
+      const isLate = latesAdded < config.late && (logs.length % 5 === 0 || latesAdded === 0);
+      if (isLate) latesAdded++;
+      
+      let checkinStr = "";
+      let checkoutStr = config.end;
+      let statusStr = "ON TIME";
+      let workHoursStr = "7h 00m";
+      
+      if (employeeId === "emp-7") {
+        checkinStr = "07:00 PM";
+        statusStr = "COMPLETED";
+        workHoursStr = "7h 00m";
+      } else if (config.isPM) {
+        if (isLate) {
+          const lateMin = 5 + (dayCounter % 20);
+          checkinStr = `02:${lateMin.toString().padStart(2, '0')} PM`;
+          statusStr = `LATE (${lateMin}M)`;
+          workHoursStr = `6h ${(60 - lateMin).toString().padStart(2, '0')}m`;
+        } else {
+          const min = (dayCounter % 10);
+          checkinStr = min === 0 ? "02:00 PM" : `01:${(60 - min).toString().padStart(2, '0')} PM`;
+          statusStr = min % 3 === 0 ? "COMPLETED" : "ON TIME";
+          workHoursStr = min === 0 ? "7h 00m" : `7h ${min.toString().padStart(2, '0')}m`;
+        }
+      } else {
+        if (isLate) {
+          const lateMin = 5 + (dayCounter % 20);
+          checkinStr = `09:${lateMin.toString().padStart(2, '0')} AM`;
+          statusStr = `LATE (${lateMin}M)`;
+          workHoursStr = `6h ${(60 - lateMin).toString().padStart(2, '0')}m`;
+        } else {
+          const min = (dayCounter % 10);
+          checkinStr = min === 0 ? "09:00 AM" : `08:${(60 - min).toString().padStart(2, '0')} AM`;
+          statusStr = min % 3 === 0 ? "COMPLETED" : "ON TIME";
+          workHoursStr = min === 0 ? "7h 00m" : `7h ${min.toString().padStart(2, '0')}m`;
+        }
+      }
+      
+      logs.push({
+        date: dateStr,
+        shiftName: config.shift,
+        checkin: checkinStr,
+        checkout: checkoutStr,
+        breakTime: config.breakD,
+        workHours: workHoursStr,
+        status: statusStr
+      });
+    }
+  }
+  
+  return logs.sort((a, b) => {
+    const mA = months.indexOf(a.date.split(" ")[0]);
+    const mB = months.indexOf(b.date.split(" ")[0]);
+    if (mA !== mB) return mA - mB;
+    const dA = parseInt(a.date.split(" ")[1]);
+    const dB = parseInt(b.date.split(" ")[1]);
+    return dA - dB;
+  }).slice(0, config.total);
 }
 
 export interface CheckinViewProps {
@@ -367,6 +526,7 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
 
   // Administrative Manual Form State
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
+  const [editingRecordId, setEditingRecordId] = useState<string | null>(null);
   const [manualEmployeeId, setManualEmployeeId] = useState("emp-1");
   const [manualDate, setManualDate] = useState("2026-06-24");
   const [manualCheckin, setManualCheckin] = useState("09:00");
@@ -392,6 +552,126 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(10);
+
+  // Tabs state
+  const [activeTab, setActiveTab] = useState<'checkin' | 'summary'>('checkin');
+  const [selectedDetailEmployeeId, setSelectedDetailEmployeeId] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string>("All");
+
+  const staffSummaries = [
+    {
+      no: 1,
+      employeeId: "emp-1",
+      name: "Nguyen An",
+      role: "Operation Specialist",
+      avatarColor: "bg-blue-100 text-blue-700",
+      flextime2025: "+12.5 hrs",
+      flextime2025Value: 12.5,
+      flextime2026: "+4.0 hrs",
+      flextime2026Value: 4.0,
+      vacationAllowance: 24,
+      vacationPeriod: "01.01.2026 - 31.12.2026",
+      daysTaken: 5,
+      remaining2025: 3,
+      note: "Exceptional attendance record and consistent on-time performance."
+    },
+    {
+      no: 2,
+      employeeId: "emp-2",
+      name: "Tran Binh",
+      role: "HR Assistant",
+      avatarColor: "bg-purple-100 text-[#7553FF]",
+      flextime2025: "-2.0 hrs",
+      flextime2025Value: -2.0,
+      flextime2026: "+1.5 hrs",
+      flextime2026Value: 1.5,
+      vacationAllowance: 24,
+      vacationPeriod: "01.01.2026 - 31.12.2026",
+      daysTaken: 8,
+      remaining2025: 0,
+      note: "Slight lateness on morning shifts but offset by extra hours."
+    },
+    {
+      no: 3,
+      employeeId: "emp-3",
+      name: "Le Chi",
+      role: "Sales Associate",
+      avatarColor: "bg-pink-100 text-pink-700",
+      flextime2025: "+8.0 hrs",
+      flextime2025Value: 8.0,
+      flextime2026: "-1.0 hrs",
+      flextime2026Value: -1.0,
+      vacationAllowance: 20,
+      vacationPeriod: "01.01.2026 - 31.12.2026",
+      daysTaken: 3,
+      remaining2025: 2,
+      note: "Flexible hours, works remotely when needed."
+    },
+    {
+      no: 4,
+      employeeId: "emp-4",
+      name: "Pham Dung",
+      role: "Operations Supervisor",
+      avatarColor: "bg-indigo-100 text-indigo-700",
+      flextime2025: "+15.0 hrs",
+      flextime2025Value: 15.0,
+      flextime2026: "+6.5 hrs",
+      flextime2026Value: 6.5,
+      vacationAllowance: 28,
+      vacationPeriod: "01.01.2026 - 31.12.2026",
+      daysTaken: 12,
+      remaining2025: 5,
+      note: "Highly reliable, candidates for promotion."
+    },
+    {
+      no: 5,
+      employeeId: "emp-5",
+      name: "Hoang Em",
+      role: "Kitchen Staff",
+      avatarColor: "bg-amber-100 text-amber-700",
+      flextime2025: "0.0 hrs",
+      flextime2025Value: 0.0,
+      flextime2026: "+2.0 hrs",
+      flextime2026Value: 2.0,
+      vacationAllowance: 24,
+      vacationPeriod: "01.01.2026 - 31.12.2026",
+      daysTaken: 2,
+      remaining2025: 1,
+      note: "Consistently on-time and active in team communications."
+    },
+    {
+      no: 6,
+      employeeId: "emp-6",
+      name: "Vu Giang",
+      role: "Bartender",
+      avatarColor: "bg-emerald-100 text-emerald-700",
+      flextime2025: "-5.5 hrs",
+      flextime2025Value: -5.5,
+      flextime2026: "-3.0 hrs",
+      flextime2026Value: -3.0,
+      vacationAllowance: 24,
+      vacationPeriod: "01.01.2026 - 31.12.2026",
+      daysTaken: 6,
+      remaining2025: 0,
+      note: "Needs coaching on schedule adherence."
+    },
+    {
+      no: 7,
+      employeeId: "emp-7",
+      name: "Doan Minh",
+      role: "Kitchen Sous-Chef",
+      avatarColor: "bg-violet-100 text-violet-700",
+      flextime2025: "+20.0 hrs",
+      flextime2025Value: 20.0,
+      flextime2026: "+10.0 hrs",
+      flextime2026Value: 10.0,
+      vacationAllowance: 30,
+      vacationPeriod: "01.01.2026 - 31.12.2026",
+      daysTaken: 15,
+      remaining2025: 7,
+      note: "Covered multiple overnight shifts in peak season."
+    }
+  ];
 
   // Success Feedback Toast state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -735,6 +1015,35 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
     setResolvingAbsentLogId(null);
   };
 
+  // Helper to convert time back to 24h format for input[type=time]
+  const convertTo24h = (timeStr?: string | null) => {
+    if (!timeStr) return "09:00";
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (match) {
+      let hrs = parseInt(match[1]);
+      const mins = match[2];
+      const ampm = match[3].toUpperCase();
+      if (ampm === "PM" && hrs < 12) hrs += 12;
+      if (ampm === "AM" && hrs === 12) hrs = 0;
+      return `${String(hrs).padStart(2, '0')}:${mins}`;
+    }
+    return timeStr;
+  };
+
+  const handleEditClick = (record: AttendanceRecord) => {
+    setEditingRecordId(record.id);
+    setManualEmployeeId(record.employeeId);
+    setManualDate(record.date);
+    setManualBranch(record.location);
+    setManualCompensatoryHours(String(record.compensatoryHours || 0));
+    setManualCheckin(convertTo24h(record.checkInTime));
+    setManualCheckout(convertTo24h(record.checkOutTime));
+    setManualBreak(record.breakDuration ? record.breakDuration.replace('h', '').trim() : "");
+    setManualReason(record.reasonNote || "");
+    setManualAttachmentName(record.documentProof || "");
+    setIsManualModalOpen(true);
+  };
+
   // ADMINISTRATIVE MANUAL OVERRIDE SUBMISSION
   const handleManualOverrideSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -766,38 +1075,73 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
       manualBreak !== "" ? manualBreak : null
     );
 
-    const newRecord: AttendanceRecord = {
-      id: `manual-${Date.now()}`,
-      employeeId: manualEmployeeId,
-      name: employee.employeeName,
-      email: employee.email,
-      department: employee.department,
-      shiftName: employee.shiftName,
-      shiftTimes: `${formatTimeString(parseInt(employee.startTime.split(":")[0]), parseInt(employee.startTime.split(":")[1]))} - ${formatTimeString(parseInt(employee.endTime.split(":")[0]), parseInt(employee.endTime.split(":")[1]))}`,
-      checkInTime: formattedIn,
-      checkInLoc: manualBranch,
-      checkOutTime: formattedOut,
-      checkOutLoc: manualBranch,
-      breakDuration: manualBreak !== "" ? `${manualBreak}h` : (calcObj.isAuto ? `${calcObj.breakApplied}` : null),
-      workingHours: calcObj.workingHours,
-      status: "Completed",
-      location: manualBranch,
-      avatarColor: employee.avatarColor,
-      date: manualDate,
-      reasonNote: manualReason,
-      compensatoryHours: Number(manualCompensatoryHours) || undefined,
-      documentProof: manualAttachmentName || "Proof_Attached.pdf",
-    };
+    if (editingRecordId) {
+      setAttendanceData((prev) =>
+        prev.map((r) => {
+          if (r.id === editingRecordId) {
+            return {
+              ...r,
+              employeeId: manualEmployeeId,
+              name: employee.employeeName,
+              email: employee.email,
+              department: employee.department,
+              shiftName: employee.shiftName,
+              shiftTimes: `${formatTimeString(parseInt(employee.startTime.split(":")[0]), parseInt(employee.startTime.split(":")[1]))} - ${formatTimeString(parseInt(employee.endTime.split(":")[0]), parseInt(employee.endTime.split(":")[1]))}`,
+              checkInTime: formattedIn,
+              checkInLoc: manualBranch,
+              checkOutTime: formattedOut,
+              checkOutLoc: manualBranch,
+              breakDuration: manualBreak !== "" ? `${manualBreak}h` : (calcObj.isAuto ? `${calcObj.breakApplied}` : null),
+              workingHours: calcObj.workingHours,
+              status: "Completed",
+              location: manualBranch,
+              avatarColor: employee.avatarColor,
+              date: manualDate,
+              reasonNote: manualReason,
+              compensatoryHours: Number(manualCompensatoryHours) || undefined,
+              documentProof: manualAttachmentName || r.documentProof || "Proof_Attached.pdf",
+            };
+          }
+          return r;
+        })
+      );
+      setIsManualModalOpen(false);
+      setEditingRecordId(null);
+      showToast("Attendance record updated successfully!");
+    } else {
+      const newRecord: AttendanceRecord = {
+        id: `manual-${Date.now()}`,
+        employeeId: manualEmployeeId,
+        name: employee.employeeName,
+        email: employee.email,
+        department: employee.department,
+        shiftName: employee.shiftName,
+        shiftTimes: `${formatTimeString(parseInt(employee.startTime.split(":")[0]), parseInt(employee.startTime.split(":")[1]))} - ${formatTimeString(parseInt(employee.endTime.split(":")[0]), parseInt(employee.endTime.split(":")[1]))}`,
+        checkInTime: formattedIn,
+        checkInLoc: manualBranch,
+        checkOutTime: formattedOut,
+        checkOutLoc: manualBranch,
+        breakDuration: manualBreak !== "" ? `${manualBreak}h` : (calcObj.isAuto ? `${calcObj.breakApplied}` : null),
+        workingHours: calcObj.workingHours,
+        status: "Completed",
+        location: manualBranch,
+        avatarColor: employee.avatarColor,
+        date: manualDate,
+        reasonNote: manualReason,
+        compensatoryHours: Number(manualCompensatoryHours) || undefined,
+        documentProof: manualAttachmentName || "Proof_Attached.pdf",
+      };
 
-    setAttendanceData((prev) => [newRecord, ...prev]);
-    setIsManualModalOpen(false);
+      setAttendanceData((prev) => [newRecord, ...prev]);
+      setIsManualModalOpen(false);
+      showToast(`Retroactive attendance recorded successfully for ${employee.employeeName}.`);
+    }
 
     // Reset Form
     setManualReason("");
     setManualBreak("");
     setManualAttachmentName("");
     setManualCompensatoryHours("0");
-    showToast(`Retroactive attendance recorded successfully for ${employee.employeeName}.`);
   };
 
   // --- STATS COMPUTATION ---
@@ -937,253 +1281,37 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
         </div>
       </div>
 
-      {/* BRAND POLICIES & SIMULATION PRESETS */}
-      <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-3xs text-left grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-emerald-500 inline-block rounded-full animate-pulse" />
-            <span className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Access Permission Simulator</span>
-          </div>
-          <p className="text-[13px] text-slate-600 leading-normal">
-            Toggle the active simulated profile to test branch visibility restrictions. Branch managers and staff are barred from viewing or editing logs of other branches.
-          </p>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <span className="text-[13px] font-medium text-slate-700 whitespace-nowrap">Simulate As:</span>
-            <select
-              value={currentUser.id}
-              onChange={(e) => {
-                const found = simulatedUsers.find(u => u.id === e.target.value);
-                if (found) {
-                  setCurrentUser(found);
-                  if (found.role !== 'Admin') {
-                    setSelectedBranch(found.assignedBranches[0]);
-                  } else {
-                    setSelectedBranch("All");
-                  }
-                  showToast(`Simulating active user: ${found.name} (${found.role} role)`);
-                }
-              }}
-              className="border border-slate-200 bg-[#FAF9F7] px-3 py-1.5 text-xs rounded-lg text-slate-800 font-semibold outline-none focus:ring-1 focus:ring-[#7553FF] cursor-pointer"
-            >
-              {simulatedUsers.map(u => (
-                <option key={u.id} value={u.id}>{u.name}</option>
-              ))}
-            </select>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-mono text-slate-600">
-              <span className="font-semibold text-slate-700">Bound to:</span>
-              <span>{currentUser.assignedBranches.join(", ")}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3 border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-[#7553FF] inline-block rounded-full" />
-            <span className="text-sm font-semibold text-slate-800 uppercase tracking-wider">Operational Engine Mode</span>
-          </div>
-          <p className="text-[13px] text-slate-600 leading-normal">
-            Switch between full **Integrated Mode** (verifies shifts, grace windows, absent checks) and **Standalone Mode** (unconstrained clock-in/out log capture with default status values).
-          </p>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  setWorkMode('Integrated');
-                  showToast("Switched to Integrated Mode (Full shift verification enabled)");
-                }}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${workMode === 'Integrated' ? 'bg-[#7553FF] text-white border-[#7553FF]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
-              >
-                Integrated Mode
-              </button>
-              <button
-                onClick={() => {
-                  setWorkMode('Standalone');
-                  showToast("Switched to Standalone Mode (Simple log capture mode active)");
-                }}
-                className={`px-4 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${workMode === 'Standalone' ? 'bg-[#7553FF] text-white border-[#7553FF]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
-              >
-                Standalone Mode
-              </button>
-            </div>
-
-            <div className="text-[11px] text-slate-500 leading-tight">
-              {workMode === 'Integrated' 
-                ? "✓ Shift validation, Late status (grace +5m), Absent auto-checks, Compensatory exemption." 
-                : "✓ Simple Checked-in / Completed log records. No shift timing rules or late flags."
-              }
-            </div>
-          </div>
+      {/* Tab Switcher */}
+      <div className="flex justify-start pt-1">
+        <div className="bg-[#EBECEE] p-1 rounded-xl flex items-center gap-1">
+          <button
+            onClick={() => setActiveTab('checkin')}
+            className={`px-8 py-2 text-[14px] font-semibold rounded-lg transition-all cursor-pointer ${
+              activeTab === 'checkin'
+                ? 'bg-white text-[#7553FF] shadow-xs'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            Checkin
+          </button>
+          <button
+            onClick={() => setActiveTab('summary')}
+            className={`px-8 py-2 text-[14px] font-semibold rounded-lg transition-all cursor-pointer ${
+              activeTab === 'summary'
+                ? 'bg-white text-[#7553FF] shadow-xs'
+                : 'text-slate-600 hover:text-slate-800'
+            }`}
+          >
+            Summary
+          </button>
         </div>
       </div>
 
-      {/* CORE MODULE A: INTERACTIVE SIMULATION CONSOLE */}
-      {currentUser.role !== 'Staff' && (
-        <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-3xs text-left space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 bg-[#7553FF] inline-block rounded-full animate-pulse" />
-            <h2 className="text-base font-medium tracking-tight text-slate-800">
-              Interactive Hardware Check-In Simulator (Check-In Console)
-            </h2>
-          </div>
-          {workMode === 'Integrated' && (
-            <button
-              onClick={triggerAbsentCheck}
-              className="text-[13px] bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-medium py-1.5 px-3.5 rounded-lg transition-colors cursor-pointer"
-              title="Auto absent is run if 60 minutes elapse past shift end and no checkin exists."
-            >
-              Run Active Absent State Check (+60m Past Shift End)
-            </button>
-          )}
-        </div>
 
-        <p className="text-[13px] text-slate-600 leading-relaxed">
-          This console simulates physical fingerprint, web portal, or tablet branch verification. Change the simulated device location to test the **Branch Lock Logic** mismatch block, and adjust check-in times to observe the **Grace Window & State Machine** calculations.
-        </p>
 
-        {/* Location mismatch warning guardrail container */}
-        <AnimatePresence>
-          {locationError && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="bg-amber-50/60 border border-amber-200 p-4 flex items-start gap-3 rounded-xl shadow-3xs"
-            >
-              <AlertCircle className="w-[14px] h-[14px] text-amber-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <span className="text-[13px] font-semibold text-amber-800 uppercase block tracking-wider">Location Mismatch Blocked</span>
-                <p className="text-[13px] text-slate-700 leading-tight">
-                  {locationError}
-                </p>
-                <div className="text-[12px] text-slate-600">
-                  Expected branch for this employee shift: <strong className="text-slate-700 font-medium">{scheduledShifts.find(s => s.employeeId === consoleEmployee)?.branch}</strong>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 pt-2">
-          
-          {/* Emp selector */}
-          <div className="space-y-1">
-            <label className="text-[12px] font-semibold text-slate-700 block tracking-wider uppercase">1. Employee</label>
-            <select
-              value={consoleEmployee}
-              onChange={(e) => {
-                setConsoleEmployee(e.target.value);
-                setLocationError(null);
-                const sched = scheduledShifts.find((s) => s.employeeId === e.target.value);
-                if (sched) {
-                  setConsoleTime(sched.startTime);
-                }
-              }}
-              className="w-full h-10 border border-slate-200 bg-white px-3 text-[13px] focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] outline-none rounded-lg text-slate-800 font-medium cursor-pointer"
-            >
-              {availableEmployeesForSim.map((s) => (
-                <option key={s.employeeId} value={s.employeeId}>
-                  {s.employeeName} ({s.shiftName} - Expected: {s.branch})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Simulated Location */}
-          <div className="space-y-1">
-            <label className="text-[12px] font-semibold text-slate-700 block tracking-wider uppercase">2. Device Location</label>
-            <select
-              value={consoleLocation}
-              onChange={(e) => {
-                setConsoleLocation(e.target.value);
-                setLocationError(null);
-              }}
-              className="w-full h-10 border border-slate-200 bg-white px-3 text-[13px] focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] outline-none rounded-lg text-slate-800 font-medium cursor-pointer"
-            >
-              <option value="HCM 1">HCM 1 Branch Office</option>
-              <option value="HCM 2">HCM 2 Restaurant Floor</option>
-              <option value="HN 1">HN 1 Bistro</option>
-              <option value="HQ">HQ Administrative Office</option>
-            </select>
-          </div>
-
-          {/* Device Type */}
-          <div className="space-y-1">
-            <label className="text-[12px] font-semibold text-slate-700 block tracking-wider uppercase">3. Device/Channel</label>
-            <select
-              value={consoleDeviceType}
-              onChange={(e) => {
-                setConsoleDeviceType(e.target.value as 'Web Browser' | 'Mobile App');
-              }}
-              className="w-full h-10 border border-slate-200 bg-white px-3 text-[13px] focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] outline-none rounded-lg text-slate-800 font-medium cursor-pointer"
-            >
-              <option value="Web Browser">Web Portal (PC)</option>
-              <option value="Mobile App">Mobile App (GPS/WiFi)</option>
-            </select>
-          </div>
-
-          {/* Simulated Time */}
-          <div className="space-y-1">
-            <label className="text-[12px] font-semibold text-slate-700 block tracking-wider uppercase">4. Simulate Time (24h)</label>
-            <input
-              type="time"
-              value={consoleTime}
-              onChange={(e) => {
-                setConsoleTime(e.target.value);
-                setLocationError(null);
-              }}
-              className="w-full h-10 border border-slate-200 bg-white px-3 text-[13px] focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] outline-none rounded-lg text-slate-800 font-medium font-mono"
-            />
-          </div>
-
-          {/* Action Trigger */}
-          <div className="flex items-end">
-            <button
-              onClick={handleClockIn}
-              className="w-full h-10 bg-[#7553FF] hover:bg-[#623EE2] text-white font-medium text-[13px] transition-all shadow-xs rounded-lg flex items-center justify-center gap-2 border-none cursor-pointer"
-            >
-              Simulate Instant Check-In
-            </button>
-          </div>
-
-        </div>
-
-        {/* Dynamic Compensatory and Break Inputs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-          <div className="space-y-1">
-            <label className="text-[12px] font-semibold text-slate-700 block tracking-wider uppercase">Custom Break Duration Override (Optional)</label>
-            <input
-              type="text"
-              placeholder="e.g. 0.5 for 30m, 1.5 for 90m. Leave blank for dynamic auto break."
-              value={consoleBreak}
-              onChange={(e) => setConsoleBreak(e.target.value)}
-              className="w-full h-10 border border-slate-200 bg-white px-3.5 text-[13px] focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] outline-none rounded-lg text-slate-800"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[12px] font-semibold text-slate-700 block tracking-wider uppercase">Approved Compensatory Leave Hours (Late Arrival Exemption)</label>
-            <select
-              value={consoleCompensatoryHours}
-              onChange={(e) => setConsoleCompensatoryHours(e.target.value)}
-              className="w-full h-10 border border-slate-200 bg-white px-3 text-[13px] focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] outline-none rounded-lg text-slate-800 font-medium cursor-pointer"
-            >
-              <option value="0">None (Standard grace +5 mins applies)</option>
-              <option value="0.5">0.5 Hours (Late up to 30 mins exempted)</option>
-              <option value="1.0">1.0 Hour (Late up to 60 mins exempted)</option>
-              <option value="1.5">1.5 Hours (Late up to 90 mins exempted)</option>
-              <option value="2.0">2.0 Hours (Late up to 120 mins exempted)</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="text-[11px] text-slate-500 italic">
-          * Auto break settings: {brandAutoBreak ? `Enabled (First Tier: ${breakThreshold1Min}m for shifts >= ${breakThreshold1Start}h, Second Tier: ${breakThreshold2Min}m for shifts >= ${breakThreshold2Start}h)` : "Disabled (No automatic breaks applied)"}.
-        </div>
-      </div>
-      )}
-
-      {/* METRIC BOXES - STYLED EXACTLY TO MATCH STAFF & ROLES STATS */}
+      {activeTab === 'checkin' && (
+        <>
+          {/* METRIC BOXES - STYLED EXACTLY TO MATCH STAFF & ROLES STATS */}
       {currentUser.role !== 'Staff' && (
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-5 mb-6">
         
@@ -1307,13 +1435,13 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
 
           {/* Department Selector */}
           <div className="flex items-center gap-2 border border-slate-200 bg-white px-3.5 py-2 rounded-xl text-[14px] shadow-3xs">
-            <span className="text-slate-500 font-medium">Dept:</span>
+            <span className="text-slate-500 font-medium">Job Role:</span>
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
               className="bg-transparent text-slate-800 font-medium cursor-pointer focus:outline-none border-none p-0 pr-1.5 focus:ring-0 text-[14px]"
             >
-              <option value="All">All Departments</option>
+              <option value="All">All Job Roles</option>
               <option value="Operation">Operation</option>
               <option value="HR">HR</option>
               <option value="Sales">Sales</option>
@@ -1347,20 +1475,17 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
           <table className="w-full min-w-[900px] border-collapse bg-white text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">Staff Member</th>
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">Department</th>
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">Shift Details</th>
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">Simulated Logs</th>
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">Break Details</th>
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">Work Hours</th>
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-center">Status</th>
-                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-right">Actions</th>
+                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Staff Member</th>
+                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Checkin</th>
+                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Checkout</th>
+                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Break</th>
+                <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-right">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginatedRecords.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-10 text-center text-[14px] text-slate-700 font-sans">
+                  <td colSpan={5} className="p-10 text-center text-[14px] text-slate-700 font-sans">
                     No attendance logs found for simulated date {selectedFilterDate} matching active filters.
                   </td>
                 </tr>
@@ -1377,62 +1502,96 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
                         <div className="text-left leading-snug">
                           <div className="text-[14px] font-medium text-slate-800 font-sans">{item.name}</div>
                           <div className="text-[14px] text-slate-700 font-sans">{item.email}</div>
+                          <div className="text-[14px] text-slate-700 font-sans mt-0.5">
+                            {item.department} • {item.shiftName} Shift ({item.location})
+                          </div>
                         </div>
                       </div>
                     </td>
 
-                    {/* Department */}
-                    <td className="px-5 py-4 text-[14px] text-slate-700 font-sans text-left">
-                      {item.department}
-                    </td>
-
-                    {/* Shift & Branch */}
+                    {/* Checkin Column */}
                     <td className="px-5 py-4 text-left">
-                      <div className="space-y-0.5">
-                        <div className="font-medium text-[14px] text-slate-800">{item.shiftName} Shift</div>
-                        <div className="text-[14px] text-slate-700 font-sans">{item.shiftTimes}</div>
-                        <span className="inline-flex items-center gap-1 text-[14px] text-slate-700 font-medium">
-                          <MapPin className="w-[14px] h-[14px] text-slate-700" />
-                          {item.location}
-                        </span>
+                      <div className="text-[14px] space-y-1 font-sans">
+                        {item.checkInTime ? (
+                          <>
+                            <div className="font-semibold text-slate-800 font-mono flex items-center gap-1.5">
+                              {item.checkInTime}
+                              {item.deviceType && (
+                                <span className="inline-flex items-center text-[12px] px-1.5 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200 font-sans">
+                                  {item.deviceType === "Mobile App" ? "📱 Mobile" : "💻 Web"}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-slate-700 text-[14px] flex items-center gap-1">
+                              <MapPin className="w-[14px] h-[14px] text-slate-700" />
+                              {item.checkInLoc || item.location}
+                            </div>
+                            <div className="pt-0.5">
+                              {(() => {
+                                let badgeClass = "bg-slate-50 text-slate-700 border border-slate-200";
+                                if (item.status === "On Time" || item.status === "Completed") {
+                                  badgeClass = "bg-emerald-50 text-emerald-700 border border-emerald-100";
+                                } else if (item.status.startsWith("Late")) {
+                                  badgeClass = "bg-amber-50 text-amber-700 border border-amber-100";
+                                } else if (item.status === "Absent") {
+                                  badgeClass = "bg-rose-50 text-rose-700 border border-rose-100";
+                                }
+                                return (
+                                  <span className={`inline-flex items-center px-2 py-0.5 text-[14px] font-sans font-semibold rounded-[2px] select-none tracking-wide ${badgeClass}`}>
+                                    {item.status}
+                                  </span>
+                                );
+                              })()}
+                            </div>
+                          </>
+                        ) : item.status === "Absent" ? (
+                          <span className="inline-flex items-center px-2 py-0.5 text-[14px] font-sans font-semibold rounded-[2px] bg-rose-50 text-rose-700 border border-rose-100 tracking-wide">
+                            Absent
+                          </span>
+                        ) : (
+                          <span className="text-slate-700 italic font-normal">Not started</span>
+                        )}
                       </div>
                     </td>
 
-                    {/* Check-in/Check-out logs */}
+                    {/* Checkout Column */}
                     <td className="px-5 py-4 text-left">
-                      <div className="text-[13px] space-y-1 font-mono">
-                        <div>
-                          <span className="text-slate-500 uppercase font-sans mr-1 text-[11px]">In:</span> 
-                          {item.checkInTime ? (
-                            <span className="text-slate-700 font-medium">{item.checkInTime}</span>
-                          ) : (
-                            <span className="text-slate-400 font-sans italic font-normal">Not started</span>
-                          )}
-                          {item.deviceType && (
-                            <span className="ml-1.5 inline-flex items-center text-[9px] px-1 bg-slate-100 text-slate-500 rounded border border-slate-200">
-                              {item.deviceType === "Mobile App" ? "📱 Mobile" : "💻 Web"}
-                            </span>
-                          )}
-                        </div>
-                        <div>
-                          <span className="text-slate-500 uppercase font-sans mr-1 text-[11px]">Out:</span>
-                          {item.checkOutTime ? (
-                            <span className="text-slate-700 font-medium">{item.checkOutTime}</span>
-                          ) : (
-                            <span className="text-slate-400 font-sans italic font-normal">—</span>
-                          )}
-                        </div>
+                      <div className="text-[14px] space-y-1 font-sans">
+                        {item.checkOutTime ? (
+                          <>
+                            <div className="font-semibold text-slate-800 font-mono">
+                              {item.checkOutTime}
+                            </div>
+                            {item.checkOutLoc && (
+                              <div className="text-slate-700 text-[14px] flex items-center gap-1">
+                                <MapPin className="w-[14px] h-[14px] text-slate-700" />
+                                {item.checkOutLoc}
+                              </div>
+                            )}
+                            {item.workingHours && (
+                              <div className="text-slate-750 text-[14px] font-mono mt-0.5">
+                                Total Worked: {item.workingHours}
+                              </div>
+                            )}
+                          </>
+                        ) : item.checkInTime ? (
+                          <span className="inline-flex items-center px-2 py-0.5 text-[14px] font-sans font-semibold rounded-[2px] bg-amber-50 text-amber-700 border border-amber-100 tracking-wide">
+                            Active Shift
+                          </span>
+                        ) : (
+                          <span className="text-slate-700">—</span>
+                        )}
                       </div>
                     </td>
 
-                    {/* Break Duration / Auto deduction warning */}
-                    <td className="px-5 py-4 text-left text-[13px] font-sans">
+                    {/* Break Duration */}
+                    <td className="px-5 py-4 text-left text-[14px] font-sans">
                       {item.checkInTime && item.checkOutTime ? (
                         item.breakDuration ? (
-                          <div className="space-y-0.5">
-                            <span className="text-slate-700 font-medium font-mono block">{item.breakDuration}</span>
+                          <div className="space-y-1">
+                            <span className="text-slate-800 font-medium font-mono block">{item.breakDuration}</span>
                             {!item.breakDuration.includes("(Manual)") && item.breakDuration !== "0h 00m" && (
-                              <span className="inline-flex items-center text-[10px] text-emerald-700 font-medium bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded uppercase">
+                              <span className="inline-flex items-center text-[14px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-[2px]">
                                 Auto-Deducted
                               </span>
                             )}
@@ -1445,154 +1604,136 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
                       )}
                     </td>
 
-                    {/* Net Hours */}
-                    <td className="px-5 py-4 font-mono font-medium text-slate-800 text-[13px] text-left">
-                      {item.workingHours ? (
-                        <span>{item.workingHours}</span>
-                      ) : (
-                        <span className="text-slate-500">—</span>
-                      )}
-                    </td>
-
-                    {/* Highly aesthetic Status Badge with Soft backgrounds */}
-                    <td className="px-5 py-4 text-center">
-                      {(() => {
-                        let badgeClass = "bg-slate-50 text-slate-700 border border-slate-200";
-                        if (item.status === "On Time" || item.status === "Completed") {
-                          badgeClass = "bg-emerald-50 text-emerald-700 border border-emerald-100";
-                        } else if (item.status.startsWith("Late")) {
-                          badgeClass = "bg-amber-50 text-amber-700 border border-amber-100";
-                        } else if (item.status === "Absent") {
-                          badgeClass = "bg-rose-50 text-rose-700 border border-rose-100";
-                        }
-                        return (
-                          <span className={`inline-flex items-center px-2 py-0.5 text-[11px] font-sans font-semibold rounded select-none tracking-wide uppercase ${badgeClass}`}>
-                            {item.status.toUpperCase()}
-                          </span>
-                        );
-                      })()}
-                    </td>
-
-                    {/* Actions: Check-out retroactive or view */}
+                    {/* Actions: Check-out retroactive, resolve, or edit */}
                     <td className="px-5 py-4 text-right">
-                      {item.status === "Absent" ? (
-                        <div className="flex flex-col items-end gap-2">
-                          {resolvingAbsentLogId === item.id ? (
-                            <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg space-y-2 text-left max-w-xs shadow-sm">
-                              <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
-                                Policy: <strong className="text-[#7553FF]">{forgetBehavior}</strong>
-                              </div>
-                              {forgetBehavior === "Snap to Shift" ? (
-                                <p className="text-[12px] text-slate-600 leading-snug">
-                                  Prefills planned hours: <strong className="text-slate-700">{scheduledShifts.find(s => s.employeeId === item.employeeId)?.startTime} - {scheduledShifts.find(s => s.employeeId === item.employeeId)?.endTime}</strong>
-                                </p>
-                              ) : (
-                                <div className="space-y-1">
-                                  <span className="text-[11px] text-slate-500 block">Enter actual times:</span>
-                                  <div className="flex gap-1">
-                                    <input
-                                      type="time"
-                                      value={resolveCheckinTime}
-                                      onChange={(e) => setResolveCheckinTime(e.target.value)}
-                                      className="border border-slate-200 bg-white p-1 rounded font-mono text-[11px] w-20 outline-none"
-                                    />
-                                    <input
-                                      type="time"
-                                      value={resolveCheckoutTime}
-                                      onChange={(e) => setResolveCheckoutTime(e.target.value)}
-                                      className="border border-slate-200 bg-white p-1 rounded font-mono text-[11px] w-20 outline-none"
-                                    />
-                                  </div>
+                      <div className="flex flex-col items-end gap-2">
+                        {/* Always show Edit button if current user is not a regular Staff */}
+                        {currentUser.role !== 'Staff' && (
+                          <button
+                            onClick={() => handleEditClick(item)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-lg text-[14px] font-medium transition-colors cursor-pointer"
+                          >
+                            <Pencil className="w-4 h-4 text-slate-700" />
+                            <span>Edit</span>
+                          </button>
+                        )}
+
+                        {item.status === "Absent" ? (
+                          <div className="flex flex-col items-end gap-2 mt-1">
+                            {resolvingAbsentLogId === item.id ? (
+                              <div className="bg-slate-50 border border-slate-200 p-3 rounded-lg space-y-2 text-left max-w-xs shadow-sm">
+                                <div className="text-[14px] text-slate-700 font-medium tracking-wider">
+                                  Policy: <strong className="text-[#7553FF]">{forgetBehavior}</strong>
                                 </div>
-                              )}
-                              <div className="flex gap-1.5 pt-1 justify-end">
-                                <button
-                                  onClick={() => handleResolveAbsent(item.id, resolveCheckinTime, resolveCheckoutTime)}
-                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] px-2.5 py-1 rounded font-semibold cursor-pointer border-none"
-                                >
-                                  Apply
-                                </button>
-                                <button
-                                  onClick={() => setResolvingAbsentLogId(null)}
-                                  className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] px-2.5 py-1 rounded font-semibold cursor-pointer border-none"
-                                >
-                                  Cancel
-                                </button>
+                                {forgetBehavior === "Snap to Shift" ? (
+                                  <p className="text-[14px] text-slate-700 leading-snug">
+                                    Prefills planned hours: <strong className="text-slate-800">{scheduledShifts.find(s => s.employeeId === item.employeeId)?.startTime} - {scheduledShifts.find(s => s.employeeId === item.employeeId)?.endTime}</strong>
+                                  </p>
+                                ) : (
+                                  <div className="space-y-1">
+                                    <span className="text-[14px] text-slate-700 block">Enter actual times:</span>
+                                    <div className="flex gap-1.5">
+                                      <input
+                                        type="time"
+                                        value={resolveCheckinTime}
+                                        onChange={(e) => setResolveCheckinTime(e.target.value)}
+                                        className="border border-slate-200 bg-white p-1.5 rounded font-mono text-[14px] w-24 outline-none focus:border-[#7553FF]"
+                                      />
+                                      <input
+                                        type="time"
+                                        value={resolveCheckoutTime}
+                                        onChange={(e) => setResolveCheckoutTime(e.target.value)}
+                                        className="border border-slate-200 bg-white p-1.5 rounded font-mono text-[14px] w-24 outline-none focus:border-[#7553FF]"
+                                      />
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="flex gap-1.5 pt-1 justify-end">
+                                  <button
+                                    onClick={() => handleResolveAbsent(item.id, resolveCheckinTime, resolveCheckoutTime)}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-[14px] px-3 py-1.5 rounded font-semibold cursor-pointer border-none"
+                                  >
+                                    Apply
+                                  </button>
+                                  <button
+                                    onClick={() => setResolvingAbsentLogId(null)}
+                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 text-[14px] px-3 py-1.5 rounded font-semibold cursor-pointer border-none"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
                               </div>
+                            ) : (
+                              <button
+                                onClick={() => {
+                                  setResolvingAbsentLogId(item.id);
+                                  const sched = scheduledShifts.find(s => s.employeeId === item.employeeId);
+                                  if (sched) {
+                                    setResolveCheckinTime(sched.startTime);
+                                    setResolveCheckoutTime(sched.endTime);
+                                  }
+                                }}
+                                className="bg-amber-600 hover:bg-amber-700 text-white text-[14px] font-semibold py-1.5 px-3 rounded-lg transition-colors cursor-pointer border-none"
+                              >
+                                Resolve Absent Shift
+                              </button>
+                            )}
+                          </div>
+                        ) : item.checkInTime && !item.checkOutTime ? (
+                          <div className="flex flex-col items-end gap-1.5 mt-1 border border-slate-100 p-2.5 rounded-lg bg-slate-50/50">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[14px] text-slate-700 font-medium">Comp. Hours:</span>
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                max="4"
+                                defaultValue="0"
+                                id={`comp-out-${item.id}`}
+                                className="w-12 h-8 border border-slate-200 text-center text-[14px] font-sans rounded outline-none text-slate-800"
+                                title="Compensatory hours for early checkout"
+                              />
                             </div>
-                          ) : (
-                            <button
-                              onClick={() => {
-                                setResolvingAbsentLogId(item.id);
-                                const sched = scheduledShifts.find(s => s.employeeId === item.employeeId);
-                                if (sched) {
-                                  setResolveCheckinTime(sched.startTime);
-                                  setResolveCheckoutTime(sched.endTime);
-                                }
-                              }}
-                              className="bg-amber-600 hover:bg-amber-700 text-white text-[12px] font-semibold py-1 px-2.5 rounded transition-colors cursor-pointer border-none"
-                            >
-                              Resolve Absent Shift
-                            </button>
-                          )}
-                        </div>
-                      ) : item.checkInTime && !item.checkOutTime ? (
-                        <div className="flex flex-col items-end gap-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] text-slate-500 font-medium">Comp. Hours (Approved):</span>
-                            <input
-                              type="number"
-                              step="0.5"
-                              min="0"
-                              max="4"
-                              defaultValue="0"
-                              id={`comp-out-${item.id}`}
-                              className="w-12 h-7 border border-slate-200 text-center text-xs font-sans rounded outline-none text-slate-800"
-                              title="Compensatory hours for early checkout"
-                            />
+                            <div className="flex items-center gap-1.5">
+                              <input
+                                type="time"
+                                defaultValue="17:00"
+                                id={`out-time-${item.id}`}
+                                className="w-24 h-8 border border-slate-200 text-[14px] px-2 font-mono rounded-lg focus:border-[#7553FF] outline-none text-slate-800"
+                              />
+                              <button
+                                onClick={() => {
+                                  const inputEl = document.getElementById(`out-time-${item.id}`) as HTMLInputElement;
+                                  const compEl = document.getElementById(`comp-out-${item.id}`) as HTMLInputElement;
+                                  handleClockOut(item.id, inputEl?.value || "17:00", Number(compEl?.value) || 0);
+                                }}
+                                className="bg-[#7553FF] hover:bg-[#623EE2] text-white text-[14px] font-medium py-1.5 px-3 rounded-lg transition-colors shadow-none border-none cursor-pointer"
+                              >
+                                Check Out
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <input
-                              type="time"
-                              defaultValue="17:00"
-                              id={`out-time-${item.id}`}
-                              className="w-24 h-8 border border-slate-200 text-[13px] px-2 font-mono rounded-lg focus:border-[#7553FF] outline-none text-slate-800"
-                            />
-                            <button
-                              onClick={() => {
-                                const inputEl = document.getElementById(`out-time-${item.id}`) as HTMLInputElement;
-                                const compEl = document.getElementById(`comp-out-${item.id}`) as HTMLInputElement;
-                                handleClockOut(item.id, inputEl?.value || "17:00", Number(compEl?.value) || 0);
-                              }}
-                              className="bg-[#7553FF] hover:bg-[#623EE2] text-white text-[13px] font-medium py-1.5 px-3 rounded-lg transition-colors shadow-none border-none cursor-pointer"
-                            >
-                              Check Out
-                            </button>
+                        ) : (
+                          <div className="text-[14px] text-slate-700 space-y-0.5 text-right flex flex-col items-end mt-1">
+                            {item.reasonNote && (
+                              <span className="block text-[14px] text-slate-700 italic truncate max-w-[180px]" title={item.reasonNote}>
+                                "{item.reasonNote}"
+                              </span>
+                            )}
+                            {item.documentProof && (
+                              <span className="inline-flex items-center gap-1 text-[14px] text-slate-700 font-medium">
+                                <FileText className="w-[14px] h-[14px] text-slate-700" />
+                                {item.documentProof}
+                              </span>
+                            )}
+                            {item.compensatoryHours && Number(item.compensatoryHours) > 0 && (
+                              <span className="inline-flex items-center text-[14px] bg-indigo-50 border border-indigo-100 text-indigo-700 px-2 py-0.5 rounded-[2px] font-semibold">
+                                Compensated: {item.compensatoryHours}h
+                              </span>
+                            )}
                           </div>
-                        </div>
-                      ) : (
-                        <div className="text-[13px] text-slate-600 space-y-0.5 text-right flex flex-col items-end">
-                          {item.reasonNote && (
-                            <span className="block text-[13px] text-slate-600 italic truncate max-w-[180px]" title={item.reasonNote}>
-                              "{item.reasonNote}"
-                            </span>
-                          )}
-                          {item.documentProof && (
-                            <span className="inline-flex items-center gap-1 text-[12px] text-slate-500 font-medium">
-                              <FileText className="w-[12px] h-[12px] text-slate-400" />
-                              {item.documentProof}
-                            </span>
-                          )}
-                          {item.compensatoryHours && Number(item.compensatoryHours) > 0 && (
-                            <span className="inline-flex items-center text-[10px] bg-indigo-50 border border-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded uppercase font-semibold">
-                              Compensated: {item.compensatoryHours}h
-                            </span>
-                          )}
-                          {!item.reasonNote && !item.documentProof && (!item.compensatoryHours || Number(item.compensatoryHours) === 0) && (
-                            <span className="text-slate-400 italic font-normal text-[12px]">No notes</span>
-                          )}
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </td>
 
                   </tr>
@@ -1625,6 +1766,92 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
           </div>
         </div>
       </div>
+      </>
+      )}
+
+      {activeTab === 'summary' && (
+        <div className="space-y-6 text-left">
+          {/* SUMMARY TAB HEADER CARD */}
+          <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-3xs">
+            <h2 className="text-[14px] font-bold text-slate-800 tracking-wider uppercase mb-1 font-serif">
+              Staff Attendance & Vacation Summary
+            </h2>
+            <p className="text-[14px] text-slate-700 leading-relaxed">
+              Click on any staff member row to view their detailed daily check-in logs for the entire year 2026. Review Flextime account balances, vacation entitlements, and overall notes.
+            </p>
+          </div>
+
+          {/* SUMMARY TAB LISTING TABLE */}
+          <div className="bg-white border border-slate-100 rounded-2xl shadow-3xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1000px] border-collapse bg-white text-left">
+                <thead>
+                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">No.</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Name</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Flextime Account 2025</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Flextime Account 2026</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Vacation Allowance 2026</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Vacation Period</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Days Taken</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Remaining Vacation 2025</th>
+                    <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 tracking-widest text-left">Note</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {staffSummaries.map((item, index) => (
+                    <tr
+                      key={item.employeeId}
+                      onClick={() => setSelectedDetailEmployeeId(item.employeeId)}
+                      className="hover:bg-[#7553FF]/5 transition-colors cursor-pointer group"
+                    >
+                      <td className="px-5 py-4 text-[14px] text-slate-700 font-sans">
+                        {item.no}
+                      </td>
+                      <td className="px-5 py-4 text-left">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-[14px] ${item.avatarColor}`}>
+                            {item.name.split(" ").map(n => n[0]).join("")}
+                          </div>
+                          <div className="text-left leading-snug">
+                            <div className="text-[14px] font-semibold text-slate-900 group-hover:text-[#7553FF] font-sans transition-colors">{item.name}</div>
+                            <div className="text-[14px] text-slate-700 font-sans">{item.role}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-[14px] font-medium font-mono">
+                        <span className={item.flextime2025Value > 0 ? "text-emerald-700 font-semibold" : item.flextime2025Value < 0 ? "text-rose-600 font-semibold" : "text-slate-600"}>
+                          {item.flextime2025}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[14px] font-medium font-mono">
+                        <span className={item.flextime2026Value > 0 ? "text-emerald-700 font-semibold" : item.flextime2026Value < 0 ? "text-rose-600 font-semibold" : "text-slate-600"}>
+                          {item.flextime2026}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[14px] text-slate-700 font-sans font-medium">
+                        {item.vacationAllowance} days
+                      </td>
+                      <td className="px-5 py-4 text-[14px] text-slate-700 font-sans font-medium">
+                        {item.vacationPeriod}
+                      </td>
+                      <td className="px-5 py-4 text-[14px] text-slate-700 font-sans font-medium">
+                        {item.daysTaken} days
+                      </td>
+                      <td className="px-5 py-4 text-[14px] text-slate-700 font-sans font-medium">
+                        {item.remaining2025} days
+                      </td>
+                      <td className="px-5 py-4 text-[14px] text-slate-700 font-sans italic max-w-xs truncate" title={item.note}>
+                        {item.note}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CORE MODULE E: ADMINISTRATIVE MANUAL OVERRIDE DIALOG / FORM (MODAL) */}
       <AnimatePresence>
@@ -1637,9 +1864,14 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
               className="bg-white border border-slate-100 max-w-3xl w-full p-6 text-left space-y-4 shadow-xl rounded-lg"
             >
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="text-[18px] font-medium text-slate-800">Retroactive Manual Check-In Override</span>
+                <span className="text-[18px] font-medium text-slate-800">
+                  {editingRecordId ? "Edit Attendance Record" : "Retroactive Manual Check-In Override"}
+                </span>
                 <button
-                  onClick={() => setIsManualModalOpen(false)}
+                  onClick={() => {
+                    setIsManualModalOpen(false);
+                    setEditingRecordId(null);
+                  }}
                   className="text-slate-700 hover:text-slate-900 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
@@ -1782,11 +2014,14 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
                   />
                 </div>
 
-                {/* Form Buttons */}
+                 {/* Form Buttons */}
                 <div className="flex items-center justify-end gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsManualModalOpen(false)}
+                    onClick={() => {
+                      setIsManualModalOpen(false);
+                      setEditingRecordId(null);
+                    }}
                     className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-[14px] font-medium rounded-lg cursor-pointer text-slate-700"
                   >
                     Cancel
@@ -1795,11 +2030,214 @@ export default function CheckinView({ simulatedUser }: CheckinViewProps) {
                     type="submit"
                     className="px-4 py-2 bg-[#7553FF] hover:bg-[#623EE2] text-white text-[14px] font-medium rounded-lg border-none cursor-pointer"
                   >
-                    Save & Record Logs
+                    {editingRecordId ? "Save Changes" : "Save & Record Logs"}
                   </button>
                 </div>
 
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Detailed Employee Dialog (Modal) */}
+      <AnimatePresence>
+        {selectedDetailEmployeeId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-xs">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white border border-[#EAE4DC] max-w-5xl w-full h-[700px] max-h-[90vh] flex flex-col p-6 text-left shadow-2xl rounded-lg relative overflow-hidden"
+            >
+              {/* Header */}
+              {(() => {
+                const emp = staffSummaries.find(s => s.employeeId === selectedDetailEmployeeId);
+                if (!emp) return null;
+
+                const historicalLogs = getHistoricalLogsForEmployee(emp.employeeId);
+                const totalShifts = historicalLogs.length;
+                const lateArrivals = historicalLogs.filter(l => l.status.toUpperCase().startsWith("LATE")).length;
+                const onTimeCompleted = totalShifts - lateArrivals;
+
+                const actualLogs = attendanceData.filter(d => d.employeeId === selectedDetailEmployeeId);
+                const actualLogsFormatted = actualLogs.map(l => {
+                  const dateObj = new Date(l.date);
+                  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                  const formattedDate = !isNaN(dateObj.getTime())
+                    ? `${monthNames[dateObj.getMonth()]} ${dateObj.getDate()}, ${dateObj.getFullYear()}`
+                    : l.date;
+                    
+                  return {
+                    date: formattedDate,
+                    shiftName: `${l.shiftName} (${l.shiftTimes})`,
+                    checkin: l.checkInTime || "Absent",
+                    checkout: l.checkOutTime || "—",
+                    breakTime: l.breakDuration || "1h 00m",
+                    workHours: l.workingHours || "—",
+                    status: l.status.toUpperCase()
+                  };
+                });
+
+                const combinedLogs = [...actualLogsFormatted, ...historicalLogs];
+                const filteredLogs = selectedMonth === "All"
+                  ? combinedLogs
+                  : combinedLogs.filter(l => l.date.startsWith(selectedMonth));
+
+                return (
+                  <>
+                    <div className="flex items-start justify-between border-b border-[#EAE4DC] pb-4 flex-shrink-0">
+                      <div className="flex items-center gap-4 text-left">
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg bg-indigo-50 text-[#7553FF]">
+                          {emp.name.charAt(0)}
+                        </div>
+                        <div className="leading-snug">
+                          <h3 className="text-[20px] font-bold text-slate-900 font-poppins">{emp.name}</h3>
+                          <p className="text-[14px] text-slate-500 font-medium font-poppins">{emp.role} • 1-Year Check-In Log (2026)</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSelectedDetailEmployeeId(null);
+                          setSelectedMonth("All");
+                        }}
+                        className="text-slate-400 hover:text-slate-600 cursor-pointer p-1.5 rounded-full hover:bg-slate-100 border-none bg-transparent transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Scrollable Modal Content */}
+                    <div className="flex-1 overflow-y-auto py-4 pr-1 space-y-6 text-left">
+
+                      {/* Quick Stats Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Card 1: TOTAL SHIFTS */}
+                        <div className="bg-[#FAF9F7] border border-[#EAE4DC] p-5 rounded-lg text-left flex flex-col justify-between h-[115px]">
+                          <span className="text-[#5C534C] text-[11px] font-bold tracking-wider uppercase font-poppins">TOTAL SHIFTS</span>
+                          <strong className="text-[32px] font-bold text-[#1C1814] font-poppins leading-none">
+                            {totalShifts}
+                          </strong>
+                        </div>
+
+                        {/* Card 2: ON-TIME / COMPLETED */}
+                        <div className="bg-emerald-50/60 border border-emerald-100 p-5 rounded-lg text-left flex flex-col justify-between h-[115px]">
+                          <span className="text-emerald-700 text-[11px] font-bold tracking-wider uppercase font-poppins font-semibold">ON-TIME / COMPLETED</span>
+                          <strong className="text-[32px] font-bold text-emerald-700 font-poppins leading-none">
+                            {onTimeCompleted}
+                          </strong>
+                        </div>
+
+                        {/* Card 3: LATE ARRIVALS */}
+                        <div className="bg-amber-50/60 border border-amber-100 p-5 rounded-lg text-left flex flex-col justify-between h-[115px]">
+                          <span className="text-amber-700 text-[11px] font-bold tracking-wider uppercase font-poppins font-semibold">LATE ARRIVALS</span>
+                          <strong className="text-[32px] font-bold text-amber-600 font-poppins leading-none">
+                            {lateArrivals}
+                          </strong>
+                        </div>
+
+                        {/* Card 4: FLEXTIME BAL (2026) */}
+                        <div className="bg-indigo-50/60 border border-indigo-100 p-5 rounded-lg text-left flex flex-col justify-between h-[115px]">
+                          <span className="text-[#7553FF] text-[11px] font-bold tracking-wider uppercase font-poppins font-semibold">FLEXTIME BAL (2026)</span>
+                          <strong className="text-[32px] font-bold text-[#7553FF] font-poppins leading-none">
+                            {emp.flextime2026}
+                          </strong>
+                        </div>
+                      </div>
+
+                    {/* Month Filters */}
+                    <div className="text-left space-y-2">
+                      <span className="text-slate-500 text-[11px] font-bold tracking-wider uppercase font-poppins block">FILTER BY MONTH</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {["All Months", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((month) => {
+                          const isSelected = selectedMonth === (month === "All Months" ? "All" : month);
+                          return (
+                            <button
+                              key={month}
+                              onClick={() => setSelectedMonth(month === "All Months" ? "All" : month)}
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                                isSelected
+                                  ? "bg-[#7553FF] border-[#7553FF] text-white shadow-sm"
+                                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300"
+                              }`}
+                            >
+                              {month}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                      {/* Detailed shift log timeline table */}
+                      <div className="space-y-3 text-left">
+                        <div className="bg-white border border-[#EAE4DC] rounded-lg overflow-hidden shadow-xs">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="bg-slate-50/60 border-b border-slate-100">
+                              <th className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left font-poppins">Date</th>
+                              <th className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left font-poppins">Shift Name</th>
+                              <th className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left font-poppins">Check-In</th>
+                              <th className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left font-poppins">Check-Out</th>
+                              <th className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left font-poppins">Break</th>
+                              <th className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left font-poppins">Work Hours</th>
+                              <th className="px-4 py-3 font-semibold text-slate-700 text-[13px] text-left font-poppins">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-sans text-[13px] text-slate-700">
+                            {filteredLogs.map((log, idx) => (
+                              <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/40 transition-colors">
+                                <td className="px-4 py-3.5 text-slate-700 font-medium font-poppins text-left">{log.date}</td>
+                                <td className="px-4 py-3.5 text-slate-600 font-poppins text-left">{log.shiftName}</td>
+                                <td className={`px-4 py-3.5 font-bold font-poppins text-left ${log.checkin === "Absent" ? "text-rose-600" : "text-emerald-600"}`}>
+                                  {log.checkin}
+                                </td>
+                                <td className="px-4 py-3.5 text-slate-600 font-poppins text-left">{log.checkout}</td>
+                                <td className="px-4 py-3.5 text-slate-500 font-poppins text-left">{log.breakTime}</td>
+                                <td className="px-4 py-3.5 text-slate-800 font-bold font-mono text-left">{log.workHours}</td>
+                                <td className="px-4 py-3.5 text-left">
+                                  <span className={`inline-flex items-center px-2.5 py-1 text-xs font-normal rounded-md border ${
+                                    log.status === "ON TIME" || log.status === "On Time"
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                      : log.status === "COMPLETED" || log.status === "Completed"
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                      : log.status.startsWith("LATE") || log.status.startsWith("Late")
+                                      ? "bg-amber-50 text-amber-700 border-amber-100"
+                                      : "bg-rose-50 text-rose-700 border-rose-100"
+                                  }`}>
+                                    {log.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                            {filteredLogs.length === 0 && (
+                              <tr>
+                                <td colSpan={7} className="px-4 py-8 text-center text-slate-400 text-sm font-poppins">
+                                  No check-in logs found for this month.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex justify-end pt-4 border-t border-[#EAE4DC] flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          setSelectedDetailEmployeeId(null);
+                          setSelectedMonth("All");
+                        }}
+                        className="px-5 py-2.5 bg-[#FAF9F7] hover:bg-[#F4F0EB] text-[#1C1814] font-semibold border border-[#EAE4DC] rounded-lg text-xs cursor-pointer transition-colors font-poppins"
+                      >
+                        Close Summary View
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
             </motion.div>
           </div>
         )}

@@ -808,7 +808,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-2 border-b border-[#EAE4DC]">
           <div className="space-y-1.5 text-left">
             <div className="flex items-center gap-2">
-              <span className="text-[12px] font-semibold text-[#7553FF] bg-[#7553FF]/10 px-2 py-0.5 rounded-[2px] uppercase tracking-wider font-sans">HR & Finance</span>
+              <span className="text-[12px] font-semibold text-[#7553FF] bg-[#7553FF]/10 px-2 py-0.5 rounded-[2px]  tracking-wider font-sans">HR & Finance</span>
               <span className="text-[12px] text-slate-700 font-mono">Period: June 2026</span>
             </div>
             <h1 className="text-[28px] font-semibold text-[#1C1814] tracking-tight flex items-center gap-2.5 font-sans">
@@ -912,7 +912,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                         <p className="text-xs text-slate-700">Germany - National Operations</p>
                       </div>
                       <div className="text-right">
-                        <h4 className="font-medium text-xs text-[#7553FF] uppercase tracking-wider">Individual Payslip Statement</h4>
+                        <h4 className="font-medium text-xs text-[#7553FF]  tracking-wider">Individual Payslip Statement</h4>
                         <p className="text-xs text-slate-700 font-mono">Period: 06/2026</p>
                         <p className="text-xs text-slate-700 font-mono">Created: {new Date().toLocaleDateString()}</p>
                       </div>
@@ -952,7 +952,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
                     {/* Financial item breakdown */}
                     <div className="mb-4 text-left">
-                      <h4 className="font-medium text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Gross Earnings</h4>
+                      <h4 className="font-medium text-xs text-slate-800  tracking-wide border-b border-slate-200 pb-1 mb-2">Gross Earnings</h4>
                       <table className="w-full text-xs text-slate-700">
                         <tbody>
                           <tr className="border-b border-slate-50 py-1">
@@ -1011,7 +1011,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
                     {/* Deductions */}
                     <div className="mb-4 text-left">
-                      <h4 className="font-medium text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Deductions & Offsets</h4>
+                      <h4 className="font-medium text-xs text-slate-800  tracking-wide border-b border-slate-200 pb-1 mb-2">Deductions & Offsets</h4>
                       <table className="w-full text-xs text-slate-700">
                         <tbody>
                           {calc.foodDeduction > 0 && (
@@ -1033,7 +1033,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                     {/* Totals Summary */}
                     <div className="border-t-2 border-slate-400 pt-4 mt-4 flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl" id="payslip-totals">
                       <div className="text-left leading-tight">
-                        <span className="text-[10px] text-slate-400 block uppercase font-medium">Payment Method: Bank Transfer</span>
+                        <span className="text-[10px] text-slate-400 block  font-medium">Payment Method: Bank Transfer</span>
                         <span className="text-xs font-semibold font-sans">OFFICIAL NET DISBURSEMENT</span>
                       </div>
                       <div className="text-right">
@@ -1085,7 +1085,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                 payrollState === 'Draft' ? 'bg-amber-50 text-amber-700 border-amber-200' :
                 payrollState === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                 'bg-blue-50 text-blue-700 border-blue-200'
-              } uppercase tracking-wide`}>
+              }  tracking-wide`}>
                 {payrollState}
               </span>
             </div>
@@ -1149,7 +1149,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
           
           <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
             <div>
-              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Total Reported Hours</p>
+              <p className="text-[14px] font-medium text-slate-700  tracking-wider mb-1">Total Reported Hours</p>
               <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
                 {totalReportedHours.toFixed(1)}h
               </h3>
@@ -1162,7 +1162,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
           <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
             <div>
-              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Total Gross Personnel Costs</p>
+              <p className="text-[14px] font-medium text-slate-700  tracking-wider mb-1">Total Gross Personnel Costs</p>
               <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
                 €{totalGrossCost.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
@@ -1175,7 +1175,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
           <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
             <div>
-              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Net Bank Transfers</p>
+              <p className="text-[14px] font-medium text-slate-700  tracking-wider mb-1">Net Bank Transfers</p>
               <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
                 €{totalNetPayout.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
@@ -1188,7 +1188,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
           <div className="bg-white border border-[#1C1814]/5 p-5 rounded-lg shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
             <div>
-              <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-1">Total Cash Payments</p>
+              <p className="text-[14px] font-medium text-slate-700  tracking-wider mb-1">Total Cash Payments</p>
               <h3 className="text-3xl font-bold text-slate-900 tracking-tight font-sans">
                 €{totalCashPayout.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </h3>
@@ -1211,7 +1211,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
               <div>
-                <label className="block text-sm font-medium text-slate-700 uppercase tracking-wider mb-1.5">Total Period Tip Pool (EUR)</label>
+                <label className="block text-sm font-medium text-slate-700  tracking-wider mb-1.5">Total Period Tip Pool (EUR)</label>
                 <div className="relative">
                   <span className="absolute left-3 top-2.5 text-slate-700 text-sm">€</span>
                   <input
@@ -1303,31 +1303,31 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#FAF9F7] border-b border-[#EAE4DC]">
-                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest">Employee Name</th>
-                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest">Contract Type</th>
+                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest">Employee Name</th>
+                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest">Contract Type</th>
                   
                   {/* Ledger-specific Columns */}
                   {displayLedger === 'internal' ? (
                     <>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Actual Hours</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Base Salary</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Exempt Premiums</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Tips</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Meal Deduction</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Cash Pay Out</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right bg-[#7553FF]/5">Net Bank Payout</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Actual Hours</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Base Salary</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Exempt Premiums</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Tips</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Meal Deduction</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Cash Pay Out</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right bg-[#7553FF]/5">Net Bank Payout</th>
                     </>
                   ) : (
                     <>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Tax-Reported Hours</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Taxable Salary</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Tax-Exempt Premiums</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Reported Tips</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right">Taxes & Social Security</th>
-                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-right bg-[#7553FF]/5">Official Net Payout</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Tax-Reported Hours</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Taxable Salary</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Tax-Exempt Premiums</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Reported Tips</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right">Taxes & Social Security</th>
+                      <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-right bg-[#7553FF]/5">Official Net Payout</th>
                     </>
                   )}
-                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest text-center">FWHA & Actions</th>
+                  <th className="py-4 px-5 text-[14px] font-serif font-medium text-slate-800  tracking-widest text-center">FWHA & Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -1358,7 +1358,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                               <div className="flex items-center gap-2">
                                 <span className="font-sans font-medium text-slate-900 block text-[14px] leading-[20px]">{emp.name}</span>
                                 {exitDate && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-red-100 text-red-800 border border-red-200 uppercase tracking-wider">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium bg-red-100 text-red-800 border border-red-200  tracking-wider">
                                     Exit: {exitDate}
                                   </span>
                                 )}
@@ -1377,7 +1377,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                             emp.contractType === 'Minijob' ? 'bg-[#7553FF]/10 text-[#7553FF] border-[#7553FF]/20' :
                             emp.contractType === 'Monthly' ? 'bg-blue-50 text-blue-700 border-blue-100' :
                             'bg-slate-50 text-slate-700 border-slate-200'
-                          } uppercase tracking-wide`}>
+                          }  tracking-wide`}>
                             {emp.contractType}
                           </span>
                         </td>
@@ -1456,7 +1456,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                               <div className="flex flex-col items-end">
                                 <span>{calc.reportedHours.toFixed(1)}h</span>
                                 {calc.isCapped && (
-                                  <span className="text-xs text-[#7553FF] font-sans font-medium uppercase tracking-wider bg-[#7553FF]/10 px-1 mt-0.5 rounded-[2px]">Scaled down (Minijob)</span>
+                                  <span className="text-xs text-[#7553FF] font-sans font-medium  tracking-wider bg-[#7553FF]/10 px-1 mt-0.5 rounded-[2px]">Scaled down (Minijob)</span>
                                 )}
                               </div>
                             </td>
@@ -1565,7 +1565,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                   <span className="text-[#7553FF] font-semibold">{log.action}:</span>{' '}
                   <span className="text-slate-800">{log.note}</span>
                 </div>
-                <span className="text-[#7553FF] font-sans text-xs uppercase font-semibold">User: {log.user}</span>
+                <span className="text-[#7553FF] font-sans text-xs  font-semibold">User: {log.user}</span>
               </div>
             ))}
           </div>
@@ -1616,7 +1616,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                         <p className="text-sm text-slate-700">Germany - National Operations</p>
                       </div>
                       <div className="text-right">
-                        <h4 className="font-bold text-xs text-[#7553FF] uppercase tracking-wider">Individual Payslip Statement</h4>
+                        <h4 className="font-bold text-xs text-[#7553FF]  tracking-wider">Individual Payslip Statement</h4>
                         <p className="text-sm text-slate-700 font-mono">Period: 06/2026</p>
                         <p className="text-sm text-slate-700 font-mono">Created: {new Date().toLocaleDateString()}</p>
                       </div>
@@ -1658,7 +1658,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                         <div className="mb-4 bg-red-50/70 border border-red-200/60 p-3.5 rounded-lg text-xs leading-relaxed text-red-800 flex items-start gap-2.5">
                           <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>
-                            <span className="font-bold text-red-900 block uppercase tracking-wider mb-0.5">⚠️ Exit Settlement Warning</span>
+                            <span className="font-bold text-red-900 block  tracking-wider mb-0.5">⚠️ Exit Settlement Warning</span>
                             <p className="font-normal text-red-800">
                               This employee is scheduled for termination/exit on <strong>{exitDate}</strong>.
                             </p>
@@ -1688,7 +1688,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
                     {/* Financial item breakdown */}
                     <div className="mb-4 text-left">
-                      <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Gross Earnings Breakdown</h4>
+                      <h4 className="font-bold text-xs text-slate-800  tracking-wide border-b border-slate-200 pb-1 mb-2">Gross Earnings Breakdown</h4>
                       <table className="w-full text-sm text-slate-700">
                         <tbody>
                           <tr className="border-b border-slate-50 py-1">
@@ -1755,7 +1755,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
                     {/* Deductions */}
                     <div className="mb-4 text-left">
-                      <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wide border-b border-slate-200 pb-1 mb-2">Deductions & Offsets Details</h4>
+                      <h4 className="font-bold text-xs text-slate-800  tracking-wide border-b border-slate-200 pb-1 mb-2">Deductions & Offsets Details</h4>
                       <table className="w-full text-sm text-slate-700">
                         <tbody>
                           {calc.foodDeduction > 0 && (
@@ -1783,7 +1783,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                     {/* Totals Summary */}
                     <div className="border-t-2 border-slate-400 pt-4 mt-4 flex justify-between items-center bg-slate-900 text-white p-4 rounded-lg" id="payslip-totals">
                       <div className="text-left">
-                        <span className="text-xs text-slate-400 block uppercase font-semibold">Payment Method: Bank Transfer</span>
+                        <span className="text-xs text-slate-400 block  font-semibold">Payment Method: Bank Transfer</span>
                         <span className="text-sm font-bold font-sans">
                           {displayLedger === 'internal' ? 'BANK TRANSFER NET AMOUNT (BANK NET)' : 'OFFICIAL NET DISBURSEMENT (AUSZAHLUNG)'}
                         </span>
@@ -1875,7 +1875,7 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
 
               {/* Special Premiums Hours inputs */}
               <div className="border-t border-[#EAE4DC] pt-3">
-                <h4 className="text-xs font-bold text-[#7553FF] uppercase tracking-wider mb-2">Special Shift Hours (Premium Hours)</h4>
+                <h4 className="text-xs font-bold text-[#7553FF]  tracking-wider mb-2">Special Shift Hours (Premium Hours)</h4>
                 <div className="grid grid-cols-2 gap-3 text-xs text-slate-700">
                   <div>
                     <label className="block text-slate-700 mb-1">Evening Hours (Shift premium 10%)</label>

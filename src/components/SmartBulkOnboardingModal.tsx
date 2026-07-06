@@ -694,13 +694,13 @@ export const SmartBulkOnboardingModal: React.FC<SmartBulkOnboardingModalProps> =
                 <table className="w-full text-left border-collapse">
                   <thead className="bg-[#FAF9F7] border-b border-slate-100">
                     <tr>
-                      <th className="py-3 px-5 text-[14px] font-medium font-serif text-slate-800 uppercase tracking-widest w-1/3">
+                      <th className="py-3 px-5 text-[14px] font-medium font-serif text-slate-800  tracking-widest w-1/3">
                         System Field (Tenohub)
                       </th>
-                      <th className="py-3 px-5 text-[14px] font-medium font-serif text-slate-800 uppercase tracking-widest w-1/3">
+                      <th className="py-3 px-5 text-[14px] font-medium font-serif text-slate-800  tracking-widest w-1/3">
                         Mapped Column from File
                       </th>
-                      <th className="py-3 px-5 text-[14px] font-medium font-serif text-slate-800 uppercase tracking-widest w-1/3">
+                      <th className="py-3 px-5 text-[14px] font-medium font-serif text-slate-800  tracking-widest w-1/3">
                         Sample Value
                       </th>
                     </tr>
@@ -839,34 +839,34 @@ export const SmartBulkOnboardingModal: React.FC<SmartBulkOnboardingModalProps> =
                   <table className="w-full text-left border-collapse min-w-[1200px]">
                     <thead className="bg-[#FAF9F7] border-b border-slate-100 sticky top-0 z-10">
                       <tr>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[80px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[80px]">
                           No.
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[120px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[120px]">
                           Status
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest">
                           Full Name *
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest">
                           Email Address *
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[140px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[140px]">
                           Start Date *
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[110px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[110px]">
                           Wage/Hour
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[100px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[100px]">
                           Tax Class
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[140px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[140px]">
                           Tax ID
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[130px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[130px]">
                           Date of Birth
                         </th>
-                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest w-[80px]">
+                        <th className="py-3 px-4 text-[14px] font-serif font-medium text-slate-800  tracking-widest w-[80px]">
                           Delete
                         </th>
                       </tr>

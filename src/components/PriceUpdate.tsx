@@ -343,7 +343,7 @@ export default function PriceUpdate() {
                   </div>
 
                   <div className="text-center mt-3 space-y-1">
-                    <h4 className="text-sm font-bold text-[#1C1814] uppercase tracking-wider font-sans">
+                    <h4 className="text-sm font-bold text-[#1C1814] tracking-wider font-sans">
                       Scan Pending
                     </h4>
                     <p className="text-sm text-[#7C7267] font-light leading-normal max-w-[240px] mx-auto font-sans">
@@ -428,7 +428,7 @@ export default function PriceUpdate() {
                 </div>
                 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-extrabold text-[#1C1814] uppercase tracking-wider font-sans">Running Intelligent Scan</h3>
+                  <h3 className="text-sm font-extrabold text-[#1C1814] tracking-wider font-sans">Running Intelligent Scan</h3>
                   <p className="text-sm text-[#5C534C] font-sans">Please wait while the AI identifies prices and prepares overlay placements.</p>
                 </div>
 
@@ -466,8 +466,8 @@ export default function PriceUpdate() {
                       
                       {/* APPETIZERS SECTION */}
                       <div>
-                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center uppercase border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
-                          APPETIZERS
+                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
+                          Appetizers
                         </h4>
                         <div className="space-y-3">
                           {appetizers.map((item, i) => (
@@ -484,8 +484,8 @@ export default function PriceUpdate() {
 
                       {/* MAIN COURSES SECTION */}
                       <div>
-                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center uppercase border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
-                          MAIN COURSES
+                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
+                          Main Courses
                         </h4>
                         <div className="space-y-3">
                           {mainCourses.map((item, i) => (
@@ -502,8 +502,8 @@ export default function PriceUpdate() {
 
                       {/* BEVERAGES SECTION */}
                       <div>
-                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center uppercase border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
-                          BEVERAGES
+                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
+                          Beverages
                         </h4>
                         <div className="space-y-3">
                           {beverages.map((item, i) => (
@@ -527,8 +527,8 @@ export default function PriceUpdate() {
                       
                       {/* APPETIZERS SECTION */}
                       <div>
-                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center uppercase border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
-                          APPETIZERS
+                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
+                          Appetizers
                         </h4>
                         <div className="space-y-3">
                           {appetizers.map((item, i) => (
@@ -545,8 +545,8 @@ export default function PriceUpdate() {
 
                       {/* MAIN COURSES SECTION */}
                       <div>
-                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center uppercase border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
-                          MAIN COURSES
+                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
+                          Main Courses
                         </h4>
                         <div className="space-y-3">
                           {mainCourses.map((item, i) => (
@@ -563,8 +563,8 @@ export default function PriceUpdate() {
 
                       {/* BEVERAGES SECTION */}
                       <div>
-                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center uppercase border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
-                          BEVERAGES
+                        <h4 className="text-sm font-bold text-[#124E4A] tracking-widest text-center border-b border-[#1C1814]/15 pb-1 mb-3 font-serif">
+                          Beverages
                         </h4>
                         <div className="space-y-3">
                           {beverages.map((item, i) => (

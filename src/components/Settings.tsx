@@ -840,8 +840,8 @@ export default function Settings({
                 <div className="absolute -left-16 -bottom-16 w-48 h-48 rounded-full bg-white/5 blur-3xl pointer-events-none" />
                 
                 <div className="space-y-3 relative z-10">
-                  <span className="text-[14px] font-normal text-white uppercase tracking-widest block font-mono" style={{ color: '#ffffff', fontWeight: 'normal' }}>
-                    YOUR CURRENT PLAN
+                  <span className="text-[14px] font-normal text-white tracking-widest block font-mono" style={{ color: '#ffffff', fontWeight: 'normal' }}>
+                    Your Current Plan
                   </span>
                   <div>
                     <div className="flex items-center gap-2.5 flex-wrap">
@@ -1242,7 +1242,7 @@ export default function Settings({
                   >
                     <div>
                       <div className="flex items-center justify-between mb-3.5">
-                        <span className={`px-2.5 pt-[4px] pb-[4px] rounded-[2px] border text-[10px] font-mono font-normal uppercase tracking-wide leading-none ${
+                        <span className={`px-2.5 pt-[4px] pb-[4px] rounded-[2px] border text-[10px] font-mono font-normal tracking-wide leading-none ${
                           st.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-500 border-slate-200'
                         }`} style={{ fontWeight: 'normal', borderRadius: '2px', borderWidth: '1px', paddingTop: '4px', paddingBottom: '4px' }}>
                           {st.status}
@@ -1520,11 +1520,11 @@ export default function Settings({
                 <table className="w-full text-left text-slate-800 text-sm">
                   <thead>
                     <tr className="border-b border-slate-100 bg-slate-50">
-                      <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px] text-slate-700">Event Name</th>
-                      <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px] text-slate-700">Target Audience</th>
-                      <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px] text-slate-700 text-center">Email</th>
-                      <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px] text-slate-700 text-center">Web Push</th>
-                      <th className="py-3 px-4 font-bold uppercase tracking-wider text-[11px] text-slate-700 text-center">Mobile SMS</th>
+                      <th className="py-3 px-4 font-bold tracking-wider text-[11px] text-slate-700">Event Name</th>
+                      <th className="py-3 px-4 font-bold tracking-wider text-[11px] text-slate-700">Target Audience</th>
+                      <th className="py-3 px-4 font-bold tracking-wider text-[11px] text-slate-700 text-center">Email</th>
+                      <th className="py-3 px-4 font-bold tracking-wider text-[11px] text-slate-700 text-center">Web Push</th>
+                      <th className="py-3 px-4 font-bold tracking-wider text-[11px] text-slate-700 text-center">Mobile SMS</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1725,7 +1725,7 @@ export default function Settings({
                       <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 text-xs font-sans">
                         {/* Threshold 1 */}
                         <div className="space-y-2 text-left">
-                          <span className="font-bold text-slate-700 block uppercase tracking-wider text-[10px]">Threshold 1: Shifts &gt; 6 hours</span>
+                          <span className="font-bold text-slate-700 block tracking-wider text-[10px]">Threshold 1: Shifts &gt; 6 hours</span>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <label className="text-[10px] text-slate-500 block">Deduct Min</label>
@@ -1751,7 +1751,7 @@ export default function Settings({
 
                         {/* Threshold 2 */}
                         <div className="space-y-2 text-left">
-                          <span className="font-bold text-slate-700 block uppercase tracking-wider text-[10px]">Threshold 2: Shifts &gt; 9 hours</span>
+                          <span className="font-bold text-slate-700 block tracking-wider text-[10px]">Threshold 2: Shifts &gt; 9 hours</span>
                           <div className="grid grid-cols-2 gap-2">
                             <div>
                               <label className="text-[10px] text-slate-500 block">Deduct Min</label>
@@ -1903,7 +1903,7 @@ export default function Settings({
                           onChange={(e) => setEveningShiftPremiumEnabled(e.target.checked)}
                           className="accent-[#7553FF] rounded-xs"
                         />
-                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Evening Premium</span>
+                        <span className="text-xs font-bold text-slate-800 tracking-wider">Evening Premium</span>
                       </label>
                       {eveningShiftPremiumEnabled && (
                         <div className="space-y-1.5 text-xs">
@@ -1935,7 +1935,7 @@ export default function Settings({
                           onChange={(e) => setNightShiftPremiumEnabled(e.target.checked)}
                           className="accent-[#7553FF] rounded-xs"
                         />
-                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Night Premium</span>
+                        <span className="text-xs font-bold text-slate-800 tracking-wider">Night Premium</span>
                       </label>
                       {nightShiftPremiumEnabled && (
                         <div className="space-y-1.5 text-xs">
@@ -1967,7 +1967,7 @@ export default function Settings({
                           onChange={(e) => setSundayPremiumEnabled(e.target.checked)}
                           className="accent-[#7553FF] rounded-xs"
                         />
-                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Sunday Premium</span>
+                        <span className="text-xs font-bold text-slate-800 tracking-wider">Sunday Premium</span>
                       </label>
                       {sundayPremiumEnabled && (
                         <div className="space-y-1.5 text-xs">
@@ -1992,7 +1992,7 @@ export default function Settings({
                           onChange={(e) => setHolidayPremiumEnabled(e.target.checked)}
                           className="accent-[#7553FF] rounded-xs"
                         />
-                        <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Holiday Premium</span>
+                        <span className="text-xs font-bold text-slate-800 tracking-wider">Holiday Premium</span>
                       </label>
                       {holidayPremiumEnabled && (
                         <div className="space-y-1.5 text-xs">
@@ -2325,7 +2325,7 @@ export default function Settings({
                       }`}
                     >
                       <span>Annual</span>
-                      <span className="px-2 py-0.5 text-[10px] font-bold text-emerald-800 bg-emerald-100/80 uppercase tracking-wide rounded-full font-sans">
+                      <span className="px-2 py-0.5 text-[10px] font-bold text-emerald-800 bg-emerald-100/80 tracking-wide rounded-full font-sans">
                         Save 20%
                       </span>
                     </button>
@@ -2349,13 +2349,13 @@ export default function Settings({
                         isCurrent ? 'border-[#7553FF] ring-2 ring-[#7553FF]/15 shadow-sm' : 'border-slate-100 shadow-3xs'
                       }`}>
                         {isCurrent && (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[12px] font-bold uppercase tracking-wider rounded-full font-mono">
-                            ACTIVE
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[12px] font-bold tracking-wider rounded-full font-mono">
+                            Active
                           </span>
                         )}
                         <div className="space-y-4">
                           <div className="text-left space-y-1">
-                            <span className="text-[12px] text-slate-700 font-bold block uppercase tracking-widest font-mono">Starter</span>
+                            <span className="text-[12px] text-slate-700 font-bold block tracking-widest font-mono">Starter</span>
                             <h4 className="text-[16px] font-bold text-slate-800">Basic Plan</h4>
                           </div>
 
@@ -2372,7 +2372,7 @@ export default function Settings({
                           <div className="h-px bg-slate-100" />
 
                           <div className="space-y-2">
-                            <span className="text-[12px] font-bold text-slate-700 uppercase tracking-wider block font-mono">Included Features:</span>
+                            <span className="text-[12px] font-bold text-slate-700 tracking-wider block font-mono">Included Features:</span>
                             <ul className="space-y-2">
                               {modalPlanDetails.Basic.map((benefit, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 text-slate-700 leading-normal font-normal text-[14px]">
@@ -2413,13 +2413,13 @@ export default function Settings({
                         isCurrent ? 'border-[#7553FF] ring-2 ring-[#7553FF]/15 shadow-sm' : 'border-slate-100 shadow-3xs'
                       }`}>
                         {isCurrent && (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[12px] font-bold uppercase tracking-wider rounded-full font-mono">
-                            ACTIVE
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[12px] font-bold tracking-wider rounded-full font-mono">
+                            Active
                           </span>
                         )}
                         <div className="space-y-4">
                           <div className="text-left space-y-1">
-                            <span className="text-[12px] text-slate-700 font-bold block uppercase tracking-widest font-mono">Team Power</span>
+                            <span className="text-[12px] text-slate-700 font-bold block tracking-widest font-mono">Team Power</span>
                             <h4 className="text-[16px] font-bold text-slate-800 font-sans">Gold Plan</h4>
                           </div>
 
@@ -2436,7 +2436,7 @@ export default function Settings({
                           <div className="h-px bg-slate-100" />
 
                           <div className="space-y-2">
-                            <span className="text-[12px] font-bold text-slate-700 uppercase tracking-wider block font-mono">Included Features:</span>
+                            <span className="text-[12px] font-bold text-slate-700 tracking-wider block font-mono">Included Features:</span>
                             <ul className="space-y-2">
                               {modalPlanDetails.Gold.map((benefit, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 text-slate-700 leading-normal font-normal text-[14px]">
@@ -2477,18 +2477,18 @@ export default function Settings({
                         isCurrent ? 'border-indigo-600 ring-2 ring-indigo-600/15 shadow-md' : 'border-slate-200 shadow-xs'
                       }`}>
                         {isCurrent ? (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-indigo-600 text-white text-[12px] font-bold uppercase tracking-wider rounded-full font-mono">
-                            ACTIVE
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-indigo-600 text-white text-[12px] font-bold tracking-wider rounded-full font-mono">
+                            Active
                           </span>
                         ) : (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-gradient-to-r from-[#7553FF] to-indigo-600 text-white text-[11px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-gradient-to-r from-[#7553FF] to-indigo-600 text-white text-[11px] font-bold tracking-wider rounded-full flex items-center gap-1">
                             <Sparkles className="w-2.5 h-2.5 fill-white" />
-                            <span>PREMIUM</span>
+                            <span>Premium</span>
                           </span>
                         )}
                         <div className="space-y-4">
                           <div className="text-left space-y-1">
-                            <span className="text-[12px] text-indigo-600 font-bold block uppercase tracking-widest font-mono">Enterprise Elite</span>
+                            <span className="text-[12px] text-indigo-600 font-bold block tracking-widest font-mono">Enterprise Elite</span>
                             <h4 className="text-[16px] font-bold text-[#7553FF] font-sans">Diamond Plan</h4>
                           </div>
 
@@ -2505,7 +2505,7 @@ export default function Settings({
                           <div className="h-px bg-slate-100" />
 
                           <div className="space-y-2">
-                            <span className="text-[12px] font-bold text-[#7553FF] uppercase tracking-wider block font-mono">Included Features:</span>
+                            <span className="text-[12px] font-bold text-[#7553FF] tracking-wider block font-mono">Included Features:</span>
                             <ul className="space-y-2">
                               {modalPlanDetails.Diamond.map((benefit, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 text-slate-700 leading-normal font-normal text-[14px]">

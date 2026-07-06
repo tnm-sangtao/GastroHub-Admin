@@ -189,13 +189,18 @@ export default function App() {
     }
     const found = staff.find(s => s.id === activeSimulatedUserId);
     if (found) {
+      let calcRole = found.role || 'Staff';
+      if (found.id === '1') calcRole = 'Manager';
+      if (found.id === '2') calcRole = 'Accountant';
+      if (found.id === '3') calcRole = 'Staff';
+
       return {
         id: found.id,
         name: found.name,
         email: found.email || `${found.name.toLowerCase().replace(/\s+/g, '.')}@johnsbistro.com`,
         systemAccessLevel: found.systemAccessLevel || 'Employee',
         systemPermissions: found.systemPermissions || [],
-        role: found.role || 'Staff',
+        role: calcRole,
         avatar: found.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
       };
     }
@@ -346,7 +351,7 @@ export default function App() {
               { id: 'hr_shift_write', enabled: false },
               { id: 'hr_shift_read', enabled: true },
               { id: 'hr_payroll_write', enabled: true },
-              { id: 'hr_leave_write', enabled: false }
+              { id: 'hr_leave_write', enabled: true }
             ]
           },
           {
@@ -681,7 +686,7 @@ export default function App() {
           {/* Plan Selector Widget for Testing */}
           {!collapsed ? (
             <div className="mx-3 mt-3.5 p-3 bg-indigo-500/5 border border-slate-200 rounded-xl text-center space-y-2 shrink-0 select-none pb-3" id="sidebar-plan-selector">
-              <div className="flex items-center justify-between text-[11px] font-bold text-[#7553FF]/70 uppercase tracking-wider px-0.5">
+              <div className="flex items-center justify-between text-[11px] font-bold text-[#7553FF]/70 tracking-wider px-0.5">
                 <span>Access Plan</span>
                 <span className="text-[9px] bg-[#7553FF]/15 text-[#7553FF] px-1.5 py-0.5 rounded-md font-mono font-bold">{currentPlan}</span>
               </div>
@@ -737,7 +742,7 @@ export default function App() {
           {/* Simulated Role Dropdown Selector */}
           {!collapsed ? (
             <div className="mx-3 mt-2 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 shrink-0 select-none font-sans" id="sidebar-role-simulator">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1C1814]/50 uppercase tracking-wider px-0.5">
+              <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1C1814]/50 tracking-wider px-0.5">
                 <Users className="w-3.5 h-3.5 text-[#7553FF]" strokeWidth={2.5} />
                 <span>Simulate Role</span>
               </div>
@@ -749,10 +754,10 @@ export default function App() {
                 }}
                 className="w-full text-[13px] font-medium bg-white border border-slate-200 rounded-lg p-1.5 text-[#1C1814] focus:outline-none focus:border-[#7553FF] cursor-pointer"
               >
-                <option value="super-admin">👑 Super Admin</option>
-                <option value="1">💼 Nguyen An (Mgr)</option>
-                <option value="2">📊 Tran Binh (Acct)</option>
-                <option value="3">🚶 Le Chi (Staff)</option>
+                <option value="super-admin">👑 Admin (Brand Owner)</option>
+                <option value="1">💼 Store Manager</option>
+                <option value="2">👥 HR / Accountant</option>
+                <option value="3">🚶 Staff</option>
               </select>
             </div>
           ) : (
@@ -767,7 +772,7 @@ export default function App() {
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-xs bg-slate-100 hover:bg-slate-200 text-[#1C1814] cursor-pointer border-none"
                 title="Toggle simulated role"
               >
-                {activeSimulatedUserId === 'super-admin' ? '👑' : activeSimulatedUserId === '1' ? '💼' : activeSimulatedUserId === '2' ? '📊' : '🚶'}
+                {activeSimulatedUserId === 'super-admin' ? '👑' : activeSimulatedUserId === '1' ? '💼' : activeSimulatedUserId === '2' ? '👥' : '🚶'}
               </button>
             </div>
           )}
@@ -806,7 +811,7 @@ export default function App() {
             {getFilteredMenuStructure().map((group) => (
               <div key={group.title} className="space-y-1 pt-1.5">
                 {!collapsed ? (
-                  <span className="px-3 text-[11px] font-bold tracking-wider text-[#1C1814]/40 uppercase font-poppins block">
+                  <span className="px-3 text-[11px] font-bold tracking-wider text-[#1C1814]/40 font-poppins block">
                     {group.title}
                   </span>
                 ) : (
@@ -849,7 +854,7 @@ export default function App() {
                         )}
                         {!collapsed && (isLocked || isComingSoon) && (
                           <span 
-                            className={`ml-auto shrink-0 border text-[9px] font-bold uppercase tracking-wider px-1 py-0.5 rounded-md leading-none select-none transition-all duration-300 ${
+                            className={`ml-auto shrink-0 border text-[9px] font-bold tracking-wider px-1 py-0.5 rounded-md leading-none select-none transition-all duration-300 ${
                               isComingSoon
                                 ? 'bg-slate-50 text-slate-700 border-slate-200'
                                 : requiredPlan === 'Gold'
@@ -857,7 +862,7 @@ export default function App() {
                                   : 'bg-[#7553FF]/10 text-[#7553FF] border-[#7553FF]/20'
                             }`}
                           >
-                            {isComingSoon ? 'SOON' : requiredPlan.toLowerCase()}
+                            {isComingSoon ? 'Soon' : requiredPlan.toLowerCase()}
                           </span>
                         )}
                       </button>
@@ -994,7 +999,7 @@ export default function App() {
                           className="absolute bottom-12 right-[-140px] w-[320px] bg-white border border-slate-200 rounded-[8px] p-4 z-50 space-y-3 font-poppins text-left"
                         >
                           <div className="flex items-center justify-between border-b border-b-slate-200 pb-2">
-                            <h4 className="text-[11px] font-bold text-[#1C1814]/40 uppercase tracking-wider font-poppins">
+                            <h4 className="text-[11px] font-bold text-[#1C1814]/40 tracking-wider font-poppins">
                               Latest Notifications
                             </h4>
                             <span className="w-2 h-2 bg-[#7553FF] rounded-full animate-pulse" />
@@ -1313,7 +1318,7 @@ export default function App() {
                 className="space-y-4 font-sans"
               >
                 <div>
-                  <label className="text-[14px] font-bold text-slate-600 block mb-1.5 uppercase tracking-wide">
+                  <label className="text-[14px] font-bold text-slate-600 block mb-1.5 tracking-wide">
                     Email
                   </label>
                   <input
@@ -1326,7 +1331,7 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="text-[14px] font-bold text-slate-600 block mb-1.5 uppercase tracking-wide">
+                  <label className="text-[14px] font-bold text-slate-600 block mb-1.5 tracking-wide">
                     Password
                   </label>
                   <input

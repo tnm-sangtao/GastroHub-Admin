@@ -543,7 +543,7 @@ export default function MenuTranslator() {
           <button
             onClick={startTranslationSequence}
             disabled={isTranslating}
-            className="w-full h-11 bg-[#7553FF] hover:bg-[#623EE2] disabled:bg-slate-100 disabled:text-slate-700 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+            className="w-full h-11 bg-[#7553FF] hover:bg-[#623EE2] disabled:bg-slate-100 disabled:text-slate-700 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer  tracking-wider"
           >
             {isTranslating ? (
               <>
@@ -768,7 +768,7 @@ export default function MenuTranslator() {
             
             {/* Left Side: Original Panel */}
             <div className="space-y-6 text-left p-[12px] border-none">
-              <div className="text-xs font-bold text-slate-700 uppercase tracking-widest pl-1">
+              <div className="text-xs font-bold text-slate-700  tracking-widest pl-1">
                 Original ({activeJob.source})
               </div>
               
@@ -792,7 +792,7 @@ export default function MenuTranslator() {
 
             {/* Right Side: Translated Panel */}
             <div className="space-y-6 text-left md:pl-8 p-[12px] border-none">
-              <div className="text-xs font-bold text-[#7553FF] uppercase tracking-widest pl-1">
+              <div className="text-xs font-bold text-[#7553FF]  tracking-widest pl-1">
                 Translated ({activeJob.target})
               </div>
 
@@ -855,12 +855,12 @@ export default function MenuTranslator() {
           <table className="w-full border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-slate-50 text-left border-b border-slate-100">
-                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider uppercase">File Name</th>
-                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider uppercase">Source → Target</th>
-                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider uppercase text-center">Pages</th>
-                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider uppercase">Created</th>
-                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider uppercase text-center">Status</th>
-                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider uppercase text-center">Actions</th>
+                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider ">File Name</th>
+                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider ">Source → Target</th>
+                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider  text-center">Pages</th>
+                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider ">Created</th>
+                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider  text-center">Status</th>
+                <th className="py-4 px-5 font-sans font-bold text-slate-700 text-xs tracking-wider  text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50 text-[14px] text-slate-700 font-medium">
@@ -1059,7 +1059,7 @@ export default function MenuTranslator() {
                 <div className="overflow-hidden border border-[#1C1814]/15 rounded-[8px]">
                   <table className="w-full text-left font-sans text-[14px]">
                     <thead>
-                      <tr className="bg-[#FAF9F7] text-[#5C534C] border-b border-[#1C1814]/15 text-xs font-bold uppercase tracking-wider">
+                      <tr className="bg-[#FAF9F7] text-[#5C534C] border-b border-[#1C1814]/15 text-xs font-bold  tracking-wider">
                         <th className="py-3 px-4 text-[#1C1814]">Word</th>
                         <th className="py-3 px-4 text-[#1C1814]">Translation</th>
                         <th className="py-3 px-4 text-[#1C1814]">Explanation Note</th>

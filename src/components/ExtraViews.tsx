@@ -641,7 +641,7 @@ export function CheckinView() {
             <Users className="w-5 h-5 text-[#7553FF]" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-medium text-slate-700 uppercase tracking-wide">Checked In Now</p>
+            <p className="text-sm font-medium text-slate-700  tracking-wide">Checked In Now</p>
             <p className="text-3xl font-extrabold text-[#15803D] font-display mt-0.5">{totalCheckedIn}</p>
             <p className="text-sm text-slate-700 mt-1">Staff currently at work</p>
           </div>
@@ -653,7 +653,7 @@ export function CheckinView() {
             <Calendar className="w-5 h-5 text-[#15803D]" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-medium text-slate-700 uppercase tracking-wide">Expected Today</p>
+            <p className="text-sm font-medium text-slate-700  tracking-wide">Expected Today</p>
             <p className="text-3xl font-extrabold text-slate-800 font-display mt-0.5">{totalExpected}</p>
             <p className="text-sm text-slate-700 mt-1">Across all shifts</p>
           </div>
@@ -665,7 +665,7 @@ export function CheckinView() {
             <Clock className="w-5 h-5 text-amber-600" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-medium text-slate-700 uppercase tracking-wide">Late Check In</p>
+            <p className="text-sm font-medium text-slate-700  tracking-wide">Late Check In</p>
             <p className="text-3xl font-extrabold text-orange-655 font-display mt-0.5">{totalLate}</p>
             <p className="text-sm text-slate-700 mt-1">Staff late today</p>
           </div>
@@ -677,7 +677,7 @@ export function CheckinView() {
             <AlertCircle className="w-5 h-5 text-red-650" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-medium text-slate-700 uppercase tracking-wide">Absent</p>
+            <p className="text-sm font-medium text-slate-700  tracking-wide">Absent</p>
             <p className="text-3xl font-extrabold text-red-650 font-display mt-0.5">{totalAbsent}</p>
             <p className="text-sm text-slate-700 mt-1">No check in</p>
           </div>
@@ -739,7 +739,7 @@ export function CheckinView() {
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
             >
-              <option value="All">All Departments</option>
+              <option value="All">All Job Roles</option>
               <option value="Operation">Operation</option>
               <option value="HR">HR</option>
               <option value="Sales">Sales</option>
@@ -789,9 +789,9 @@ export function CheckinView() {
         <div className="overflow-x-auto -mx-6 md:mx-0 rounded-lg">
           <table className="w-full min-w-[800px] border-collapse bg-white text-left font-sans">
           <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium text-slate-700 uppercase tracking-wider font-display select-none">
+            <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium text-slate-700  tracking-wider font-display select-none">
               <th className="px-5 py-4 text-left">Staff</th>
-              <th className="px-4 py-4 text-left">Department</th>
+              <th className="px-4 py-4 text-left">Job Role</th>
               <th className="px-4 py-4 text-left">Shift</th>
               <th className="px-4 py-4 text-left">Check In</th>
               <th className="px-4 py-4 text-left">Check Out</th>
@@ -820,7 +820,7 @@ export function CheckinView() {
                   <tr key={log.id} className="hover:bg-slate-50/30 transition-all">
                     {/* Staff */}
                     <td className="py-3.5 px-5 flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full border border-white flex items-center justify-center font-normal text-[14px] tracking-wide uppercase ${log.avatarColor || "bg-purple-100 text-[#7553FF]"} shadow-3xs`}>
+                      <div className={`w-8 h-8 rounded-full border border-white flex items-center justify-center font-normal text-[14px] tracking-wide  ${log.avatarColor || "bg-purple-100 text-[#7553FF]"} shadow-3xs`}>
                         {initials}
                       </div>
                       <div className="text-left leading-tight">
@@ -837,7 +837,7 @@ export function CheckinView() {
                     {/* Shift */}
                     <td className="py-3.5 px-4 text-left leading-tight">
                       <span className="font-medium text-slate-750 block text-[14px]">{log.shiftTimes}</span>
-                      <span className={`inline-block text-[14px] font-medium px-1.5 py-0.5 mt-1 rounded uppercase tracking-wider ${
+                      <span className={`inline-block text-[14px] font-medium px-1.5 py-0.5 mt-1 rounded  tracking-wider ${
                         log.shiftName === "Morning" 
                           ? "bg-blue-50 text-blue-600" 
                           : log.shiftName === "Afternoon"
@@ -892,23 +892,23 @@ export function CheckinView() {
                     {/* Status */}
                     <td className="py-3.5 px-4 text-left">
                       {log.status === "On Time" && (
-                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                          ON TIME
+                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                          On time
                         </span>
                       )}
                       {log.status.startsWith("Late") && (
-                        <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                          {log.status.toUpperCase()}
+                        <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                          {log.status}
                         </span>
                       )}
                       {log.status === "Absent" && (
-                        <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                          ABSENT
+                        <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                          Absent
                         </span>
                       )}
                       {log.status === "Completed" && (
-                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                          COMPLETED
+                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                          Completed
                         </span>
                       )}
                     </td>
@@ -1048,7 +1048,7 @@ export function CheckinView() {
                   
                   {/* Section 1: Staff Selection */}
                   <div className="space-y-3">
-                    <h4 className="text-[14px] font-bold text-[#1E1B4B] uppercase tracking-wide border-b border-slate-100 pb-1.5 select-none">Staff Selection</h4>
+                    <h4 className="text-[14px] font-bold text-[#1E1B4B]  tracking-wide border-b border-slate-100 pb-1.5 select-none">Staff Selection</h4>
                     <div className="space-y-1.5">
                       <label className="text-[14px] font-semibold text-slate-700">Staff <span className="text-rose-500">*</span></label>
                       <div className="relative">
@@ -1147,7 +1147,7 @@ export function CheckinView() {
 
                   {/* Section 2: Check In Details */}
                   <div className="space-y-4">
-                    <h4 className="text-[14px] font-bold text-[#1E1B4B] uppercase tracking-wide border-b border-slate-100 pb-1.5 select-none">Check In Details</h4>
+                    <h4 className="text-[14px] font-bold text-[#1E1B4B]  tracking-wide border-b border-slate-100 pb-1.5 select-none">Check In Details</h4>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
@@ -1240,7 +1240,7 @@ export function CheckinView() {
                     
                     <div className="grid grid-cols-2 gap-4 pt-2">
                       <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/20 text-left">
-                        <div className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-2">Expected Working Hours</div>
+                        <div className="text-[14px] font-medium text-slate-700  tracking-wider mb-2">Expected Working Hours</div>
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-slate-700 shrink-0" />
                           <input
@@ -1254,7 +1254,7 @@ export function CheckinView() {
                       </div>
 
                       <div className="border border-slate-100 rounded-xl p-4 bg-slate-50/20 text-left">
-                        <div className="text-[14px] font-medium text-slate-700 uppercase tracking-wider mb-2">Break Duration</div>
+                        <div className="text-[14px] font-medium text-slate-700  tracking-wider mb-2">Break Duration</div>
                         <div className="flex items-center gap-2">
                           <input
                             type="text"
@@ -1519,7 +1519,7 @@ export function CheckinView() {
 
                 {/* GPS Validation Metrics */}
                 <div className="space-y-3 font-sans">
-                  <h5 className="text-[14px] font-bold text-[#7553FF] uppercase tracking-wider">Geofence Compliance Verification</h5>
+                  <h5 className="text-[14px] font-bold text-[#7553FF]  tracking-wider">Geofence Compliance Verification</h5>
                   
                   {activeLog.status !== "Absent" ? (
                     <div className="space-y-3 pt-1">
@@ -1537,15 +1537,15 @@ export function CheckinView() {
 
                       <div className="grid grid-cols-2 gap-4 text-[14px] font-medium text-slate-600">
                         <div className="p-3 bg-[#FAF9F7] rounded-lg border border-slate-150/60">
-                          <span className="text-slate-700 text-[14px] uppercase font-bold tracking-wide">Baseline LAT / LONG</span>
+                          <span className="text-slate-700 text-[14px]  font-bold tracking-wide">Baseline LAT / LONG</span>
                           <p className="font-mono text-slate-850 mt-1">21.0285° N, 105.8542° E</p>
                         </div>
                         <div className="p-3 bg-[#FAF9F7] rounded-lg border border-slate-150/60">
-                          <span className="text-slate-700 text-[14px] uppercase font-bold tracking-wide">Target Measured Distance</span>
+                          <span className="text-slate-700 text-[14px]  font-bold tracking-wide">Target Measured Distance</span>
                           <p className="font-mono text-slate-850 mt-1">3.4 Meters</p>
                         </div>
                         <div className="p-3 bg-[#FAF9F7] rounded-lg border border-slate-150/60 col-span-2">
-                          <span className="text-slate-700 text-[14px] uppercase font-bold tracking-wide">Biometric Key Scan ID</span>
+                          <span className="text-slate-700 text-[14px]  font-bold tracking-wide">Biometric Key Scan ID</span>
                           <p className="font-mono text-slate-850 mt-1">SHA_256_HASH_8F66E7C{activeLog.id}</p>
                         </div>
                       </div>
@@ -1596,7 +1596,7 @@ export function LeaveCalculatorView() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [typeFilter, setTypeFilter] = useState("All Types");
-  const [deptFilter, setDeptFilter] = useState("All Departments");
+  const [deptFilter, setDeptFilter] = useState("All Job Roles");
   const [dateRangeFilter, setDateRangeFilter] = useState("All Date Ranges");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -1888,7 +1888,7 @@ export function LeaveCalculatorView() {
 
     // 4. Department Filter
     let matchesDept = true;
-    if (deptFilter !== "All Departments") {
+    if (deptFilter !== "All Job Roles") {
       matchesDept = item.department.toLowerCase() === deptFilter.toLowerCase();
     }
 
@@ -2032,7 +2032,7 @@ export function LeaveCalculatorView() {
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider">Total Leave Balance</p>
+            <p className="text-[14px] font-medium text-slate-700  tracking-wider">Total Leave Balance</p>
             <p className="text-3xl font-extrabold text-[#15803D] mt-0.5 font-display">{totalLeaveBalance.toFixed(1)}</p>
             <p className="text-[14px] text-slate-700 font-sans mt-0.5">Days available</p>
           </div>
@@ -2044,7 +2044,7 @@ export function LeaveCalculatorView() {
             <Send className="w-5 h-5 -rotate-45 text-[#15803D]" />
           </div>
           <div>
-            <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider">Approved</p>
+            <p className="text-[14px] font-medium text-slate-700  tracking-wider">Approved</p>
             <p className="text-3xl font-extrabold text-slate-800 mt-0.5 font-display">{approvedCount}</p>
             <p className="text-[14px] text-slate-700 font-sans mt-0.5">Requests</p>
           </div>
@@ -2056,7 +2056,7 @@ export function LeaveCalculatorView() {
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider">Pending</p>
+            <p className="text-[14px] font-medium text-slate-700  tracking-wider">Pending</p>
             <p className="text-3xl font-extrabold text-amber-600 mt-0.5 font-display">{pendingCount}</p>
             <p className="text-[14px] text-slate-700 font-sans mt-0.5">Requests</p>
           </div>
@@ -2070,7 +2070,7 @@ export function LeaveCalculatorView() {
             </div>
           </div>
           <div>
-            <p className="text-[14px] font-medium text-slate-700 uppercase tracking-wider">Rejected</p>
+            <p className="text-[14px] font-medium text-slate-700  tracking-wider">Rejected</p>
             <p className="text-3xl font-extrabold text-red-600 mt-0.5 font-display">{rejectedCount}</p>
             <p className="text-[14px] text-slate-700 font-sans mt-0.5">Requests</p>
           </div>
@@ -2224,7 +2224,7 @@ export function LeaveCalculatorView() {
               }}
               className="w-full pl-4 pr-10 py-2.5 bg-slate-50/20 border border-slate-200 rounded-xl outline-none text-[14px] text-slate-800 font-semibold appearance-none cursor-pointer focus:border-[#7553FF]/60 transition-all"
             >
-              <option value="All Departments">All Departments</option>
+              <option value="All Job Roles">All Job Roles</option>
               <option value="Sales">Sales</option>
               <option value="HR">HR</option>
               <option value="Operation">Operation</option>
@@ -2243,7 +2243,7 @@ export function LeaveCalculatorView() {
             setSearchQuery("");
             setStatusFilter("All Status");
             setTypeFilter("All Types");
-            setDeptFilter("All Departments");
+            setDeptFilter("All Job Roles");
             setDateRangeFilter("All Date Ranges");
             setCurrentPage(1);
           }}
@@ -2260,7 +2260,7 @@ export function LeaveCalculatorView() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse min-w-[1000px]">
             <thead>
-              <tr className="border-b border-slate-100 bg-[#FAF9F7]/40 text-[14px] font-medium text-slate-800 uppercase tracking-wider select-none">
+              <tr className="border-b border-slate-100 bg-[#FAF9F7]/40 text-[14px] font-medium text-slate-800  tracking-wider select-none">
                 <th className="px-5 py-5 text-left font-sans text-[14px] font-semibold">Staff</th>
                 {activeSubTab === "leave" ? (
                   <>
@@ -2316,7 +2316,7 @@ export function LeaveCalculatorView() {
                               referrerPolicy="no-referrer"
                             />
                           ) : (
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-[14px] tracking-wide uppercase shrink-0 ${nameColors[record.name] || 'bg-slate-100 text-slate-700'}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-[14px] tracking-wide  shrink-0 ${nameColors[record.name] || 'bg-slate-100 text-slate-700'}`}>
                               {initials}
                             </div>
                           )}
@@ -2333,20 +2333,20 @@ export function LeaveCalculatorView() {
                           {/* Leave Type Badge Column */}
                           <td className="py-4 px-4 text-left">
                             {record.leaveType === "Annual Leave" ? (
-                              <span className="inline-flex items-center bg-purple-50 text-purple-700 border border-purple-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                ANNUAL LEAVE
+                              <span className="inline-flex items-center bg-purple-50 text-purple-700 border border-purple-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                Annual Leave
                               </span>
                             ) : record.leaveType === "Sick Leave" ? (
-                              <span className="inline-flex items-center bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                SICK LEAVE
+                              <span className="inline-flex items-center bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                Sick Leave
                               </span>
                             ) : record.leaveType === "Personal Leave" ? (
-                              <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                PERSONAL LEAVE
+                              <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                Personal Leave
                               </span>
                             ) : (
-                              <span className="inline-flex items-center bg-slate-50 text-slate-700 border border-slate-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                {record.leaveType ? record.leaveType.toUpperCase() : "UNPAID LEAVE"}
+                              <span className="inline-flex items-center bg-slate-50 text-slate-700 border border-slate-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                {record.leaveType || "Unpaid Leave"}
                               </span>
                             )}
                           </td>
@@ -2374,20 +2374,20 @@ export function LeaveCalculatorView() {
                           {/* Flextime Type */}
                           <td className="py-4 px-4 text-left">
                             {record.flextimeType === "Flexible Hours" ? (
-                              <span className="inline-flex items-center bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                FLEXIBLE HOURS
+                              <span className="inline-flex items-center bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                Flexible Hours
                               </span>
                             ) : record.flextimeType === "Compressed Workweek" ? (
-                              <span className="inline-flex items-center bg-violet-50 text-violet-700 border border-violet-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                COMPRESSED WORKWEEK
+                              <span className="inline-flex items-center bg-violet-50 text-violet-700 border border-violet-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                Compressed Workweek
                               </span>
                             ) : record.flextimeType === "Flexible Days" ? (
-                              <span className="inline-flex items-center bg-teal-50 text-teal-700 border border-teal-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                FLEXIBLE DAYS
+                              <span className="inline-flex items-center bg-teal-50 text-teal-700 border border-teal-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                Flexible Days
                               </span>
                             ) : (
-                              <span className="inline-flex items-center bg-slate-50 text-slate-700 border border-slate-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
-                                {record.flextimeType ? record.flextimeType.toUpperCase() : "FLEXTIME"}
+                              <span className="inline-flex items-center bg-slate-50 text-slate-700 border border-slate-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
+                                {record.flextimeType || "Flextime"}
                               </span>
                             )}
                           </td>
@@ -2410,15 +2410,15 @@ export function LeaveCalculatorView() {
                       {/* Status Column styled exactly like the Checkin table */}
                       <td className="py-4 px-4 text-left whitespace-nowrap">
                         {record.status === "Active" || record.status === "Approved" ? (
-                          <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
+                          <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
                             {activeSubTab === "leave" ? "APPROVED" : "ACTIVE"}
                           </span>
                         ) : record.status === "Pending" ? (
-                          <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
+                          <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
                             PENDING
                           </span>
                         ) : (
-                          <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
+                          <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
                             {activeSubTab === "leave" ? "REJECTED" : "ENDED"}
                           </span>
                         )}
@@ -2470,7 +2470,7 @@ export function LeaveCalculatorView() {
                               <>
                                 <div className="fixed inset-0 z-40" onClick={() => setActiveActionMenuId(null)} />
                                 <div className="absolute right-6 top-10 w-44 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1.5 text-left text-[14px] text-slate-700">
-                                  <span className="px-3 py-1.5 text-[11px] font-bold text-slate-700 block uppercase tracking-wider border-b border-b-slate-100 mb-1">
+                                  <span className="px-3 py-1.5 text-[11px] font-bold text-slate-700 block  tracking-wider border-b border-b-slate-100 mb-1">
                                     Change Status
                                   </span>
                                   
@@ -3987,7 +3987,7 @@ export function BookTableView({
           <div className="overflow-x-auto border border-slate-100 rounded-2xl bg-white shadow-3xs">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium text-slate-800 uppercase tracking-widest select-none">
+                <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium text-slate-800  tracking-widest select-none">
                   <th className="px-5 py-4 text-left font-serif text-[14px] font-medium">
                     CUSTOMER
                   </th>
@@ -4049,15 +4049,15 @@ export function BookTableView({
                     {/* STATUS BADGES */}
                     <td className="px-5 py-4">
                       {b.status === "CONFIRMED" ? (
-                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
+                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
                           CONFIRMED
                         </span>
                       ) : b.status === "PENDING" ? (
-                        <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
+                        <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
                           PENDING
                         </span>
                       ) : (
-                        <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none uppercase">
+                        <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
                           CANCELLED
                         </span>
                       )}
@@ -4491,7 +4491,7 @@ export function BookTableView({
                         <div className="space-y-6 font-sans p-1">
                           {/* Header Hierarchy */}
                           <div className="pb-3 border-b border-[#1C1814]/15">
-                            <h4 className="text-[14px] font-medium text-[#1C1814] tracking-tight uppercase">
+                            <h4 className="text-[14px] font-medium text-[#1C1814] tracking-tight ">
                               INTEGRATION GUIDE
                             </h4>
                           </div>
@@ -4689,7 +4689,7 @@ export function BookTableView({
                                     type="text"
                                     value={accentColor}
                                     onChange={(e) => setAccentColor(e.target.value)}
-                                    className="w-full h-10 px-3.5 border border-slate-200 rounded-lg text-sm font-light font-mono bg-white text-[#1C1814] focus:outline-none focus:border-[#7553FF] uppercase shadow-none"
+                                    className="w-full h-10 px-3.5 border border-slate-200 rounded-lg text-sm font-light font-mono bg-white text-[#1C1814] focus:outline-none focus:border-[#7553FF]  shadow-none"
                                   />
                                 </div>
                               </div>
@@ -4698,7 +4698,7 @@ export function BookTableView({
 
                           {/* Right Panel: Interactive Unified Live Preview */}
                           <div className="bg-[#F8FAFC] p-6 lg:p-8 border-t lg:border-t-0 lg:border-l border-slate-200 flex flex-col items-stretch text-left self-stretch shadow-none h-full justify-center min-h-[500px] transition-all duration-300">
-                            <span className="text-[12px] font-semibold text-[#1C1814]/40 tracking-widest uppercase mb-4 block">
+                            <span className="text-[12px] font-semibold text-[#1C1814]/40 tracking-widest  mb-4 block">
                               LIVE PREVIEW
                             </span>
 
@@ -4722,16 +4722,16 @@ export function BookTableView({
                                   },
                                   Modern: {
                                     borderRadius: "0px",
-                                    fontStyles: "font-mono font-extrabold uppercase tracking-wider text-[#1C1814]",
+                                    fontStyles: "font-mono font-extrabold  tracking-wider text-[#1C1814]",
                                     inputBorder: "border-2 border-[#1C1814] rounded-none",
-                                    labelStyle: "text-[10px] font-bold uppercase tracking-widest text-[#1C1814]",
+                                    labelStyle: "text-[10px] font-bold  tracking-widest text-[#1C1814]",
                                     inputBg: "bg-white",
                                   },
                                   Minimal: {
                                     borderRadius: "4px",
                                     fontStyles: "font-sans font-light text-slate-700",
                                     inputBorder: "border-b border-slate-200 rounded-none px-0",
-                                    labelStyle: "text-[11px] font-light text-slate-700 uppercase tracking-wide",
+                                    labelStyle: "text-[11px] font-light text-slate-700  tracking-wide",
                                     inputBg: "bg-transparent",
                                   },
                                 };
@@ -4827,7 +4827,7 @@ export function BookTableView({
 
                                             <div className="space-y-2">
                                               <div className="space-y-0.5">
-                                                <div className="text-[9px] uppercase tracking-wider text-white/50">Party Size</div>
+                                                <div className="text-[9px]  tracking-wider text-white/50">Party Size</div>
                                                 <div 
                                                   className="w-full px-2.5 py-1.5 bg-white/10 border rounded-md text-[12px] font-light flex justify-between items-center text-white"
                                                   style={{ borderColor: accentColor }} // active border is color synced
@@ -4838,13 +4838,13 @@ export function BookTableView({
                                               </div>
                                               <div className="grid grid-cols-2 gap-1.5">
                                                 <div className="space-y-0.5">
-                                                  <div className="text-[9px] uppercase tracking-wider text-white/50">Date</div>
+                                                  <div className="text-[9px]  tracking-wider text-white/50">Date</div>
                                                   <div className="w-full px-2.5 py-1.5 bg-white/10 border border-white/25 rounded-md text-[12px] font-light text-white">
                                                     <span className="truncate block">June 12</span>
                                                   </div>
                                                 </div>
                                                 <div className="space-y-0.5">
-                                                  <div className="text-[9px] uppercase tracking-wider text-white/50">Time</div>
+                                                  <div className="text-[9px]  tracking-wider text-white/50">Time</div>
                                                   <div className="w-full px-2.5 py-1.5 bg-white/10 border border-white/25 rounded-md text-[12px] font-light text-white">
                                                     <span>7:30 PM</span>
                                                   </div>
@@ -5027,7 +5027,7 @@ export function BookTableView({
                           {/* Weekly hours block */}
                           <div className="bg-white border border-[#EAE4DC]/60 rounded-2xl p-5 shadow-3xs space-y-4 font-sans">
                             <div className="flex items-center justify-between font-sans">
-                              <h3 className="text-sm font-medium text-[#1C1814] uppercase tracking-wider">
+                              <h3 className="text-sm font-medium text-[#1C1814]  tracking-wider">
                                 Weekly hours
                               </h3>
                               <button
@@ -5111,7 +5111,7 @@ export function BookTableView({
                           <div className="bg-white border border-[#EAE4DC]/60 rounded-2xl p-5 shadow-3xs space-y-4 font-sans font-sans">
                             <div className="flex items-center justify-between flex-wrap gap-2 font-sans">
                               <div>
-                                <h3 className="text-sm font-medium text-[#1C1814] uppercase tracking-wider font-sans">
+                                <h3 className="text-sm font-medium text-[#1C1814]  tracking-wider font-sans">
                                   Special days ({specialDays.length}/50)
                                 </h3>
                                 <p className="text-sm text-[#7C7267] font-light leading-relaxed mt-0.5 font-sans">
@@ -5154,7 +5154,7 @@ export function BookTableView({
                             <div className="border border-[#EAE4DC]/60 rounded-xl overflow-hidden bg-white font-sans">
                               <table className="w-full border-collapse text-left font-sans">
                                 <thead>
-                                  <tr className="bg-[#FAF9F7]/80 text-sm font-medium text-[#5C534C] uppercase tracking-wider border-b border-[#EAE4DC]/60">
+                                  <tr className="bg-[#FAF9F7]/80 text-sm font-medium text-[#5C534C]  tracking-wider border-b border-[#EAE4DC]/60">
                                     <th className="p-3">Name</th>
                                     <th className="p-3">Date</th>
                                     <th className="p-3">Hours</th>
@@ -5196,7 +5196,7 @@ export function BookTableView({
                           {/* Config Section Card */}
                           <div className="bg-white border border-[#EAE4DC]/60 rounded-2xl p-5 shadow-3xs space-y-4 font-sans">
                             <div className="flex items-center justify-between font-sans">
-                              <h3 className="text-sm font-medium text-[#1C1814] uppercase tracking-wider font-sans">
+                              <h3 className="text-sm font-medium text-[#1C1814]  tracking-wider font-sans">
                                 Floor plan & Table distribution
                               </h3>
                               <button
@@ -5543,7 +5543,7 @@ export function BookTableView({
 
                                                   {isComboSelectorOpen === c.id && (
                                                     <div className="absolute left-0 top-[102%] z-[99] mt-1 w-64 bg-white border border-[#EAE4DC] rounded-xl shadow-lg p-2.5 max-h-[220px] overflow-y-auto">
-                                                      <div className="text-[10px] font-semibold text-slate-700 px-2 py-1 uppercase tracking-wider border-b border-slate-100 select-none mb-1">
+                                                      <div className="text-[10px] font-semibold text-slate-700 px-2 py-1  tracking-wider border-b border-slate-100 select-none mb-1">
                                                         Select combinations
                                                       </div>
                                                       <div className="space-y-0.5">
@@ -6077,7 +6077,7 @@ export function BookTableView({
                         <div className="space-y-6 text-left font-sans">
                           {/* Fields settings check card */}
                           <div className="bg-white border border-[#EAE4DC]/60 rounded-2xl p-5 shadow-3xs space-y-4 font-sans">
-                            <h3 className="text-sm font-medium text-[#1C1814] uppercase tracking-wider">
+                            <h3 className="text-sm font-medium text-[#1C1814]  tracking-wider">
                               Form Field Toggles
                             </h3>
                             <p className="text-sm text-[#7C7267] font-light">
@@ -6209,7 +6209,7 @@ export function BookTableView({
                           <div className="bg-white border border-[#EAE4DC]/60 rounded-2xl p-5 shadow-3xs space-y-4">
                             <div className="flex items-center justify-between font-sans">
                               <div>
-                                <h3 className="text-xs font-black text-[#1C1814] uppercase tracking-wider font-sans">
+                                <h3 className="text-xs font-black text-[#1C1814]  tracking-wider font-sans">
                                   Custom fields
                                 </h3>
                                 <p className="text-xs text-slate-700 font-semibold leading-relaxed mt-0.5">
@@ -6351,7 +6351,7 @@ export function BookTableView({
                           {/* Progress Step Guide */}
                           <div className="bg-white border border-[#EAE4DC]/60 rounded-2xl p-5 shadow-3xs space-y-4">
                             <div className="flex items-center justify-between flex-wrap gap-2 border-b border-slate-100 pb-3 font-sans">
-                              <h4 className="text-xs font-black text-[#1C1814] uppercase tracking-wider">
+                              <h4 className="text-xs font-black text-[#1C1814]  tracking-wider">
                                 Follow steps to activate Reserve with Google
                               </h4>
                               <span className="px-2 py-0.5 bg-amber-50 text-amber-705 text-[10px] font-black rounded-[2px] border border-amber-100">
@@ -6396,7 +6396,7 @@ export function BookTableView({
                                   <span className="text-xs font-bold text-slate-700 block line-through">
                                     Publish your Bistro public booking path
                                   </span>
-                                  <span className="text-[11px] text-emerald-600 font-extrabold uppercase">
+                                  <span className="text-[11px] text-emerald-600 font-extrabold ">
                                     Done & Connected
                                   </span>
                                 </div>
@@ -6406,7 +6406,7 @@ export function BookTableView({
 
                           {/* Technical error block */}
                           <div className="bg-white border border-[#EAE4DC]/60 rounded-2xl p-8 shadow-3xs text-center space-y-5 font-sans">
-                            <h4 className="text-xs font-black text-slate-808 uppercase tracking-widest">
+                            <h4 className="text-xs font-black text-slate-808  tracking-widest">
                               Manage Reserve with Google
                             </h4>
                             <p className="text-xs text-slate-700 font-semibold">
@@ -6441,7 +6441,7 @@ export function BookTableView({
                         <div className="space-y-6 text-left font-sans p-1">
                           {/* Header Hierarchy */}
                           <div className="pb-3 border-b border-[#1C1814]/15">
-                            <h4 className="text-[14px] font-medium text-[#1C1814] tracking-tight uppercase">
+                            <h4 className="text-[14px] font-medium text-[#1C1814] tracking-tight ">
                               NOTIFICATIONS CONFIGURATION
                             </h4>
                           </div>
@@ -6655,7 +6655,7 @@ export function BookTableView({
               {/* Status & particulars grids */}
               <div className="grid grid-cols-2 gap-4 p-4 border border-slate-100 rounded-2xl bg-slate-50/50 text-xs font-sans">
                 <div>
-                  <span className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block mb-1">
+                  <span className="text-[14px] font-bold text-slate-700  tracking-widest block mb-1">
                     GUESTS CAP
                   </span>
                   <span className="font-extrabold text-slate-700">
@@ -6663,7 +6663,7 @@ export function BookTableView({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block mb-1">
+                  <span className="text-[14px] font-bold text-slate-700  tracking-widest block mb-1">
                     SEATING STATUS
                   </span>
                   <span
@@ -6680,7 +6680,7 @@ export function BookTableView({
                 </div>
 
                 <div>
-                  <span className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block mb-1">
+                  <span className="text-[14px] font-bold text-slate-700  tracking-widest block mb-1">
                     RESERVATION DATE
                   </span>
                   <span className="font-poppins text-slate-700 font-semibold">
@@ -6692,7 +6692,7 @@ export function BookTableView({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block mb-1">
+                  <span className="text-[14px] font-bold text-slate-700  tracking-widest block mb-1">
                     VISIT TIME
                   </span>
                   <span className="font-poppins text-slate-700 font-semibold">
@@ -6701,7 +6701,7 @@ export function BookTableView({
                 </div>
 
                 <div>
-                  <span className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block mb-1">
+                  <span className="text-[14px] font-bold text-slate-700  tracking-widest block mb-1">
                     DISH PREFERENCES
                   </span>
                   <span className="text-slate-600">
@@ -6709,7 +6709,7 @@ export function BookTableView({
                   </span>
                 </div>
                 <div>
-                  <span className="text-[14px] font-bold text-slate-700 uppercase tracking-widest block mb-1">
+                  <span className="text-[14px] font-bold text-slate-700  tracking-widest block mb-1">
                     DINER PHONE
                   </span>
                   <span className="font-poppins text-slate-700 font-semibold">
@@ -6720,7 +6720,7 @@ export function BookTableView({
 
               {/* Notes block */}
               <div className="mt-4 space-y-1.5 p-3.5 bg-slate-100/30 rounded-xl text-xs border border-dashed border-slate-200">
-                <span className="font-bold text-slate-550 block text-[14px] uppercase">
+                <span className="font-bold text-slate-550 block text-[14px] ">
                   MEMO INFORMATION
                 </span>
                 <p className="text-slate-600 italic leading-relaxed">
@@ -6730,7 +6730,7 @@ export function BookTableView({
 
               {/* FLOOR PLAN ASSIGNED SEATING VECTOR */}
               <div className="mt-5 space-y-2">
-                <span className="text-[14px] uppercase font-bold text-slate-700 tracking-wider block">
+                <span className="text-[14px]  font-bold text-slate-700 tracking-wider block">
                   FLOOR LAYOUT LOCATION
                 </span>
 
@@ -6773,7 +6773,7 @@ export function BookTableView({
                           }`}
                           title={`Table ${table.num} seating specification`}
                         >
-                          <span className="text-[14px] font-mono uppercase tracking-lighter">
+                          <span className="text-[14px] font-mono  tracking-lighter">
                             {table.type}
                           </span>
                           <span className="text-[14px] font-bold mt-1">
@@ -8107,7 +8107,7 @@ export function AiFoodImagesView() {
 
       {showHowItWorks && (
         <div className="mb-6 bg-slate-50 border border-slate-200 p-5 rounded-xl text-left space-y-2.5 animate-fadeIn">
-          <h3 className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wide flex items-center gap-2">
+          <h3 className="text-[14px] font-bold text-[#1C1814]  tracking-wide flex items-center gap-2">
             <Play className="w-4 h-4 text-[#7553FF] fill-[#7553FF]/15" />
             AI Food Image Generator - How It Works
           </h3>
@@ -9857,7 +9857,7 @@ export function QrMenuView() {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left">
                     <thead>
-                      <tr className="border-b border-[#1C1814]/5 text-[14px] font-bold text-[#1C1814] uppercase tracking-wider select-none">
+                      <tr className="border-b border-[#1C1814]/5 text-[14px] font-bold text-[#1C1814]  tracking-wider select-none">
                         <th className="pb-3 w-12 text-[#1C1814]">Item</th>
                         <th className="pb-3 pl-8 text-[#1C1814]"></th>
                         <th className="pb-3 text-right text-[#1C1814]">Price</th>
@@ -10337,7 +10337,7 @@ export function QrMenuView() {
                           setPrimaryColor(e.target.value);
                           setSelectedTemplateId("");
                         }}
-                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none uppercase"
+                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none "
                       />
                     </div>
                   </div>
@@ -10369,7 +10369,7 @@ export function QrMenuView() {
                           setBackgroundColor(e.target.value);
                           setSelectedTemplateId("");
                         }}
-                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none uppercase"
+                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none "
                       />
                     </div>
                   </div>
@@ -10401,7 +10401,7 @@ export function QrMenuView() {
                           setTextColor(e.target.value);
                           setSelectedTemplateId("");
                         }}
-                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none uppercase"
+                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none "
                       />
                     </div>
                   </div>
@@ -10433,7 +10433,7 @@ export function QrMenuView() {
                           setQrDotColor(e.target.value);
                           setSelectedTemplateId("");
                         }}
-                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none uppercase"
+                        className="text-[13px] font-mono font-medium text-slate-700 w-full focus:outline-none "
                       />
                     </div>
                   </div>
@@ -10588,7 +10588,7 @@ export function QrMenuView() {
                   >
                     {/* Top status bar */}
                     <div
-                      className="p-3 pt-5 flex items-center justify-between text-[10px] uppercase tracking-wider font-extrabold"
+                      className="p-3 pt-5 flex items-center justify-between text-[10px]  tracking-wider font-extrabold"
                       style={{ color: textColor }}
                     >
                       {/* Menu hamburger */}
@@ -10626,7 +10626,7 @@ export function QrMenuView() {
 
                       {/* Accent Welcome */}
                       <span
-                        className="text-[10px] font-extrabold tracking-widest uppercase opacity-85"
+                        className="text-[10px] font-extrabold tracking-widest  opacity-85"
                         style={{ color: textColor }}
                       >
                         Welcome
@@ -10717,7 +10717,7 @@ export function QrMenuView() {
                       <div className="w-full text-left pt-2 space-y-2">
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                          <span className="text-[9px] font-extrabold text-slate-700 uppercase tracking-tight">
+                          <span className="text-[9px] font-extrabold text-slate-700  tracking-tight">
                             Chef's Recommendation
                           </span>
                         </div>
@@ -11023,7 +11023,7 @@ export function QrMenuView() {
                       {useWifiOnQr && (
                         <div className="space-y-2.5 pt-3">
                           <div className="space-y-1">
-                            <span className="text-[10px] text-[#1C1814]/40 font-mono font-bold block uppercase">
+                            <span className="text-[10px] text-[#1C1814]/40 font-mono font-bold block ">
                               WiFi Name (SSID)
                             </span>
                             <input
@@ -11034,7 +11034,7 @@ export function QrMenuView() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <span className="text-[10px] text-[#1C1814]/40 font-mono font-bold block uppercase">
+                            <span className="text-[10px] text-[#1C1814]/40 font-mono font-bold block ">
                               wifi key/pass
                             </span>
                             <input
@@ -11424,7 +11424,7 @@ export function SocialPostView() {
         <div className="bg-white border border-[#EAE4DC]/40 p-6 rounded-2xl flex flex-col justify-between space-y-5 text-left shadow-sm">
           <div className="space-y-5">
             <div className="flex justify-between items-center border-b border-[#EAE4DC]/30 pb-3">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-slate-800  tracking-wider">
                 Post Creator
               </h3>
             </div>
@@ -11535,7 +11535,7 @@ export function SocialPostView() {
                   <span className="text-[14px] font-bold text-slate-700 block animate-none font-sans">
                     Add Photo
                   </span>
-                  <span className="text-[14px] text-slate-700 font-normal uppercase mt-0.5 tracking-tight font-mono">
+                  <span className="text-[14px] text-slate-700 font-normal  mt-0.5 tracking-tight font-mono">
                     Media
                   </span>
                 </button>
@@ -11554,7 +11554,7 @@ export function SocialPostView() {
                   <span className="text-[14px] font-bold text-slate-700 block animate-none font-sans">
                     Add from
                   </span>
-                  <span className="text-[14px] text-slate-700 font-normal uppercase mt-0.5 tracking-tight font-mono">
+                  <span className="text-[14px] text-slate-700 font-normal  mt-0.5 tracking-tight font-mono">
                     Library
                   </span>
                 </button>
@@ -11586,7 +11586,7 @@ export function SocialPostView() {
         <div className="space-y-4">
           <div className="bg-white border border-[#EAE4DC]/40 p-6 rounded-2xl flex flex-col space-y-4 text-left shadow-sm min-h-[460px]">
             <div className="flex justify-between items-center border-b border-[#EAE4DC]/30 pb-3 bg-white">
-              <span className="text-sm font-bold text-slate-800 uppercase tracking-wider font-sans">
+              <span className="text-sm font-bold text-slate-800  tracking-wider font-sans">
                 Generic Preview
               </span>
             </div>
@@ -11675,7 +11675,7 @@ export function SocialPostView() {
 
             <div className="space-y-5 relative z-10 w-full">
               {/* Badge */}
-              <div className="inline-block bg-[#EBE5FF] text-[#7553FF] text-[14px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md select-none">
+              <div className="inline-block bg-[#EBE5FF] text-[#7553FF] text-[14px] font-bold tracking-wider  px-2.5 py-1 rounded-md select-none">
                 Marketing & Brand Growth
               </div>
 
@@ -11903,7 +11903,7 @@ export function SeoOptViewUnified() {
         <div className="space-y-6">
           {/* Quote-style What you'll get note - Super-minimal flat quote block with a left accent border */}
           <div className="bg-[#7553FF]/5 border border-[#7553FF]/15 rounded-2xl p-4.5 flex gap-4 text-left select-none font-sans text-[14px]">
-            <span className="font-semibold text-[#7553FF/50] uppercase tracking-wider shrink-0 text-[14px] mr-1.5">
+            <span className="font-semibold text-[#7553FF/50]  tracking-wider shrink-0 text-[14px] mr-1.5">
               WHAT YOU'LL GET:
             </span>
 
@@ -12098,7 +12098,7 @@ export function SeoOptViewUnified() {
                     </div>
 
                     <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2 text-amber-600 font-bold text-[14px] uppercase tracking-wider">
+                      <div className="flex items-center gap-2 text-amber-600 font-bold text-[14px]  tracking-wider">
                         <span className="w-2.5 h-2.5 rounded-full bg-amber-500 block"></span>
                         <span>Needs Improvement</span>
                       </div>
@@ -12161,7 +12161,7 @@ export function SeoOptViewUnified() {
                     </div>
 
                     {/* Tag label segments mapping exact terminology */}
-                    <div className="grid grid-cols-10 text-[14px] font-bold uppercase tracking-wider select-none text-center font-sans">
+                    <div className="grid grid-cols-10 text-[14px] font-bold  tracking-wider select-none text-center font-sans">
                       <span className="col-span-5 text-left text-rose-600">
                         Critical
                       </span>
@@ -12274,7 +12274,7 @@ export function SeoOptViewUnified() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Top Strengths */}
                     <div className="bg-white border border-[#1C1814]/15 p-5 rounded-2xl text-left space-y-3.5">
-                      <h4 className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider pb-2 border-b border-[#1C1814]/15 font-sans">
+                      <h4 className="text-[14px] font-bold text-[#1C1814]  tracking-wider pb-2 border-b border-[#1C1814]/15 font-sans">
                         Top Strengths
                       </h4>
                       <ul className="space-y-3 font-sans">
@@ -12297,7 +12297,7 @@ export function SeoOptViewUnified() {
 
                     {/* Top Issues to Improve */}
                     <div className="bg-white border border-[#1C1814]/15 p-5 rounded-2xl text-left space-y-3.5">
-                      <h4 className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider pb-2 border-b border-[#1C1814]/15 font-sans">
+                      <h4 className="text-[14px] font-bold text-[#1C1814]  tracking-wider pb-2 border-b border-[#1C1814]/15 font-sans">
                         Top Issues to Improve
                       </h4>
                       <ul className="space-y-3 font-sans">
@@ -12321,7 +12321,7 @@ export function SeoOptViewUnified() {
 
                   {/* Detailed Breakdown Card with clear border lines matching user request */}
                   <div className="bg-white border border-[#1C1814]/15 rounded-2xl p-5 space-y-3 text-left">
-                    <h4 className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider pb-1 font-sans">
+                    <h4 className="text-[14px] font-bold text-[#1C1814]  tracking-wider pb-1 font-sans">
                       Detailed Parameter Breakdown
                     </h4>
                     <div className="divide-y divide-[#1C1814]/15">
@@ -12412,7 +12412,7 @@ export function SeoOptViewUnified() {
                 <div className="lg:col-span-4 space-y-6">
                   {/* Business Information metadata panel */}
                   <div className="bg-white border border-[#1C1814]/15 rounded-2xl p-5 text-left space-y-4">
-                    <h4 className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider pb-2 border-b border-[#1C1814]/15">
+                    <h4 className="text-[14px] font-bold text-[#1C1814]  tracking-wider pb-2 border-b border-[#1C1814]/15">
                       Business Information
                     </h4>
                     <div className="space-y-3 font-sans text-[14px]">
@@ -12483,7 +12483,7 @@ export function SeoOptViewUnified() {
 
                   {/* Recommendations */}
                   <div className="bg-white border border-[#1C1814]/15 rounded-2xl p-5 text-left space-y-4">
-                    <h4 className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider pb-2 border-b border-[#1C1814]/15">
+                    <h4 className="text-[14px] font-bold text-[#1C1814]  tracking-wider pb-2 border-b border-[#1C1814]/15">
                       Recommendations
                     </h4>
                     <div className="space-y-4">
@@ -12565,7 +12565,7 @@ export function SeoOptViewUnified() {
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-[14px] font-bold text-[#1C1814] uppercase tracking-wider font-sans">
+            <h3 className="text-[14px] font-bold text-[#1C1814]  tracking-wider font-sans">
               Running Intelligent Audit
             </h3>
             <p className="text-[14px] text-[#5C534C] font-sans">
@@ -13071,7 +13071,7 @@ export function SeoOptViewLegacyUnused() {
             <div className="space-y-6 pt-4">
               {/* Heading Overall SEO */}
               <div className="text-left">
-                <h3 className="text-sm font-black text-[#1C1814] uppercase tracking-wider">
+                <h3 className="text-sm font-black text-[#1C1814]  tracking-wider">
                   Overall SEO Score
                 </h3>
               </div>
@@ -13106,7 +13106,7 @@ export function SeoOptViewLegacyUnused() {
                       <span className="text-[26px] font-black text-slate-800 leading-none">
                         78
                       </span>
-                      <span className="text-[9px] text-slate-700 font-extrabold uppercase mt-0.5 font-mono">
+                      <span className="text-[9px] text-slate-700 font-extrabold  mt-0.5 font-mono">
                         /100
                       </span>
                     </div>
@@ -13138,7 +13138,7 @@ export function SeoOptViewLegacyUnused() {
                       <Store className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight block">
+                      <span className="text-[10px] font-black text-slate-700  tracking-tight block">
                         Google Business Profile
                       </span>
                       <span className="text-base font-extrabold text-emerald-600 block mt-0.5">
@@ -13155,7 +13155,7 @@ export function SeoOptViewLegacyUnused() {
                       <Search className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight block">
+                      <span className="text-[10px] font-black text-slate-700  tracking-tight block">
                         Search Visibility
                       </span>
                       <span className="text-base font-extrabold text-amber-550 block mt-0.5">
@@ -13172,7 +13172,7 @@ export function SeoOptViewLegacyUnused() {
                       <Star className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight block">
+                      <span className="text-[10px] font-black text-slate-700  tracking-tight block">
                         Reviews Overview
                       </span>
                       <span className="text-base font-extrabold text-emerald-600 block mt-0.5">
@@ -13189,7 +13189,7 @@ export function SeoOptViewLegacyUnused() {
                       <Monitor className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight block">
+                      <span className="text-[10px] font-black text-slate-700  tracking-tight block">
                         On-Page SEO
                       </span>
                       <span className="text-base font-extrabold text-amber-550 block mt-0.5">
@@ -13206,7 +13206,7 @@ export function SeoOptViewLegacyUnused() {
                       <TrendingUp className="w-4 h-4" />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight block">
+                      <span className="text-[10px] font-black text-slate-700  tracking-tight block">
                         Actionable Insights
                       </span>
                       <span className="text-base font-extrabold text-slate-700 block mt-0.5">
@@ -13227,7 +13227,7 @@ export function SeoOptViewLegacyUnused() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Top Strengths */}
                     <div className="bg-white border border-slate-100/40 p-5 rounded-2xl shadow-3xs text-left space-y-3.5">
-                      <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                      <h4 className="text-xs font-black text-slate-800  tracking-wider">
                         Top Strengths
                       </h4>
                       <ul className="space-y-3">
@@ -13251,7 +13251,7 @@ export function SeoOptViewLegacyUnused() {
 
                     {/* Top Issues to Improve */}
                     <div className="bg-white border border-slate-100/40 p-5 rounded-2xl shadow-3xs text-left space-y-3.5">
-                      <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                      <h4 className="text-xs font-black text-slate-800  tracking-wider">
                         Top Issues to Improve
                       </h4>
                       <ul className="space-y-3">
@@ -13276,7 +13276,7 @@ export function SeoOptViewLegacyUnused() {
 
                   {/* Detailed Breakdown Card */}
                   <div className="bg-white border border-slate-100/40 rounded-2xl p-5 shadow-3xs space-y-3 text-left">
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider pb-1">
+                    <h4 className="text-xs font-black text-slate-800  tracking-wider pb-1">
                       Detailed Breakdown
                     </h4>
                     <div className="divide-y divide-slate-100/40">
@@ -13384,7 +13384,7 @@ export function SeoOptViewLegacyUnused() {
                 <div className="lg:col-span-4 space-y-6">
                   {/* Business Information */}
                   <div className="bg-white border border-slate-100/40 rounded-2xl p-5 shadow-3xs text-left space-y-4">
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                    <h4 className="text-xs font-black text-slate-800  tracking-wider">
                       Business Information
                     </h4>
                     <div className="space-y-3 font-sans text-xs">
@@ -13460,7 +13460,7 @@ export function SeoOptViewLegacyUnused() {
 
                   {/* Recommendations */}
                   <div className="bg-white border border-slate-100/40 rounded-2xl p-5 shadow-3xs text-left space-y-4">
-                    <h4 className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                    <h4 className="text-xs font-black text-slate-800  tracking-wider">
                       Recommendations
                     </h4>
                     <div className="space-y-4">
@@ -13572,7 +13572,7 @@ export function SeoOptViewLegacyUnused() {
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider font-mono">
+            <h3 className="text-sm font-extrabold text-slate-800  tracking-wider font-mono">
               Running Intelligent Audit
             </h3>
             <p className="text-xs text-slate-700 font-medium">
@@ -13809,7 +13809,7 @@ export function ReviewsView() {
 
       {showHowItWorks && (
         <div className="bg-[#FAF9F7] border border-[#EAE4DC]/70 p-4.5 rounded-2xl text-left space-y-2 animate-fadeIn">
-          <h3 className="text-[14px] font-black text-[#1C1814] uppercase tracking-wide">
+          <h3 className="text-[14px] font-black text-[#1C1814]  tracking-wide">
             Review Booster Workflow
           </h3>
           <p className="text-[14px] text-[#5C534C] font-medium leading-relaxed">
@@ -13837,7 +13837,7 @@ export function ReviewsView() {
           <div>
             <div className="flex items-center gap-2 text-[#7553FF]">
               <QrCode className="w-4 h-4 text-[#7553FF]" />
-              <span className="font-sans font-black text-[14px] uppercase tracking-wide">
+              <span className="font-sans font-black text-[14px]  tracking-wide">
                 Google Review Link
               </span>
             </div>
@@ -14166,7 +14166,7 @@ export function ReviewsView() {
           <div className="overflow-x-auto -mx-6 md:mx-0">
             <table className="w-full min-w-[800px] border-collapse bg-white font-sans text-[14px]">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700 uppercase tracking-wider font-display select-none">
+                <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700  tracking-wider font-display select-none">
                   <th className="px-4 py-4 text-left">Customer</th>
                   <th className="px-4 py-4 text-left">Rating</th>
                   <th className="px-4 py-4 text-left w-[350px]">Review</th>
@@ -14269,7 +14269,7 @@ export function ReviewsView() {
                           {/* 6. Current Status Badge */}
                           <td className="px-4 py-3.5 whitespace-nowrap">
                             <span
-                              className={`inline-flex items-center px-2 py-0.5 rounded-[2px] text-[14px] font-normal border select-none uppercase ${
+                              className={`inline-flex items-center px-2 py-0.5 rounded-[2px] text-[14px] font-normal border select-none  ${
                                 row.status === "Responded"
                                   ? "bg-emerald-50 text-emerald-700 border-emerald-100"
                                   : "bg-rose-50 text-rose-700 border-rose-100"
@@ -14343,7 +14343,7 @@ export function ReviewsView() {
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center gap-1.5">
                                     <Sparkles className="w-4 h-4 text-[#7553FF]" />
-                                    <span className="text-[14px] font-bold text-[#7553FF] uppercase tracking-widest">
+                                    <span className="text-[14px] font-bold text-[#7553FF]  tracking-widest">
                                       AI-Generated Replying Engine Draft
                                     </span>
                                   </div>
@@ -14786,7 +14786,7 @@ export function AdminApprovalView() {
                 <span className="text-xs font-bold text-slate-800">
                   {r.name}
                 </span>
-                <span className="text-[14px] bg-[#7553FF]/10 text-[#7553FF] px-2 py-0.5 rounded-[2px] font-mono font-bold uppercase">
+                <span className="text-[14px] bg-[#7553FF]/10 text-[#7553FF] px-2 py-0.5 rounded-[2px] font-mono font-bold ">
                   {r.category}
                 </span>
               </div>
@@ -14822,7 +14822,7 @@ export function AdminApprovalView() {
                       : "bg-red-100 text-red-700"
                   }`}
                 >
-                  {r.status.toUpperCase()}
+                  {r.status}
                 </span>
               )}
             </div>
@@ -14878,7 +14878,7 @@ export function CateringInquiriesView() {
 
         {/* Typography Content */}
         <div className="space-y-4">
-          <span className="inline-block text-[12px] font-extrabold uppercase tracking-widest text-[#7553FF] bg-[#7553FF]/10 px-3 py-1 rounded-full">
+          <span className="inline-block text-[12px] font-extrabold  tracking-widest text-[#7553FF] bg-[#7553FF]/10 px-3 py-1 rounded-full">
             Coming Soon • Feature Development
           </span>
           <h1 className="text-[28px] font-semibold tracking-tight text-[#1C1814] leading-tight">

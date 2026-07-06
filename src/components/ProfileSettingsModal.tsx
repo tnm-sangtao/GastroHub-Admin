@@ -211,7 +211,7 @@ export default function ProfileSettingsModal({ isOpen, onClose, activeUser, onSa
                     </span>
                   </div>
                   <div className="text-center">
-                    <span className="inline-block px-2.5 py-0.5 bg-[#7553FF]/10 text-[#7553FF] rounded-full text-[11px] font-bold uppercase tracking-wider font-sans">
+                    <span className="inline-block px-2.5 py-0.5 bg-[#7553FF]/10 text-[#7553FF] rounded-full text-[11px] font-bold  tracking-wider font-sans">
                       {activeUser.role || 'Member'}
                     </span>
                     <p className="text-[13px] text-slate-700 mt-1 font-sans font-medium">{activeUser.name}</p>

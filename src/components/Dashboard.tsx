@@ -952,7 +952,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                     <circle cx="20" cy="20" r="15.9155" fill="none" stroke="#94A3B8" strokeWidth="6.8" strokeDasharray="12.1 100" strokeDashoffset="-87.9" />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2">
-                    <span className="text-[11px] text-[#7C7267] font-semibold uppercase tracking-wider leading-tight block">
+                    <span className="text-[11px] text-[#7C7267] font-semibold  tracking-wider leading-tight block">
                       Total
                       <br />
                       Uses
@@ -1089,7 +1089,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
 
             <div className="space-y-4 relative z-10">
               {/* Badge */}
-              <div className="inline-block bg-[#EBE5FF] text-[#7553FF] text-[14px] font-extrabold tracking-wider uppercase px-2.5 py-1 rounded-md select-none">
+              <div className="inline-block bg-[#EBE5FF] text-[#7553FF] text-[14px] font-extrabold tracking-wider  px-2.5 py-1 rounded-md select-none">
                 Marketing & Brand Growth
               </div>
 
@@ -1222,7 +1222,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
 
             <div className="min-w-full divide-y divide-[#EAE4DC]/10 mt-4 flex-1">
               {/* Table Header */}
-              <div className="flex items-center text-[14px] font-bold text-[#7C7267] uppercase tracking-wider pb-2">
+              <div className="flex items-center text-[14px] font-bold text-[#7C7267]  tracking-wider pb-2">
                 <div className="w-1/2">Tool</div>
                 <div className="w-1/6 text-right pr-4">Uses</div>
                 <div className="w-1/3 text-right">Impact Score</div>
@@ -1362,7 +1362,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
 
               <div className="space-y-4 font-sans text-sm">
                 <div className="p-4 rounded-2xl bg-[#7553FF]/10/40 border border-[#7553FF]/20 space-y-2">
-                  <span className="text-[14px] font-black text-[#7553FF] uppercase tracking-widest block">Core Premium Features Included</span>
+                  <span className="text-[14px] font-black text-[#7553FF]  tracking-widest block">Core Premium Features Included</span>
                   <ul className="space-y-1.5 text-sm text-gray-600 font-medium">
                     <li className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -1386,7 +1386,7 @@ export default function Dashboard({ onNavigate, isLoggedIn = false, onLogin }: D
                 <div className="flex items-center justify-between text-sm pt-2">
                   <div>
                     <span className="text-lg font-extrabold text-[#7553FF] block">$49<span className="text-sm text-gray-400 font-medium font-sans">/mo</span></span>
-                    <span className="text-[14px] text-gray-400 font-bold uppercase tracking-wider block">Billed monthly</span>
+                    <span className="text-[14px] text-gray-400 font-bold  tracking-wider block">Billed monthly</span>
                   </div>
                   <div className="flex gap-2">
                     <button

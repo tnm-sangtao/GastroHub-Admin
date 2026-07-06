@@ -45,7 +45,8 @@ import {
   Inbox,
   ArrowLeftRight,
   Upload,
-  SlidersHorizontal
+  SlidersHorizontal,
+  RotateCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Payroll from './Payroll';
@@ -482,6 +483,30 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   const [assignSuccess, setAssignSuccess] = useState(false);
   const [savePlanSuccess, setSavePlanSuccess] = useState(false);
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0); // For dynamic date swapping demo
+  const [isWeekDropdownOpen, setIsWeekDropdownOpen] = useState(false);
+
+  const getDayNumbersForWeek = (weekIdx: number) => {
+    // Base date is May 25, 2025 (Sunday)
+    const baseDate = new Date(2025, 4, 25);
+    baseDate.setDate(baseDate.getDate() + weekIdx * 7);
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(baseDate);
+      d.setDate(baseDate.getDate() + i);
+      days.push(d.getDate());
+    }
+    return days;
+  };
+
+  const getWeekLabel = (weekIdx: number) => {
+    const baseDate = new Date(2025, 4, 25);
+    baseDate.setDate(baseDate.getDate() + weekIdx * 7);
+    const endDate = new Date(baseDate);
+    endDate.setDate(baseDate.getDate() + 6);
+    
+    const formatMonth = (date: Date) => date.toLocaleString('en-US', { month: 'short' });
+    return `${formatMonth(baseDate)} ${baseDate.getDate()} – ${formatMonth(endDate)} ${endDate.getDate()}, ${baseDate.getFullYear()}`;
+  };
 
   const isPastDay = (day: string) => {
     if (currentWeekIndex < 0) return true;
@@ -871,6 +896,8 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   // Staff list filters and user creation state
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddingUser, setIsAddingUser] = useState(false);
+  const [addStaffActiveTab, setAddStaffActiveTab] = useState<'personal' | 'login' | 'employment' | 'tax'>('personal');
+  const [editStaffActiveTab, setEditStaffActiveTab] = useState<'personal' | 'login' | 'employment' | 'tax'>('personal');
   const [isSmartImportOpen, setIsSmartImportOpen] = useState(false);
   const [selectedUserForView, setSelectedUserForView] = useState<StaffMember | null>(null);
   const [staffInnerTab, setStaffInnerTab] = useState<'staff' | 'roles'>('staff');
@@ -888,6 +915,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
+    password: '',
     role: 'Admin',
     status: 'Full-time' as 'Full-time' | 'Part-time' | 'Minijob',
     phone: '',
@@ -1697,7 +1725,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   <div>
                     <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
                       <h3 className="text-sm font-bold text-slate-800 font-display">Pending Requests</h3>
-                      <span className="text-[14px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-0.5 rounded-[2px] uppercase tracking-widest text-[14px]">
+                      <span className="text-[14px] font-bold text-amber-700 bg-amber-50 border border-amber-100 px-2.5 py-0.5 rounded-[2px]  tracking-widest text-[14px]">
                         {pendingRequests.length} PENDING
                       </span>
                     </div>
@@ -1796,7 +1824,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                 <div className="bg-white border border-slate-100 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between">
                   <div>
                     <h3 className="text-sm font-bold text-slate-800 font-display border-b border-slate-100 pb-2 mb-3 text-left">
-                      Department Breakdown
+                      Job Role Breakdown
                     </h3>
                     <div className="flex items-center gap-3">
                       {/* Gauge Ring */}
@@ -1934,22 +1962,129 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   </div>
 
                   {/* Pager */}
-                  <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2 py-1.5 rounded-lg">
+                  <div className="flex items-center gap-1.5 bg-white border border-slate-200 px-2 py-1.5 rounded-lg relative">
                     <button 
-                      onClick={() => setCurrentWeekIndex(prev => prev - 1)}
-                      className="p-1 hover:bg-slate-50 rounded-md text-slate-700 cursor-pointer"
+                      onClick={() => {
+                        setCurrentWeekIndex(prev => prev - 1);
+                        setIsWeekDropdownOpen(false);
+                      }}
+                      className="p-1 hover:bg-slate-50 rounded-md text-slate-700 cursor-pointer border-none bg-transparent"
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <span className="text-xs font-bold text-slate-600 px-1 min-w-[124px] text-center font-mono">
-                      {currentWeekIndex === 0 ? 'May 25 – May 31, 2025' : currentWeekIndex === -1 ? 'May 18 – May 24, 2025' : 'June 1 – June 7, 2025'}
+                    <span 
+                      onClick={() => setIsWeekDropdownOpen(!isWeekDropdownOpen)}
+                      className="text-[14px] font-bold text-slate-700 px-2 min-w-[150px] text-center font-sans cursor-pointer hover:text-[#7553FF] hover:bg-slate-50 py-1 rounded-md transition-all flex items-center justify-center gap-1 select-none"
+                    >
+                      <span>{getWeekLabel(currentWeekIndex)}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${isWeekDropdownOpen ? 'rotate-180' : ''}`} />
                     </span>
                     <button 
-                      onClick={() => setCurrentWeekIndex(prev => prev + 1)}
-                      className="p-1 hover:bg-slate-50 rounded-md text-slate-700 cursor-pointer"
+                      onClick={() => {
+                        setCurrentWeekIndex(prev => prev + 1);
+                        setIsWeekDropdownOpen(false);
+                      }}
+                      className="p-1 hover:bg-slate-50 rounded-md text-slate-700 cursor-pointer border-none bg-transparent"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
+
+                    {/* Dropdown weekly range calendar */}
+                    {isWeekDropdownOpen && (
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[340px] bg-white border border-[#EAE4DC] rounded-xl shadow-dropdown z-50 p-4 font-sans select-none">
+                        {/* Month navigation header inside calendar */}
+                        <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              setCurrentWeekIndex(prev => prev - 4);
+                            }}
+                            className="p-1.5 hover:bg-slate-50 rounded-md text-slate-700 transition-colors cursor-pointer border-none bg-transparent"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <span className="text-sm font-bold text-slate-800">
+                            May – June 2025
+                          </span>
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              setCurrentWeekIndex(prev => prev + 4);
+                            }}
+                            className="p-1.5 hover:bg-slate-50 rounded-md text-slate-700 transition-colors cursor-pointer border-none bg-transparent"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* Calendar week grid */}
+                        <div className="space-y-1">
+                          {/* Weekdays header */}
+                          <div className="grid grid-cols-7 text-center text-[12px] font-bold text-slate-600 tracking-wide pb-1 font-sans">
+                            <span>Sun</span>
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                          </div>
+
+                          {/* Render 5 weeks around the current week */}
+                          {[-2, -1, 0, 1, 2].map((weekIdx) => {
+                            const isSelected = currentWeekIndex === weekIdx;
+                            const weekDays = getDayNumbersForWeek(weekIdx);
+                            const weekLabel = getWeekLabel(weekIdx);
+                            
+                            return (
+                              <div 
+                                key={weekIdx}
+                                onClick={() => {
+                                  setCurrentWeekIndex(weekIdx);
+                                  setIsWeekDropdownOpen(false);
+                                }}
+                                className={`grid grid-cols-7 text-center py-2 px-1 rounded-lg cursor-pointer transition-all duration-150 relative group ${
+                                  isSelected 
+                                    ? 'bg-[#7553FF]/10 border border-[#7553FF]/30 text-[#7553FF]' 
+                                    : 'hover:bg-[#F0ECFF] hover:text-[#7553FF] text-slate-700'
+                                }`}
+                                title={weekLabel}
+                              >
+                                {weekDays.map((dayNum, dIdx) => (
+                                  <span 
+                                    key={dIdx} 
+                                    className={`text-[13px] font-medium block ${
+                                      isSelected ? 'font-bold' : 'group-hover:font-medium'
+                                    }`}
+                                  >
+                                    {dayNum}
+                                  </span>
+                                ))}
+                                
+                                {/* Subtle tooltip on hover for range info */}
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[12px] font-medium px-2 py-1 rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap mb-1.5 z-50">
+                                  {weekLabel}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[13px]">
+                          <span className="text-slate-600 font-medium">Click a week row to select</span>
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              setCurrentWeekIndex(0);
+                              setIsWeekDropdownOpen(false);
+                            }}
+                            className="text-[#7553FF] hover:text-[#623EE2] font-bold border-none bg-transparent cursor-pointer"
+                          >
+                            Jump to Today
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Today Button */}
@@ -1970,7 +2105,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                 <div className="flex flex-wrap items-center gap-2.5">
                   <div className="flex items-center gap-1.5 text-slate-700">
                     <Filter className="w-3.5 h-3.5 text-[#7553FF]" />
-                    <span className="text-xs font-extrabold uppercase tracking-wider">Quick Filter:</span>
+                    <span className="text-xs font-extrabold  tracking-wider">Quick Filter:</span>
                   </div>
 
                   {/* Department Filter Selector */}
@@ -1980,11 +2115,11 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       onChange={(e) => setScheduleDepartmentFilter(e.target.value)}
                       className="appearance-none pl-3 pr-8 py-1.5 bg-white border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-[#7553FF]/10 focus:border-[#7553FF] transition-all cursor-pointer min-w-[140px]"
                     >
-                      <option value="All">All Departments</option>
-                      <option value="Service">Service Department</option>
-                      <option value="Kitchen">Kitchen Department</option>
-                      <option value="Bar">Bar Department</option>
-                      <option value="Management">Management Department</option>
+                      <option value="All">All Job Roles</option>
+                      <option value="Service">Service Job Role</option>
+                      <option value="Kitchen">Kitchen Job Role</option>
+                      <option value="Bar">Bar Job Role</option>
+                      <option value="Management">Management Job Role</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-700">
                       <ChevronDown className="w-3.5 h-3.5" />
@@ -2044,8 +2179,8 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     {/* Weekday Row Header column */}
                     <thead>
                       <tr className="border-b border-slate-200 bg-slate-50/50">
-                        <th className="px-5 py-5 text-left text-[14px] font-bold text-slate-700 tracking-wider font-display uppercase w-1/5 border border-slate-200">
-                          Shift / Department
+                        <th className="px-5 py-5 text-left text-[14px] font-bold text-slate-700 tracking-wider font-display  w-1/5 border border-slate-200">
+                          Shift / Job Role
                         </th>
                         {weekdays.map((day, ix) => {
                           const isActive = day === activeDay;
@@ -2067,13 +2202,8 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                     ? 'bg-[#7553FF] !text-white shadow-sm scale-110 font-bold active-day-circle' 
                                     : 'text-[#1C1814] hover:bg-[#1C1814]/5 inactive-day-circle'
                                 }`}>
-                                  {dayNumbers[ix]}
+                                  {getDayNumbersForWeek(currentWeekIndex)[ix]}
                                 </div>
-                                {isClosedDay && (
-                                  <span className="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100" id={`header-closed-${day}`}>
-                                    Closed
-                                  </span>
-                                )}
                               </div>
                             </th>
                           );
@@ -2086,11 +2216,11 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       {/* 1. MORNING SHIFT SECTION */}
                       {(scheduleShiftFilter === 'All' || scheduleShiftFilter === 'Morning') && (
                         <>
-                          <tr className="bg-amber-50/35 border-b border-[#EAE4DC]">
-                            <td className="px-5 py-4 text-xs font-bold text-amber-800 border border-[#EAE4DC] bg-amber-50/20 text-left">
+                          <tr className="bg-amber-100/70 border-b-2 border-amber-200">
+                            <td className="px-5 py-4 text-xs font-bold text-amber-900 border border-amber-200 bg-amber-100/80 text-left">
                               <div className="flex items-center gap-2 p-0.5">
-                                <Sun className="w-4 h-4 text-amber-500 fill-amber-100" />
-                                <span className="font-display text-sm font-semibold text-amber-900">Morning Shift</span>
+                                <Sun className="w-4.5 h-4.5 text-amber-600 fill-amber-100" />
+                                <span className="font-display text-sm font-bold text-amber-950 uppercase tracking-wide">Morning Shift</span>
                               </div>
                             </td>
                             {weekdays.map((day) => {
@@ -2106,12 +2236,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                               const isClosed = isShiftClosed(day, 'morning');
 
                               return (
-                                <td key={day} className={`px-2 py-3 text-center border border-[#EAE4DC] select-none ${isClosed ? 'bg-slate-100/50' : 'bg-amber-50/10'}`}>
-                                  {isClosed ? null : (
+                                <td key={day} className={`px-2 py-3 text-center border border-amber-200 select-none transition-colors ${isClosed ? 'bg-slate-300/80 text-slate-500 font-bold' : 'bg-amber-100/40'}`}>
+                                  {isClosed ? (
+                                    <span className="text-[10px] font-bold text-slate-600/90 tracking-widest block uppercase font-mono py-1">Closed</span>
+                                  ) : (
                                     <div className="flex flex-col items-center justify-center gap-0.5">
-                                      <span className="text-[11px] text-amber-900/80 font-sans font-medium">{assignedCount} / {minRequired} staff</span>
                                       {gap > 0 && (
-                                        <span className="inline-flex items-center text-rose-600 font-medium text-[11px] bg-rose-50 border border-rose-100 px-1.5 py-px rounded-[2px]" id={`gap-badge-morning-${day}`}>
+                                        <span className="inline-flex items-center text-rose-700 font-bold text-[11px] bg-rose-100/80 border border-rose-200 px-1.5 py-px rounded-[2px]" id={`gap-badge-morning-${day}`}>
                                           Gap: {gap}
                                         </span>
                                       )}
@@ -2166,10 +2297,10 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                       }}
                                       className={`px-2 py-4.5 text-center cursor-pointer transition-all border border-[#EAE4DC] relative ${
                                         isClosed 
-                                          ? 'bg-slate-100/50 cursor-not-allowed select-none' 
+                                          ? 'bg-slate-200/50 cursor-not-allowed select-none' 
                                           : isLocked
                                             ? 'bg-amber-50/40 hover:bg-amber-50/50 cursor-not-allowed'
-                                            : 'hover:bg-amber-500/10 hover:border-amber-500/30 bg-[#FDFBF7]'
+                                            : 'hover:bg-amber-500/10 hover:border-amber-500/30 bg-white'
                                       }`}
                                     >
                                       {isClosed ? null : isLocked ? (
@@ -2185,17 +2316,17 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                           {team.map((name, i) => {
                                             const hasLeave = getApprovedLeaveForStaff(name, day, 'morning');
                                             const weeklyHours = staffWeeklyHours[name] || 0;
-                                            const isOT = weeklyHours > 40;
+                                            const isOT = false;
 
                                             return (
                                               <div 
                                                 key={i} 
-                                                className={`text-[12px] font-semibold py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
+                                                className={`text-[12px] font-medium py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
                                                   hasLeave 
                                                     ? 'text-sky-750' 
                                                     : isOT 
                                                       ? 'text-[#7553FF]' 
-                                                      : 'text-amber-950'
+                                                      : 'text-black'
                                                 } hover:text-[#7553FF]`}
                                                 title={`${name} (${weeklyHours}h this week${isOT ? ' - Overtime' : ''}${hasLeave ? ' - Approved Leave' : ''})`}
                                               >
@@ -2244,11 +2375,11 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       {/* 2. EVENING SHIFT SECTION */}
                       {(scheduleShiftFilter === 'All' || scheduleShiftFilter === 'Evening') && (
                         <>
-                          <tr className="bg-purple-50/35 border-b border-[#EAE4DC]">
-                            <td className="px-5 py-4 text-xs font-bold text-[#7553FF] border border-[#EAE4DC] bg-purple-50/20 text-left">
+                          <tr className="bg-purple-100/70 border-b-2 border-purple-200">
+                            <td className="px-5 py-4 text-xs font-bold text-purple-900 border border-purple-200 bg-purple-100/80 text-left">
                               <div className="flex items-center gap-2 p-0.5">
-                                <Moon className="w-4 h-4 text-[#7553FF] fill-[#7553FF]/10" />
-                                <span className="font-display text-sm font-semibold text-[#5438C2]">Evening Shift</span>
+                                <Moon className="w-4.5 h-4.5 text-purple-600 fill-[#7553FF]/15" />
+                                <span className="font-display text-sm font-bold text-purple-950 uppercase tracking-wide">Evening Shift</span>
                               </div>
                             </td>
                             {weekdays.map((day) => {
@@ -2264,12 +2395,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                               const isClosed = isShiftClosed(day, 'evening');
 
                               return (
-                                <td key={day} className={`px-2 py-3 text-center border border-[#EAE4DC] select-none ${isClosed ? 'bg-slate-100/50' : 'bg-purple-50/10'}`}>
-                                  {isClosed ? null : (
+                                <td key={day} className={`px-2 py-3 text-center border border-purple-200 select-none transition-colors ${isClosed ? 'bg-slate-300/80 text-slate-500 font-bold' : 'bg-purple-100/40'}`}>
+                                  {isClosed ? (
+                                    <span className="text-[10px] font-bold text-slate-600/90 tracking-widest block uppercase font-mono py-1">Closed</span>
+                                  ) : (
                                     <div className="flex flex-col items-center justify-center gap-0.5">
-                                      <span className="text-[11px] text-[#5438C2]/85 font-sans font-medium">{assignedCount} / {minRequired} staff</span>
                                       {gap > 0 && (
-                                        <span className="inline-flex items-center text-rose-600 font-medium text-[11px] bg-rose-50 border border-rose-100 px-1.5 py-px rounded-[2px]" id={`gap-badge-evening-${day}`}>
+                                        <span className="inline-flex items-center text-rose-700 font-bold text-[11px] bg-rose-100/80 border border-rose-200 px-1.5 py-px rounded-[2px]" id={`gap-badge-evening-${day}`}>
                                           Gap: {gap}
                                         </span>
                                       )}
@@ -2324,10 +2456,10 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                       }}
                                       className={`px-2 py-4.5 text-center cursor-pointer transition-all border border-[#EAE4DC] relative ${
                                         isClosed 
-                                          ? 'bg-slate-100/50 cursor-not-allowed select-none' 
+                                          ? 'bg-slate-200/50 cursor-not-allowed select-none' 
                                           : isLocked
                                             ? 'bg-amber-50/40 hover:bg-amber-50/50 cursor-not-allowed'
-                                            : 'hover:bg-[#7553FF]/10 hover:border-[#7553FF]/30 bg-[#FAF9FF]'
+                                            : 'hover:bg-[#7553FF]/10 hover:border-[#7553FF]/30 bg-white'
                                       }`}
                                     >
                                       {isClosed ? null : isLocked ? (
@@ -2343,17 +2475,17 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                           {team.map((name, i) => {
                                             const hasLeave = getApprovedLeaveForStaff(name, day, 'evening');
                                             const weeklyHours = staffWeeklyHours[name] || 0;
-                                            const isOT = weeklyHours > 40;
+                                            const isOT = false;
 
                                             return (
                                               <div 
                                                 key={i} 
-                                                className={`text-[12px] font-semibold py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
+                                                className={`text-[12px] font-medium py-1 block truncate max-w-[120px] mx-auto text-center transition-all ${
                                                   hasLeave 
                                                     ? 'text-sky-755' 
                                                     : isOT 
                                                       ? 'text-[#7553FF]' 
-                                                      : 'text-purple-950'
+                                                      : 'text-black'
                                                 } hover:text-[#7553FF]`}
                                                 title={`${name} (${weeklyHours}h this week${isOT ? ' - Overtime' : ''}${hasLeave ? ' - Approved Leave' : ''})`}
                                               >
@@ -2428,7 +2560,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d, idx) => (
                         <div 
                           key={d} 
-                          className={`py-3 text-[14px] font-bold text-[#1D1916] tracking-wider uppercase font-display ${
+                          className={`py-3 text-[14px] font-bold text-[#1D1916] tracking-wider  font-display ${
                             idx < 6 ? 'border-r border-slate-200' : ''
                           }`}
                         >
@@ -2551,17 +2683,20 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
               {/* Staff layout: standard Controls (Import and + Add Staff) */}
               <div className="flex items-center gap-2.5 pb-2.5">
                 {staffInnerTab !== 'roles' && (
-                  <button 
-                    onClick={() => setIsSmartImportOpen(true)}
-                    className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[#7553FF] font-semibold text-[14px] h-10 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-3xs"
-                  >
-                    <Upload className="w-4 h-4 text-[#7553FF]" />
-                    <span>Import</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setIsSmartImportOpen(true)}
+                      className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-[#7553FF] font-semibold text-[14px] h-10 rounded-lg transition-all flex items-center gap-2 cursor-pointer shadow-3xs"
+                    >
+                      <Upload className="w-4 h-4 text-[#7553FF]" />
+                      <span>Import</span>
+                    </button>
+                  </div>
                 )}
                 <button 
                   onClick={() => {
                     if (staffInnerTab === 'staff') {
+                      setAddStaffActiveTab('personal');
                       setIsAddingUser(true);
                     } else {
                       setIsAddingRole(true);
@@ -2740,6 +2875,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         className="bg-transparent text-slate-800 font-semibold cursor-pointer focus:outline-hidden border-none p-0 pr-1.5 focus:ring-0 text-[14px]"
                       >
                         <option value="All">All</option>
+                        <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                       </select>
                     </div>
@@ -2988,22 +3124,22 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                               onChange={handleSelectAll}
                             />
                           </th>
-                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
+                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left">
                             Name
                           </th>
-                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
+                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left">
                             Job roles
                           </th>
-                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
+                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left">
                             Branch
                           </th>
-                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
+                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left">
                             Contract Type
                           </th>
-                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
+                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left">
                             Status
                           </th>
-                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-center w-36">
+                          <th className="px-5 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-center w-36">
                             Action
                           </th>
                         </tr>
@@ -3117,7 +3253,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                     </button>
                                     <button
                                       onClick={() => {
-                                        setEditingStaffMember(member);
+                                        setEditStaffActiveTab('personal'); setEditingStaffMember(member);
                                       }}
                                       className="p-1 text-slate-700 hover:text-[#7553FF] transition-all hover:scale-110 cursor-pointer"
                                       title="Edit Staff Member"
@@ -3270,22 +3406,22 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     <table className="w-full min-w-[900px] border-collapse bg-white text-left">
                       <thead>
                         <tr className="border-b border-slate-100 bg-slate-50/50">
-                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left">
+                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left">
                             Role Name
                           </th>
-                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left max-w-sm">
+                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left max-w-sm">
                             Description
                           </th>
-                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left w-24">
+                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left w-24">
                             Users
                           </th>
-                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left w-32">
+                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left w-32">
                             Status
                           </th>
-                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-left w-52">
+                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-left w-52">
                             Last Updated
                           </th>
-                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest text-right pr-8 w-28">
+                          <th className="px-6 py-4 font-serif text-[14px] font-medium text-slate-800  tracking-widest text-right pr-8 w-28">
                             Action
                           </th>
                         </tr>
@@ -3584,7 +3720,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       </button>
 
                       <div className="space-y-1.5">
-                        <span className="text-[12px] bg-[#EEF2FF] text-[#7553FF] border border-[#7553FF]/20 px-2.5 py-0.5 rounded-full font-medium uppercase tracking-wider inline-block">
+                        <span className="text-[12px] bg-[#EEF2FF] text-[#7553FF] border border-[#7553FF]/20 px-2.5 py-0.5 rounded-full font-medium  tracking-wider inline-block">
                           Role Profile
                         </span>
                         <h3 className="text-xl font-medium text-slate-800 font-display">{selectedRoleForView.name}</h3>
@@ -3592,17 +3728,17 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                       <div className="space-y-3 pt-2">
                         <div className="p-3.5 bg-slate-50/70 border border-slate-100 rounded-xl space-y-1">
-                          <span className="text-[11px] font-medium text-slate-700 uppercase tracking-widest block">Description</span>
+                          <span className="text-[11px] font-medium text-slate-700  tracking-widest block">Description</span>
                           <p className="text-[14px] text-slate-700 leading-relaxed font-normal">{selectedRoleForView.description}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-3.5">
                           <div className="p-3 px-4 bg-slate-50/70 border border-slate-100 rounded-xl">
-                            <span className="text-[11px] font-medium text-slate-700 uppercase tracking-widest block">Users assigned</span>
+                            <span className="text-[11px] font-medium text-slate-700  tracking-widest block">Users assigned</span>
                             <p className="text-lg font-medium text-slate-800 mt-0.5">{selectedRoleForView.users} active members</p>
                           </div>
                           <div className="p-3 px-4 bg-slate-50/70 border border-slate-100 rounded-xl">
-                            <span className="text-[11px] font-medium text-slate-700 uppercase tracking-widest block">Status</span>
+                            <span className="text-[11px] font-medium text-slate-700  tracking-widest block">Status</span>
                             <p className="mt-1">
                               {selectedRoleForView.status === 'Active' ? (
                                 <span className="inline-flex items-center gap-1.5 bg-[#ECFDF5] text-[#10B981] text-[13px] font-medium px-2.5 py-0.5 rounded-md">
@@ -3618,7 +3754,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
 
                         <div className="p-3.5 bg-slate-50/70 border border-slate-100 rounded-xl space-y-1">
-                          <span className="text-[11px] font-medium text-slate-700 uppercase tracking-widest block">Last Updated On</span>
+                          <span className="text-[11px] font-medium text-slate-700  tracking-widest block">Last Updated On</span>
                           <p className="text-[14px] text-slate-700 font-medium">{selectedRoleForView.lastUpdated}</p>
                         </div>
                       </div>
@@ -3643,7 +3779,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 w-full max-w-[1080px] relative space-y-4 text-left font-sans"
+                  className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 w-full max-w-[1080px] h-[720px] max-h-[90vh] flex flex-col relative space-y-4 text-left font-sans"
                 >
                   <button 
                     onClick={() => setIsAddingUser(false)}
@@ -3799,68 +3935,141 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       setIsAddingUser(false);
                       alert(`Successfully added new staff member: ${newUser.name}`);
                     }}
-                    className="flex flex-col text-xs"
+                    className="flex flex-col flex-1 min-h-0 text-xs"
                   >
-                    <div className="space-y-5 max-h-[62vh] overflow-y-auto pr-2 pt-1">
-                    {/* Section 1: Personal Information */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Personal Information</h4>
-                      
-                      {/* Photo Upload aligned top-center */}
-                      <div className="flex flex-col items-center justify-center pb-5 border-b border-slate-100/80 mb-5">
-                        <div className="relative w-28 h-28 border-2 border-dashed border-slate-200 hover:border-[#7553FF]/50 rounded-full flex flex-col items-center justify-center bg-slate-50/55 hover:bg-[#7553FF]/5 cursor-pointer transition-all overflow-hidden shadow-3xs group select-none">
-                          <input 
-                            type="file" 
-                            accept="image/*"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                const file = e.target.files[0];
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setNewUser(prev => ({ ...prev, photo: reader.result as string }));
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
-                          />
-                          {newUser.photo ? (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <img src={newUser.photo} alt="Avatar Preview" className="w-full h-full object-cover" />
-                              <button 
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setNewUser(prev => ({ ...prev, photo: '' }));
-                                }}
-                                className="absolute top-1.5 right-1.5 bg-slate-900/60 p-1 text-white hover:bg-slate-900 rounded-full cursor-pointer z-20 border-none"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center text-center p-2 text-slate-500 gap-1">
-                              <div className="p-2 bg-white rounded-full border border-slate-100 shadow-3xs text-[#7553FF]">
-                                <Upload className="w-4 h-4" />
+                    {/* Stepper layout */}
+                    <div className="flex flex-col md:flex-row flex-1 min-h-0 gap-6 mt-2">
+                      {/* Left Sidebar Steps Indicator */}
+                      <div className="w-full md:w-64 shrink-0 flex md:flex-col border-b md:border-b-0 md:border-r border-slate-100 pb-3 md:pb-0 md:pr-5 overflow-x-auto md:overflow-x-visible whitespace-nowrap md:whitespace-normal gap-2 md:gap-3.5 select-none scrollbar-none">
+                        {[
+                          { id: 'personal', label: 'Personal Info', desc: 'Name, email, contact & DOB', num: 1 },
+                          { id: 'login', label: 'Access & Login', desc: 'Credentials & system permissions', num: 2 },
+                          { id: 'employment', label: 'Job & Contract', desc: 'Role, branch & schedule hours', num: 3 },
+                          { id: 'tax', label: 'Tax & Insurance', desc: 'Tax class, SSN & provider', num: 4 }
+                        ].map((step, idx) => {
+                          const isActive = addStaffActiveTab === step.id;
+                          const stepKeys = ['personal', 'login', 'employment', 'tax'];
+                          const activeIdx = stepKeys.indexOf(addStaffActiveTab);
+                          const isCompleted = idx < activeIdx || (step.id === 'personal' && newUser.name && newUser.email);
+                          
+                          return (
+                            <button
+                              key={step.id}
+                              type="button"
+                              onClick={() => {
+                                if (step.id !== 'personal' && (!newUser.name || !newUser.email)) {
+                                  alert("Please fill in Name and Email in Personal Info first.");
+                                  return;
+                                }
+                                setAddStaffActiveTab(step.id as any);
+                              }}
+                              className={`flex items-center text-left gap-3 p-2 rounded-xl transition-all duration-200 cursor-pointer w-full group ${
+                                isActive 
+                                  ? 'bg-[#7553FF]/5 text-[#7553FF]' 
+                                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50/80'
+                              }`}
+                            >
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition-all ${
+                                isActive 
+                                  ? 'bg-[#7553FF] text-white shadow-md shadow-[#7553FF]/20 ring-4 ring-[#7553FF]/15' 
+                                  : isCompleted 
+                                    ? 'bg-emerald-100 text-emerald-600 border border-emerald-200'
+                                    : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200'
+                              }`}>
+                                {isCompleted ? <Check className="w-4 h-4" /> : step.num}
                               </div>
-                              <span className="text-[11px] font-bold text-slate-700">Upload Photo</span>
-                            </div>
-                          )}
-                        </div>
+                              <div className="hidden md:block leading-tight">
+                                <p className={`text-[12px] font-bold tracking-wide ${isActive ? 'text-[#7553FF]' : 'text-slate-700'}`}>
+                                  {step.label}
+                                </p>
+                                <p className="text-[10px] text-slate-400 mt-0.5 font-medium">
+                                  {step.desc}
+                                </p>
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-[12px] font-semibold text-slate-600 block">Full Name <span className="text-red-500">*</span></label>
-                          <input 
-                            type="text" 
-                            required
-                            value={newUser.name}
-                            onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                            placeholder="Enter full name"
-                            className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
-                          />
+                      {/* Right Content Area */}
+                      <div className="flex-1 flex flex-col min-h-0">
+                        {/* Interactive Step Banner */}
+                        <div className="mb-4 bg-slate-50/80 rounded-xl p-3 border border-slate-100/70 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-[#7553FF] bg-[#7553FF]/10 px-2.5 py-1 rounded-md uppercase font-mono tracking-wider">
+                              Step {['personal', 'login', 'employment', 'tax'].indexOf(addStaffActiveTab) + 1} of 4
+                            </span>
+                            <span className="text-xs font-bold text-slate-600">
+                              {addStaffActiveTab === 'personal' && 'Provide personal credentials'}
+                              {addStaffActiveTab === 'login' && 'Set up login credentials'}
+                              {addStaffActiveTab === 'employment' && 'Define role & compensation details'}
+                              {addStaffActiveTab === 'tax' && 'Configure German tax and social details'}
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">
+                            * Required fields
+                          </span>
                         </div>
+
+                        {/* Scrollable form sections */}
+                        <div className="space-y-5 flex-1 overflow-y-auto pr-2 pt-1 min-h-0">
+                      {addStaffActiveTab === 'personal' && (
+                        <div className="space-y-4">
+                          {/* Photo Upload aligned top-center */}
+                          <div className="flex flex-col items-center justify-center pb-5 border-b border-slate-100/80 mb-5">
+                            <div className="relative w-28 h-28 border-2 border-dashed border-slate-200 hover:border-[#7553FF]/50 rounded-full flex flex-col items-center justify-center bg-slate-50/55 hover:bg-[#7553FF]/5 cursor-pointer transition-all overflow-hidden shadow-3xs group select-none">
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={(e) => {
+                                  if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      setNewUser(prev => ({ ...prev, photo: reader.result as string }));
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                              />
+                              {newUser.photo ? (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <img src={newUser.photo} alt="Avatar Preview" className="w-full h-full object-cover" />
+                                  <button 
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setNewUser(prev => ({ ...prev, photo: '' }));
+                                    }}
+                                    className="absolute top-1.5 right-1.5 bg-slate-900/60 p-1 text-white hover:bg-slate-900 rounded-full cursor-pointer z-20 border-none"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center text-center p-2 text-slate-500 gap-1">
+                                  <div className="p-2 bg-white rounded-full border border-slate-100 shadow-3xs text-[#7553FF]">
+                                    <Upload className="w-4 h-4" />
+                                  </div>
+                                  <span className="text-[11px] font-bold text-slate-700">Upload Photo</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-0">
+                            <div className="space-y-1">
+                              <label className="text-[12px] font-semibold text-slate-600 block">Full Name <span className="text-red-500">*</span></label>
+                              <input 
+                                type="text" 
+                                required
+                                value={newUser.name}
+                                onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                                placeholder="Enter full name"
+                                className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                              />
+                            </div>
                         <div className="space-y-1">
                           <label className="text-[12px] font-semibold text-slate-600 block">Email <span className="text-red-500">*</span></label>
                           <input 
@@ -3945,12 +4154,82 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
                           />
                         </div>
+
+                        {/* ID with Residence Permit */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">ID with Residence Permit</label>
+                          <select 
+                            value={newUser.idWithResidencePermit}
+                            onChange={(e) => setNewUser({...newUser, idWithResidencePermit: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="no">No</option>
+                            <option value="yes">Yes (Requires Residence Permit)</option>
+                          </select>
+                        </div>
+
+                        {/* Residence Permit Expiry Date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Residence Permit Expiry"
+                            value={newUser.residencePermitExpiryDate}
+                            onChange={(date) => setNewUser({...newUser, residencePermitExpiryDate: date})}
+                            placeholder="Select expiry date"
+                            maxYear={new Date().getFullYear() + 10}
+                          />
+                        </div>
                       </div>
                     </div>
+                  )}
 
-                    {/* Section 2: Job Information */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[14px] font-bold text-slate-800 uppercase tracking-wider font-sans">Job & Employment Information</h4>
+                  {addStaffActiveTab === 'login' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-0">
+                      <div className="space-y-1">
+                        <label className="text-[12px] font-semibold text-slate-600 block">Email <span className="text-red-500">*</span></label>
+                        <input 
+                          type="email" 
+                          required
+                          value={newUser.email}
+                          onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                          placeholder="Enter email address"
+                          className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[12px] font-semibold text-slate-600 block">Password</label>
+                        <input 
+                          type="password" 
+                          value={newUser.password || ''}
+                          onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                          placeholder="Enter password"
+                          className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <MultiSelectDropdown
+                          label="System Permissions"
+                          options={[
+                            { value: 'schedule_view', label: 'View Shifts' },
+                            { value: 'schedule_edit', label: 'Schedule Shifts' },
+                            { value: 'payroll_view', label: 'View Payroll' },
+                            { value: 'payroll_edit', label: 'Manage Payroll' }
+                          ]}
+                          selectedValues={newUser.systemPermissions}
+                          onChange={(updated) => {
+                            setNewUser({...newUser, systemPermissions: updated});
+                          }}
+                          placeholder="Select system permissions"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {addStaffActiveTab === 'employment' && (
+                    <div className="space-y-6">
+                    <div className="p-0 space-y-4">
+                      <h4 className="text-[14px] font-bold text-slate-800  tracking-wider font-sans">Job & Employment Information</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Role selection */}
                         <div className="space-y-1">
@@ -4223,8 +4502,8 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     </div>
 
                     {/* Section 3: Salary & Pay */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Compensation & Payroll Config</h4>
+                    <div className="p-0 space-y-4">
+                      <h4 className="text-[13px] font-bold text-slate-700  tracking-wider font-sans">Compensation & Payroll Config</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Salary Type */}
                         <div className="space-y-1">
@@ -4310,10 +4589,12 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
 
-                    {/* Section 4: Tax, Insurance & Residency Information */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Tax, Insurance & Residency Info</h4>
+                  {addStaffActiveTab === 'tax' && (
+                    <div className="p-0 space-y-4">
+                      <h4 className="text-[13px] font-bold text-slate-700  tracking-wider font-sans">Tax, Insurance & Residency Info</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Tax Class */}
                         <div className="space-y-1">
@@ -4425,24 +4706,83 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                       </div>
                     </div>
+                  )}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Action buttons */}
-                    <div className="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-slate-100">
-                      <button 
-                        type="button"
-                        onClick={() => setIsAddingUser(false)}
-                        className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition-all border-none cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button 
-                        type="submit"
-                        className="px-5 py-2 bg-[#7553FF] hover:bg-[#623EE2] active:scale-95 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all border-none cursor-pointer flex items-center gap-1.5"
-                      >
-                        <Save className="w-3.5 h-3.5" />
-                        Save Staff
-                      </button>
+                    {/* Form navigation & save buttons */}
+                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 shrink-0">
+                      <div>
+                        {addStaffActiveTab !== 'personal' && (
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              const stepKeys = ['personal', 'login', 'employment', 'tax'];
+                              const activeIdx = stepKeys.indexOf(addStaffActiveTab);
+                              if (activeIdx > 0) {
+                                setAddStaffActiveTab(stepKeys[activeIdx - 1] as any);
+                              }
+                            }}
+                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-semibold text-xs rounded-xl transition-all border-none cursor-pointer flex items-center gap-1.5"
+                          >
+                            <ChevronLeft className="w-3.5 h-3.5" />
+                            Back
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <button 
+                          type="button"
+                          onClick={() => setIsAddingUser(false)}
+                          className="px-4 py-2 hover:bg-slate-50 text-slate-500 hover:text-slate-700 font-semibold text-xs rounded-xl transition-all border-none cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+
+                        {addStaffActiveTab !== 'tax' ? (
+                          <button 
+                            type="button"
+                            onClick={() => {
+                              // Standard step validation
+                              if (addStaffActiveTab === 'personal') {
+                                if (!newUser.name) {
+                                  alert("Please fill in Full Name.");
+                                  return;
+                                }
+                                if (!newUser.email) {
+                                  alert("Please fill in Email.");
+                                  return;
+                                }
+                                const emailVal = newUser.email.trim();
+                                if (staff.some(s => s.email.toLowerCase() === emailVal.toLowerCase())) {
+                                  alert(`Email "${emailVal}" already exists in the system.`);
+                                  return;
+                                }
+                              }
+                              
+                              const stepKeys = ['personal', 'login', 'employment', 'tax'];
+                              const activeIdx = stepKeys.indexOf(addStaffActiveTab);
+                              if (activeIdx < stepKeys.length - 1) {
+                                setAddStaffActiveTab(stepKeys[activeIdx + 1] as any);
+                              }
+                            }}
+                            className="px-5 py-2 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-semibold text-xs rounded-xl transition-all border-none cursor-pointer flex items-center gap-1.5 shadow-xs"
+                          >
+                            Continue
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <button 
+                            type="submit"
+                            className="px-5 py-2 bg-[#7553FF] hover:bg-[#623EE2] active:scale-95 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all border-none cursor-pointer flex items-center gap-1.5"
+                          >
+                            <Save className="w-3.5 h-3.5" />
+                            Save Staff
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </form>
                 </motion.div>
@@ -4482,7 +4822,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     
                     <div className="text-center space-y-2">
                       <h4 className="text-lg font-medium text-slate-800 font-display">{selectedUserForView.name}</h4>
-                      <span className="inline-block px-3 py-1 bg-[#7553FF]/10 text-[#7553FF] font-medium font-mono text-[14px] uppercase rounded-[2px] tracking-wide border border-[#7553FF]/20">
+                      <span className="inline-block px-3 py-1 bg-[#7553FF]/10 text-[#7553FF] font-medium font-mono text-[14px]  rounded-[2px] tracking-wide border border-[#7553FF]/20">
                         {selectedUserForView.role}
                       </span>
                     </div>
@@ -4492,7 +4832,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {/* Personal Segment */}
                       <div className="bg-slate-50/50 p-5 rounded-xl space-y-4 border border-slate-100">
-                        <p className="font-medium text-[14px] text-[#7553FF] uppercase tracking-wider">Personal Information</p>
+                        <p className="font-medium text-[14px] text-[#7553FF]  tracking-wider">Personal Information</p>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Email</span>
                           <span className="font-medium text-slate-700 text-[14px]">{selectedUserForView.email}</span>
@@ -4523,7 +4863,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                       {/* Job & Access Segment */}
                       <div className="bg-slate-50/50 p-5 rounded-xl space-y-4 border border-slate-100">
-                        <p className="font-medium text-[14px] text-[#7553FF] uppercase tracking-wider">Employment & System Access</p>
+                        <p className="font-medium text-[14px] text-[#7553FF]  tracking-wider">Employment & System Access</p>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Primary Role</span>
                           <span className="font-medium text-[#7553FF] font-mono text-[14px]">{selectedUserForView.role}</span>
@@ -4542,7 +4882,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Assigned Stores</span>
-                          <span className="font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-[2px] text-[14px] uppercase font-mono">
+                          <span className="font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-[2px] text-[14px]  font-mono">
                             {selectedUserForView.assignedStores && selectedUserForView.assignedStores.length > 0
                               ? selectedUserForView.assignedStores.join(', ')
                               : (selectedUserForView.branch || 'HCM 1')
@@ -4566,7 +4906,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                     {/* Contract Details Segment */}
                     <div className="bg-slate-50/50 p-5 rounded-xl space-y-4 border border-slate-100">
-                      <p className="font-medium text-[14px] text-[#7553FF] uppercase tracking-wider font-sans">Contractual Details</p>
+                      <p className="font-medium text-[14px] text-[#7553FF]  tracking-wider font-sans">Contractual Details</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Exit Date</span>
@@ -4608,7 +4948,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Contract Preparation</span>
-                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded uppercase font-semibold ${
+                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded  font-semibold ${
                             selectedUserForView.contractPreparationStatus === 'yes' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                             selectedUserForView.contractPreparationStatus === 'no' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
                           }`}>
@@ -4617,7 +4957,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Contract Signing</span>
-                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded uppercase font-semibold ${
+                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded  font-semibold ${
                             selectedUserForView.contractSigningStatus === 'yes' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                             selectedUserForView.contractSigningStatus === 'no' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
                           }`}>
@@ -4629,7 +4969,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                     {/* Tax & Residency Segment */}
                     <div className="bg-slate-50/50 p-5 rounded-xl space-y-4 border border-slate-100">
-                      <p className="font-medium text-[14px] text-[#7553FF] uppercase tracking-wider font-sans">Tax, Insurance & Residency Information</p>
+                      <p className="font-medium text-[14px] text-[#7553FF]  tracking-wider font-sans">Tax, Insurance & Residency Information</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Nationality</span>
@@ -4653,7 +4993,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Insurance SEPA Mandate</span>
-                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded uppercase font-semibold ${
+                          <span className={`font-mono text-[11px] px-2 py-0.5 rounded  font-semibold ${
                             selectedUserForView.insuranceSepa === 'yes' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-700 border border-slate-200'
                           }`}>
                             {selectedUserForView.insuranceSepa === 'yes' ? 'Mandate Signed' : 'No Mandate'}
@@ -4673,11 +5013,11 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-slate-800 text-[14px]">{selectedUserForView.residencePermitExpiryDate || 'N/A'}</span>
                               {isPermitExpired(selectedUserForView) ? (
-                                <span className="bg-red-50 text-red-700 border border-red-200 font-bold px-2 py-0.5 rounded text-[11px] uppercase animate-pulse">⚠️ EXPIRED</span>
+                                <span className="bg-red-50 text-red-700 border border-red-200 font-bold px-2 py-0.5 rounded text-[11px]  animate-pulse">⚠️ Expired</span>
                               ) : isPermitExpiringSoon(selectedUserForView) ? (
-                                <span className="bg-amber-50 text-amber-700 border border-amber-200 font-bold px-2 py-0.5 rounded text-[11px] uppercase animate-pulse font-semibold">⚠️ EXPIRING SOON</span>
+                                <span className="bg-amber-50 text-amber-700 border border-amber-200 font-bold px-2 py-0.5 rounded text-[11px]  animate-pulse font-semibold">⚠️ Expiring Soon</span>
                               ) : (
-                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded text-[11px] uppercase font-semibold">Valid</span>
+                                <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold px-2 py-0.5 rounded text-[11px]  font-semibold">Valid</span>
                               )}
                             </div>
                           </div>
@@ -4687,7 +5027,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                     {/* Compensation & Payroll Segment */}
                     <div className="bg-[#7553FF]/5 p-5 rounded-xl space-y-4 border border-[#7553FF]/10">
-                      <p className="font-medium text-[14px] text-[#7553FF] uppercase tracking-wider">Compensation & Payroll Configuration</p>
+                      <p className="font-medium text-[14px] text-[#7553FF]  tracking-wider">Compensation & Payroll Configuration</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-slate-700 text-[14px]">Salary Type</span>
@@ -4724,9 +5064,9 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         <span className="text-slate-700 text-[14px]">Include in Payroll Calculations</span>
                         <span className="font-medium text-[14px]">
                           {selectedUserForView.includeInPayroll !== false ? (
-                            <span className="text-emerald-750 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-[2px] font-mono uppercase">Yes (Included)</span>
+                            <span className="text-emerald-750 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-[2px] font-mono ">Yes (Included)</span>
                           ) : (
-                            <span className="text-rose-750 bg-rose-50 border border-rose-100 px-2.5 py-1 rounded-[2px] font-mono uppercase">No (Excluded)</span>
+                            <span className="text-rose-750 bg-rose-50 border border-rose-100 px-2.5 py-1 rounded-[2px] font-mono ">No (Excluded)</span>
                           )}
                         </span>
                       </div>
@@ -4736,9 +5076,9 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       <span className="text-slate-700 text-[14px]">Current Labor Status</span>
                       <span>
                         {selectedUserForView.isActive ? (
-                          <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] px-2.5 py-1 font-mono uppercase text-[14px] font-medium">ACTIVE</span>
+                          <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] px-2.5 py-1 font-mono  text-[14px] font-medium">Active</span>
                         ) : (
-                          <span className="bg-rose-50 text-rose-700 border border-rose-100 rounded-[2px] px-2.5 py-1 font-mono uppercase text-[14px] font-medium">INACTIVE</span>
+                          <span className="bg-rose-50 text-rose-700 border border-rose-100 rounded-[2px] px-2.5 py-1 font-mono  text-[14px] font-medium">Inactive</span>
                         )}
                       </span>
                     </div>
@@ -4753,7 +5093,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 w-full max-w-[1080px] relative space-y-4 text-left font-sans"
+                  className="bg-white rounded-2xl border border-slate-200 shadow-2xl p-6 w-full max-w-[1080px] h-[720px] max-h-[90vh] flex flex-col relative space-y-4 text-left font-sans"
                 >
                   <button 
                     onClick={() => setEditingStaffMember(null)}
@@ -4775,12 +5115,40 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         setEditingStaffMember(null);
                       }
                     }}
-                    className="flex flex-col text-xs"
+                    className="flex flex-col flex-1 min-h-0 text-xs justify-between"
                   >
-                    <div className="space-y-5 max-h-[62vh] overflow-y-auto pr-2 pt-1">
-                    {/* Section 1: Personal Information */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Personal Information</h4>
+                    {/* Tab Navigation */}
+                    <div className="shrink-0 flex border-b border-slate-100 -mx-6 px-6 overflow-x-auto whitespace-nowrap scrollbar-none mb-4">
+                      {[
+                        { id: 'personal', label: 'Personal Info' },
+                        { id: 'login', label: 'Login Info' },
+                        { id: 'employment', label: 'Employment Info' },
+                        { id: 'tax', label: 'Tax & Insurance' }
+                      ].map((tab) => {
+                        const isActive = editStaffActiveTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setEditStaffActiveTab(tab.id as any)}
+                            className={`px-5 py-3 font-bold text-[11px]  tracking-wider transition-all border-b-2 cursor-pointer ${
+                              isActive 
+                                ? 'border-[#7553FF] text-[#7553FF]' 
+                                : 'border-transparent text-slate-500 hover:text-slate-800'
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="space-y-5 flex-1 overflow-y-auto pr-2 pt-1 min-h-0">
+                      {editStaffActiveTab === 'personal' && (
+                        <div className="space-y-4">
+                          {/* Section 1: Personal Information */}
+                          <div className="p-0 space-y-4">
+                            <h4 className="text-[13px] font-bold text-slate-700  tracking-wider font-sans">Personal Information</h4>
                       
                       {/* Photo Upload aligned top-center */}
                       <div className="flex flex-col items-center justify-center pb-5 border-b border-slate-100/80 mb-5">
@@ -4902,12 +5270,87 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
                           />
                         </div>
+
+                        {/* ID with Residence Permit */}
+                        <div className="space-y-1">
+                          <label className="text-[12px] font-semibold text-slate-600 block">ID with Residence Permit</label>
+                          <select 
+                            value={editingStaffMember.idWithResidencePermit || 'no'}
+                            onChange={(e) => setEditingStaffMember({...editingStaffMember, idWithResidencePermit: e.target.value as any})}
+                            className="w-full h-10 px-3 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden shadow-3xs cursor-pointer font-medium"
+                          >
+                            <option value="no">No</option>
+                            <option value="yes">Yes (Requires Residence Permit)</option>
+                          </select>
+                        </div>
+
+                        {/* Residence Permit Expiry Date */}
+                        <div className="space-y-1">
+                          <DatePicker
+                            label="Residence Permit Expiry"
+                            value={editingStaffMember.residencePermitExpiryDate || ''}
+                            onChange={(date) => setEditingStaffMember({...editingStaffMember, residencePermitExpiryDate: date})}
+                            placeholder="Select expiry date"
+                            maxYear={new Date().getFullYear() + 10}
+                          />
+                        </div>
                       </div>
                     </div>
+                  </div>
+                )}
 
-                    {/* Section 2: Job Information */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[14px] font-bold text-slate-800 uppercase tracking-wider font-sans">Job & Employment Information</h4>
+                  {editStaffActiveTab === 'login' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-0">
+                      {/* Email Address */}
+                      <div className="space-y-1">
+                        <label className="text-[12px] font-semibold text-slate-600 block">Email <span className="text-red-500">*</span></label>
+                        <input 
+                          type="email" 
+                          required
+                          value={editingStaffMember.email}
+                          onChange={(e) => setEditingStaffMember({...editingStaffMember, email: e.target.value})}
+                          placeholder="Enter email address"
+                          className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                        />
+                      </div>
+
+                      {/* Password */}
+                      <div className="space-y-1">
+                        <label className="text-[12px] font-semibold text-slate-600 block">Password</label>
+                        <input 
+                          type="password" 
+                          value={editingStaffMember.password || ''}
+                          onChange={(e) => setEditingStaffMember({...editingStaffMember, password: e.target.value})}
+                          placeholder="Enter password"
+                          className="w-full h-10 px-3 py-1.5 bg-white border border-slate-200 focus:border-[#7553FF] focus:ring-1 focus:ring-[#7553FF] rounded-xl text-xs text-slate-800 outline-hidden transition-all shadow-3xs"
+                        />
+                      </div>
+
+                      {/* System Permissions (Additional Access) */}
+                      <div className="space-y-1">
+                        <MultiSelectDropdown
+                          label="System Permissions"
+                          options={[
+                            { value: 'schedule_view', label: 'View Shifts' },
+                            { value: 'schedule_edit', label: 'Schedule Shifts' },
+                            { value: 'payroll_view', label: 'View Payroll' },
+                            { value: 'payroll_edit', label: 'Manage Payroll' }
+                          ]}
+                          selectedValues={editingStaffMember.systemPermissions || []}
+                          onChange={(updated) => {
+                            setEditingStaffMember({...editingStaffMember, systemPermissions: updated});
+                          }}
+                          placeholder="Select system permissions"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {editStaffActiveTab === 'employment' && (
+                    <div className="space-y-6">
+                      {/* Section 2: Job Information */}
+                      <div className="p-0 space-y-4">
+                      <h4 className="text-[14px] font-bold text-slate-800  tracking-wider font-sans">Job & Employment Information</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Job Role */}
                         <div className="space-y-1">
@@ -5181,9 +5624,9 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     </div>
 
                     {/* Section 3: Salary & Pay (Role gated) */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
+                    <div className="p-0 space-y-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Compensation & Payroll Config</h4>
+                        <h4 className="text-[13px] font-bold text-slate-700  tracking-wider font-sans">Compensation & Payroll Config</h4>
                         {simulatedUser && simulatedUser.systemAccessLevel !== 'Admin' && (
                           <span className="text-[11px] bg-red-50 text-red-600 font-bold px-2 py-0.5 rounded">🔒 Locked - View Only</span>
                         )}
@@ -5283,13 +5726,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           />
                         </div>
                       </div>
-
-
                     </div>
+                  </div>
+                )}
 
-                    {/* Section 4: Tax, Insurance & Residency Information */}
-                    <div className="bg-slate-50/40 border border-slate-200/60 p-5 rounded-2xl space-y-4">
-                      <h4 className="text-[13px] font-bold text-slate-700 uppercase tracking-wider font-sans">Tax, Insurance & Residency Info</h4>
+                  {editStaffActiveTab === 'tax' && (
+                    <div className="p-0 space-y-4">
+                      <h4 className="text-[13px] font-bold text-slate-700  tracking-wider font-sans">Tax, Insurance & Residency Info</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Tax Class */}
                         <div className="space-y-1">
@@ -5401,6 +5844,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         </div>
                       </div>
                     </div>
+                  )}
                     </div>
 
                     {/* Action buttons */}
@@ -5646,7 +6090,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                 <div className="overflow-x-auto -mx-6 md:mx-0 rounded-xl border border-slate-100">
                   <table className="w-full min-w-[800px] border-collapse bg-white">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700 uppercase tracking-wider font-display select-none">
+                      <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700  tracking-wider font-display select-none">
                         <th className="px-4 py-4 text-left w-12">
                           <input 
                             type="checkbox"
@@ -5680,7 +6124,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             </td>
                             <td className="px-4 py-3.5">
                               <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-full border border-white flex items-center justify-center font-normal text-[14px] tracking-wide uppercase ${record.color} shadow-3xs`}>
+                                <div className={`w-8 h-8 rounded-full border border-white flex items-center justify-center font-normal text-[14px] tracking-wide  ${record.color} shadow-3xs`}>
                                   {record.initials}
                                 </div>
                                 <span className="font-normal text-black font-display">{record.name}</span>
@@ -5716,7 +6160,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       {paginatedRecords.length > 0 && (
                         <tr className="bg-slate-50/10 font-normal border-t-2 border-slate-100/80">
                           <td className="px-4 py-4"></td>
-                          <td className="px-4 py-4 text-xs font-display font-normal text-[#111827] uppercase tracking-wide">TOTAL</td>
+                          <td className="px-4 py-4 text-xs font-display font-normal text-[#111827]  tracking-wide">Total</td>
                           <td className="px-4 py-4 text-center text-[#111827] font-normal font-mono">${totalNet.toFixed(2)}</td>
                           <td className="px-4 py-4 text-center text-[#111827] font-normal">{totalHours}h</td>
                           <td className="px-4 py-4 text-center text-slate-700 font-normal font-mono">{totalOtHours}h</td>
@@ -5814,7 +6258,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                       {/* Header info */}
                       <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-base uppercase ${selectedPayrollDetails.color || 'bg-[#7553FF]/10 text-[#7553FF]'}`}>
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-base  ${selectedPayrollDetails.color || 'bg-[#7553FF]/10 text-[#7553FF]'}`}>
                           {selectedPayrollDetails.initials}
                         </div>
                         <div>
@@ -5827,12 +6271,12 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                       {/* Content: Detailed breakdown table */}
                       <div className="py-4 space-y-4">
-                        <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Payroll Breakdown calculations</h4>
+                        <h4 className="text-xs font-bold text-slate-700  tracking-wider">Payroll Breakdown calculations</h4>
                         
                         <div className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50">
                           <table className="w-full text-xs font-sans text-slate-700">
                             <thead>
-                              <tr className="bg-slate-100 border-b border-slate-150 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+                              <tr className="bg-slate-100 border-b border-slate-150 text-[10px] font-bold  tracking-wider text-slate-700">
                                 <th className="px-4 py-2.5 text-left">Component Name</th>
                                 <th className="px-4 py-2.5 text-right">Value/Calc</th>
                                 <th className="px-4 py-2.5 text-right">Amount (USD)</th>
@@ -6059,13 +6503,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                 {/* Heading List */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-widest block font-sans">Your Shift Templates</h3>
+                  <h3 className="text-xs font-extrabold text-slate-800  tracking-widest block font-sans">Your Shift Templates</h3>
                   
                   {/* Table for templates */}
                   <div className="overflow-hidden border border-slate-100 rounded-xl">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700  tracking-wider select-none">
                           <th className="px-4 py-3.5 text-left">TEMPLATE NAME</th>
                           <th className="px-4 py-3.5 text-left">TIME</th>
                           <th className="px-4 py-3.5 text-left">REQUIRED ROLES</th>
@@ -6082,7 +6526,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                 {template.requiredRoles.map((role) => (
                                   <span 
                                     key={role}
-                                    className="text-[14px] font-semibold text-slate-700 uppercase tracking-wider"
+                                    className="text-[14px] font-semibold text-slate-700  tracking-wider"
                                   >
                                     {role}
                                   </span>
@@ -6219,13 +6663,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
                 {/* Heading List */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-widest block font-sans">Upcoming Holidays</h3>
+                  <h3 className="text-xs font-extrabold text-slate-800  tracking-widest block font-sans">Upcoming Holidays</h3>
                   
                   {/* Table for holidays */}
                   <div className="overflow-hidden border border-slate-100 rounded-xl bg-white">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700 uppercase tracking-wider select-none">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-bold text-slate-700  tracking-wider select-none">
                           <th className="px-4 py-3.5 text-left">DATE</th>
                           <th className="px-4 py-3.5 text-center">MULTIPLIER</th>
                           <th className="px-4 py-3.5 text-left">NOTE</th>
@@ -6299,7 +6743,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
               {/* Header */}
               <div className="border-b border-[#EAE4DC] pb-4 flex items-start justify-between">
                 <div className="space-y-1 text-left">
-                  <div className="flex items-center gap-2 text-[14px] font-bold text-[#7553FF] uppercase tracking-wider">
+                  <div className="flex items-center gap-2 text-[14px] font-bold text-[#7553FF]  tracking-wider">
                     <CalendarIcon className="w-4 h-4" />
                     <span>Daily Schedule Inspector</span>
                   </div>
@@ -6428,7 +6872,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
               <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-3.5 text-[14px] flex items-center justify-between shadow-3xs font-sans">
                 <div className="flex items-center gap-1.5">
                   <span className="text-slate-700 font-medium">Clearance Rating:</span>
-                  <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-semibold rounded-md border border-emerald-100 text-[14px] uppercase">
+                  <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-semibold rounded-md border border-emerald-100 text-[14px] ">
                     OPTIMAL COVERAGE
                   </span>
                 </div>
@@ -6744,7 +7188,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
               {/* LEFT SIDE: KIOSK FRONT TABLET */}
               <div className="bg-slate-50/50 border border-slate-150 rounded-2xl p-5 text-center flex flex-col items-center justify-between height-full space-y-4">
                 <div className="space-y-1">
-                  <span className="text-[14px] uppercase font-bold text-[#7553FF] bg-[#7553FF]/10 px-2 py-0.5 rounded-[2px] inline-block">
+                  <span className="text-[14px]  font-bold text-[#7553FF] bg-[#7553FF]/10 px-2 py-0.5 rounded-[2px] inline-block">
                     Instore Tablet
                   </span>
                   <h3 className="text-sm font-bold text-slate-800 font-display">Secure QR Terminal</h3>
@@ -7316,7 +7760,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   <div className="overflow-hidden border border-[#EAE4DC] rounded-lg">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800 uppercase tracking-widest leading-normal">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800  tracking-widest leading-normal">
                           <th className="px-4 py-3 text-left font-semibold font-serif">Shift Name</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Time</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Default Min. Staff</th>
@@ -7392,7 +7836,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   <div className="overflow-hidden border border-[#EAE4DC] rounded-lg">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800 uppercase tracking-widest leading-normal">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800  tracking-widest leading-normal">
                           <th className="px-4 py-3 text-left font-semibold font-serif">Day</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Status</th>
                           <th className="px-4 py-3 text-right font-semibold pr-6 font-serif">Actions</th>
@@ -7492,7 +7936,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   <div className="overflow-hidden border border-[#EAE4DC] rounded-lg">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800 uppercase tracking-widest leading-normal">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800  tracking-widest leading-normal">
                           <th className="px-4 py-3 text-left font-semibold font-serif">Date</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Reason (optional)</th>
                           <th className="px-4 py-3 text-right font-semibold pr-6 font-serif">Actions</th>
@@ -7784,14 +8228,14 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
               <div className="flex-1 overflow-x-auto min-h-[400px]">
                 <table className="w-full border-collapse bg-white">
                   <thead>
-                    <tr className="border-b border-[#EAE4DC] bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800 uppercase tracking-widest leading-normal">
-                      <th className="px-6 py-4 text-left font-serif font-medium uppercase tracking-widest">Request</th>
-                      <th className="px-6 py-4 text-left font-serif font-medium uppercase tracking-widest">Staff</th>
-                      <th className="px-6 py-4 text-left font-serif font-medium uppercase tracking-widest">Type</th>
-                      <th className="px-6 py-4 text-left font-serif font-medium uppercase tracking-widest">Shift Details</th>
-                      <th className="px-6 py-4 text-left font-serif font-medium uppercase tracking-widest">Request Time</th>
-                      <th className="px-6 py-4 text-center font-serif font-medium uppercase tracking-widest">Status</th>
-                      <th className="px-6 py-4 text-right pr-8 font-serif font-medium uppercase tracking-widest">Actions</th>
+                    <tr className="border-b border-[#EAE4DC] bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800  tracking-widest leading-normal">
+                      <th className="px-6 py-4 text-left font-serif font-medium  tracking-widest">Request</th>
+                      <th className="px-6 py-4 text-left font-serif font-medium  tracking-widest">Staff</th>
+                      <th className="px-6 py-4 text-left font-serif font-medium  tracking-widest">Type</th>
+                      <th className="px-6 py-4 text-left font-serif font-medium  tracking-widest">Shift Details</th>
+                      <th className="px-6 py-4 text-left font-serif font-medium  tracking-widest">Request Time</th>
+                      <th className="px-6 py-4 text-center font-serif font-medium  tracking-widest">Status</th>
+                      <th className="px-6 py-4 text-right pr-8 font-serif font-medium  tracking-widest">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#EAE4DC] text-[14px] font-sans text-slate-700">

@@ -343,7 +343,7 @@ export default function AllergenTool() {
 
       {/* PROCESS STATUS HORIZONTAL TRACKER (SOCIALLY INTEGRATED FROM RAW MOCKUP) */}
       <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-3xs space-y-4">
-        <h3 className="text-xs font-extrabold text-[#111827] tracking-wider uppercase">Process Status</h3>
+        <h3 className="text-xs font-extrabold text-[#111827] tracking-wider ">Process Status</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
           
@@ -550,7 +550,7 @@ export default function AllergenTool() {
               <button
                 onClick={handleStartAnalysis}
                 disabled={!fileAttached}
-                className={`w-full py-4 rounded-xl text-xs font-extrabold shadow-sm transition-all text-center flex items-center justify-center gap-2 cursor-pointer h-12 uppercase tracking-wide ${
+                className={`w-full py-4 rounded-xl text-xs font-extrabold shadow-sm transition-all text-center flex items-center justify-center gap-2 cursor-pointer h-12  tracking-wide ${
                   fileAttached 
                     ? 'bg-[#7553FF] hover:bg-[#623EE2] text-white active:scale-[0.99]' 
                     : 'bg-[#F0ECFF]/50 border border-teal-150 text-[#7553FF]/40 cursor-not-allowed'
@@ -576,7 +576,7 @@ export default function AllergenTool() {
             <div className="bg-white border border-slate-150 rounded-2xl p-8 shadow-sm space-y-6 text-center">
               
               <div className="space-y-2">
-                <span className="px-3 py-1 bg-[#F0ECFF] text-[#7553FF] border border-teal-150 rounded-[2px] text-[10px] font-bold font-mono tracking-wider uppercase">
+                <span className="px-3 py-1 bg-[#F0ECFF] text-[#7553FF] border border-teal-150 rounded-[2px] text-[10px] font-bold font-mono tracking-wider ">
                   ACTIVE AI PIPELINE
                 </span>
                 <h2 className="text-lg font-extrabold text-slate-850">Analysing PDF Ingredients...</h2>
@@ -650,13 +650,13 @@ export default function AllergenTool() {
             
             {/* Analysis Summary Row */}
             <div className="space-y-4 text-left">
-              <h3 className="text-xs font-extrabold text-slate-800 tracking-wider uppercase">Analysis Summary</h3>
+              <h3 className="text-xs font-extrabold text-slate-800 tracking-wider ">Analysis Summary</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
                 {/* Card 1: Total Menu Items */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs flex items-center justify-between gap-4">
                   <div className="space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wider">Total Menu Items</span>
+                    <span className="text-[11px] font-bold text-slate-700 block  tracking-wider">Total Menu Items</span>
                     <span className="text-3xl font-extrabold text-slate-900 block leading-none">128</span>
                     <span className="text-[11px] text-slate-700 font-medium block">items analyzed</span>
                   </div>
@@ -668,7 +668,7 @@ export default function AllergenTool() {
                 {/* Card 2: Items with Allergens */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs flex items-center justify-between gap-4">
                   <div className="space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wider">Items with Allergens</span>
+                    <span className="text-[11px] font-bold text-slate-700 block  tracking-wider">Items with Allergens</span>
                     <span className="text-3xl font-extrabold text-slate-900 block leading-none">74</span>
                     <span className="text-[11px] text-slate-700 font-medium block">57.8% of total</span>
                   </div>
@@ -680,7 +680,7 @@ export default function AllergenTool() {
                 {/* Card 3: Allergens Detected */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs flex items-center justify-between gap-4">
                   <div className="space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wider">Allergens Detected</span>
+                    <span className="text-[11px] font-bold text-slate-700 block  tracking-wider">Allergens Detected</span>
                     <span className="text-3xl font-extrabold text-slate-900 block leading-none">10</span>
                     <span className="text-[11px] text-slate-700 font-medium block">unique allergens</span>
                   </div>
@@ -692,7 +692,7 @@ export default function AllergenTool() {
                 {/* Card 4: EU Compliance */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-3xs flex items-center justify-between gap-4">
                   <div className="space-y-1.5">
-                    <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wider">EU Compliance</span>
+                    <span className="text-[11px] font-bold text-slate-700 block  tracking-wider">EU Compliance</span>
                     <span className="text-3xl font-extrabold text-emerald-600 block leading-none">92%</span>
                     <span className="text-[11px] text-slate-700 font-medium block">Good compliance</span>
                   </div>
@@ -800,7 +800,7 @@ export default function AllergenTool() {
                   <div className="overflow-x-auto border border-slate-100 rounded-xl">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-extrabold text-slate-700 uppercase tracking-wider">
+                        <tr className="bg-slate-50/70 border-b border-slate-100 text-[10px] font-extrabold text-slate-700  tracking-wider">
                           <th className="py-3.5 px-4 font-black">Menu Item</th>
                           <th className="py-3.5 px-4 font-black">Allergens Detected</th>
                           <th className="py-3.5 px-4 font-black">Risk Level</th>
@@ -1117,7 +1117,7 @@ export default function AllergenTool() {
             <Shield className="w-5 h-5" />
           </div>
           <div className="space-y-1">
-            <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-widest font-mono">EU Standard</h4>
+            <h4 className="text-xs font-extrabold text-slate-800  tracking-widest font-mono">EU Standard</h4>
             <p className="text-xs text-slate-700 font-medium leading-relaxed max-w-xl font-sans">
               This tool uses the EU 1169/2011 regulation standard to identify 14 mandatory allergens.
             </p>
@@ -1159,7 +1159,7 @@ export default function AllergenTool() {
                 <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                   <div className="flex items-center gap-2">
                     <Shield className="w-5 h-5 text-[#7553FF] animate-pulse" />
-                    <h3 className="text-sm font-extrabold text-slate-850 uppercase tracking-widest font-mono">Mandatory EU Allergens</h3>
+                    <h3 className="text-sm font-extrabold text-slate-850  tracking-widest font-mono">Mandatory EU Allergens</h3>
                   </div>
                   <button
                     onClick={() => setEuAllergenOpen(false)}

@@ -521,15 +521,15 @@ boxShadow: {
 ### 3. Cập nhật Thiết kế cho Tool Check-in (Kích thước chữ, Thống kê & Cấu trúc Modal)
 - **Chuẩn hóa kích thước font chữ tối thiểu (Minimum Typography Limit)**: Trong toàn bộ bảng dữ liệu (Table), biểu mẫu chỉnh sửa (Form inputs), nhãn phụ (Secondary labels) và hộp thoại thông tin (Modals/Inspection cards) thuộc Tool Check-in, kích thước chữ nhỏ nhất phải đạt 14px (`text-[14px]` hoặc `text-sm`). Loại bỏ hoàn toàn các loại `text-xs`, `text-[11px]` và `text-[10px]` để nâng cao khả năng tiếp cận nhanh cho người quản lý. Đồng thời nâng cấp các biểu tượng chỉ hướng đại diện (như `MapPin`) từ `w-3` lên kích thước tối thiểu `w-3.5` hoặc `w-[14px]` để tối ưu hóa sự cân bằng về mặt thị giác.
 - **Tinh chỉnh trọng số chữ của khối Thống kê (Metrics & KPI Cards Weight)**: Chuyển đổi nhãn của các thẻ KPI tổng quan (như "Checked In Now", "Expected Today") từ `font-bold` (700) sang `font-medium` (500) nhằm phân tách rõ ràng cấu trúc phân cấp thông tin trước các con số khối lượng lớn (`3xl font-extrabold`).
-- **Làm sạch ngôn ngữ Modal & Nền tảng nhập liệu (Clean Boarding & Control Modals)**: Đường phân cách khối và viền trong Modal được định hướng sử dụng sắc xám nhẹ thanh khiết (`border-slate-100`) thay vì các tông viền mờ tối đè lực nặng lên tiêu cự. Toàn bộ các vùng nhận dạng đầu vào của biểu mẫu `<input>` và `<select>` duy trì hiển thị thông điệp văn bản sẫm sắc (`text-slate-800`), song hành với hệ thống đầu mục in hoa quy mô 14px quý phái.
+- **Làm sạch ngôn ngữ Modal & Nền tảng nhập liệu (Clean Boarding & Control Modals)**: Đường phân cách khối và viền trong Modal được định hướng sử dụng sắc xám nhẹ thanh khiết (`border-slate-100`) thay vì các tông viền mờ tối đè lực nặng lên tiêu cự. Toàn bộ các vùng nhận dạng đầu vào của biểu mẫu `<input>` và `<select>` duy trì hiển thị thông điệp văn bản sẫm sắc (`text-slate-800`), song hành với hệ thống đầu mục quy mô 14px quý phái (không viết hoa).
 
 ### 4. Đồng bộ hóa Thiết kế Bảng (Table Style Synchronization)
-- **Chuẩn hóa Header của Table (TableHeader Font & Color)**: Toàn bộ tiêu đề cột (`th`) trong các bảng dữ liệu phải đồng nhất sử dụng font chữ có chân cao cấp (`font-serif`), kích thước chữ chuẩn 14px (`text-[14px]`), độ đậm vừa phải (`font-medium`), màu xám sậm quy phái cứng cáp (`text-slate-800`), viết hoa in nổi kèm theo khoảng cách ký tự thoáng đạt (`uppercase tracking-widest`). Vùng tiêu đề được phủ một màu nền xám dịu nhẹ (`bg-slate-50/50`), phân cách với thân bảng bằng một đường kẻ ngang mảnh mờ tinh tế (`border-b border-slate-100`).
+- **Chuẩn hóa Header của Table (TableHeader Font & Color)**: Toàn bộ tiêu đề cột (`th`) trong các bảng dữ liệu phải đồng nhất sử dụng font chữ có chân cao cấp (`font-serif`), kích thước chữ chuẩn 14px (`text-[14px]`), độ đậm vừa phải (`font-medium`), màu xám sậm quy phái cứng cáp (`text-slate-800`), không viết hoa (No Uppercase), giữ nguyên kiểu viết thường/chữ hoa đầu từ (Title Case) kèm theo khoảng cách ký tự thoáng đạt (`tracking-widest`). Vùng tiêu đề được phủ một màu nền xám dịu nhẹ (`bg-slate-50/50`), phân cách với thân bảng bằng một đường kẻ ngang mảnh mờ tinh tế (`border-b border-slate-100`).
 - **Thiết kế lại Thân Bảng & Font chữ (Table Body Typography)**: Toàn bộ thông tin dòng nội dung (`td`) áp dụng font chữ không chân tinh tế Inter (`font-sans`), kích thước chữ chuẩn 14px (`text-[14px]`), sử dụng độ đậm thông thường (`font-normal`) thay cho chữ đậm làm tăng nặng thị giác (`font-bold`). Các dòng thông tin bổ sung phụ trợ (như phòng ban, thông tin chi tiết, thời gian khởi tạo) dùng sắc xám dịu mắt (`text-slate-450` hoặc tương đương) tạo dải phân cấp thanh thoát.
 - **Tối giản hóa Nhãn Trạng thái (Flat Status Badges)**: Loại bỏ hoàn toàn kiểu nhãn dạng viên thuốc tròn dày đi kèm chấm tròn rườm rà. Thay vào đó, toàn bộ nhãn trạng thái sử dụng kiểu thiết kế phẳng (Flat Design) hình chữ nhật bo góc cực mảnh (`rounded-[2px]`), đi kèm viền ngoài tinh tế (`border border-{color}-100`) và nền màu cực nhạt (`bg-{color}-50`):
-  - **Trạng thái Tích cực (Active / Approved / Confirmed)**: `bg-emerald-50 text-emerald-700 border-emerald-100` (In hoa: `ACTIVE`, `APPROVED`, `CONFIRMED`).
-  - **Trạng thái Chờ duyệt (Pending)**: `bg-amber-50 text-amber-700 border-amber-100` (In hoa: `PENDING`).
-  - **Trạng thái Bị hủy / Kết thúc (Rejected / Ended / Cancelled)**: `bg-rose-50 text-rose-700 border-rose-100` (In hoa: `REJECTED`, `ENDED`, `CANCELLED`).
+  - **Trạng thái Tích cực (Active / Approved / Confirmed)**: `bg-emerald-50 text-emerald-700 border-emerald-100` (Dạng chữ thường/Title Case: `Active`, `Approved`, `Confirmed`).
+  - **Trạng thái Chờ duyệt (Pending)**: `bg-amber-50 text-amber-700 border-amber-100` (Dạng chữ thường/Title Case: `Pending`).
+  - **Trạng thái Bị hủy / Kết thúc (Rejected / Ended / Cancelled)**: `bg-rose-50 text-rose-700 border-rose-100` (Dạng chữ thường/Title Case: `Rejected`, `Ended`, `Cancelled`).
 - **Hiệu ứng rê chuột và Phân tách (Hover Interactions & Spacing)**: Sử dụng ngăn cách thanh mảnh giữa các dòng (`divide-y divide-slate-100`), đồng nhất padding dọc cho các ô dữ liệu (`py-4 px-4/px-5`), đi kèm hiệu ứng chuyển màu nền cực dịu khi di chuột qua (`hover:bg-slate-50/30 transition-all`). Các nút thao tác hành động phụ trợ (như Menu dấu ba chấm) sử dụng khung viền bo tinh gọn (`p-1.5 border border-slate-200 text-slate-450 hover:bg-slate-50 hover:border-slate-350 hover:text-slate-800 rounded-lg transition-all`).
 
 ### 5. Nhãn trạng thái Khả dụng của Nhân viên (Staff Availability Status Badges)
@@ -545,5 +545,16 @@ boxShadow: {
   - Toàn bộ các lớp màu văn bản và icon dùng sắc xám Slate thấp (bao gồm `text-slate-100`, `text-slate-200`, `text-slate-300`, `text-slate-400`, `text-slate-450`, `text-slate-500`) trong hệ thống được nâng cấp đồng loạt sang màu **`text-slate-700`**.
   - Việc loại bỏ các sắc xám mờ nhạt này giúp thông tin hiển thị đạt độ tương phản chuẩn WCAG AAA (> 7:1) trên nền sáng, mang lại giao diện sắc nét, chuyên nghiệp, dễ đọc và tinh tế tuyệt đối.
   - Các lớp nền (`bg-slate-X`) và viền (`border-slate-X`) dùng cho phân chia bố cục vẫn được giữ nguyên sắc xám nhạt để bảo toàn cấu trúc phân khu mềm mại của giao diện.
+
+### 7. Quy tắc nghiêm ngặt: Tuyệt đối không sử dụng chữ in hoa (Strict No Uppercase Rule)
+- **Quy tắc cốt lõi**: Tuyệt đối không được phép sử dụng bất kỳ kiểu viết hoa in nổi (Uppercase/All-Caps) nào cho toàn bộ văn bản và giao diện trên cả hệ thống.
+- **Nghiêm cấm hoàn toàn**:
+  - **Không dùng CSS class `uppercase`**: Nghiêm cấm sử dụng class `uppercase` của Tailwind hoặc các quy tắc CSS tương đương ở bất kỳ đâu (tiêu đề bảng, đầu mục, nhãn biểu mẫu, trạng thái, thẻ nội dung, danh mục, menu, v.v.).
+  - **Không viết hoa cứng giá trị text**: Tuyệt đối không định dạng cứng văn bản dạng in hoa hoàn toàn (ví dụ: viết `ACTIVE` thay vì `Active`, `TOTAL` thay vì `Total`, `EXPIRED` thay vì `Expired`).
+  - **Không dùng hàm `.toUpperCase()`**: Không sử dụng hàm `.toUpperCase()` để ép định dạng in hoa cho chuỗi động hiển thị ra giao diện người dùng.
+- **Chuẩn hóa thay thế**:
+  - Tất cả các nhãn, tiêu đề, trạng thái, và đề mục trước đây dùng chữ in hoa phải được chuyển đổi hoàn toàn sang **Title Case** (Ví dụ: `Active`, `Pending`, `Expired`, `Staff Member`) hoặc **Sentence Case** tùy thuộc vào ngữ cảnh.
+  - Sự thay đổi này nhằm mang lại diện mạo tinh tế, khiêm nhường, thanh lịch tuyệt đối và cải thiện đáng kể trải nghiệm tiếp nhận thông tin từ người sử dụng.
+
 
 

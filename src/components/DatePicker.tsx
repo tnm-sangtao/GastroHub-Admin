@@ -258,7 +258,7 @@ export default function DatePicker({
             {/* Weekdays Labels */}
             <div className="grid grid-cols-7 gap-y-1 text-center mb-1">
               {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((d, index) => (
-                <span key={index} className="text-[10px] font-bold uppercase tracking-wider text-slate-700">
+                <span key={index} className="text-[10px] font-bold tracking-wider text-slate-700">
                   {d}
                 </span>
               ))}

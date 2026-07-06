@@ -264,7 +264,7 @@ export default function UpgradeNeededView({
           </div>
 
           {/* Premium styled required plan badge */}
-          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold  tracking-wider ${
             requiredPlan === 'Gold'
               ? 'bg-amber-50 text-amber-700 border border-amber-200/50'
               : 'bg-[#7553FF]/10 text-[#7553FF] border border-[#7553FF]/20'

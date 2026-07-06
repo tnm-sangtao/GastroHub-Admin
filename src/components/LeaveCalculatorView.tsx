@@ -119,7 +119,7 @@ export default function LeaveCalculatorView({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [typeFilter, setTypeFilter] = useState("All Types");
-  const [deptFilter, setDeptFilter] = useState("All Departments");
+  const [deptFilter, setDeptFilter] = useState("All Job Roles");
   const [dateRangeFilter, setDateRangeFilter] = useState("All Date Ranges");
   const [pageSize, setPageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -215,7 +215,7 @@ export default function LeaveCalculatorView({
       setSuccessBanner(`Rollover Expiry Simulated Successfully! ${results.length} employee(s) carryover leave processed.`);
     } else {
       setSimulationResult([]);
-      setSuccessBanner("Rollover Expiry Simulated Successfully! However, no employees have outstanding previous year rollover vacation (VJ Url. üb.). No actions were taken.");
+      setSuccessBanner("Rollover Expiry Simulated Successfully! However, no employees have outstanding previous year rollover vacation. No actions were taken.");
     }
   };
 
@@ -528,7 +528,7 @@ export default function LeaveCalculatorView({
 
     // Department Filter
     let matchesDept = true;
-    if (deptFilter !== "All Departments") {
+    if (deptFilter !== "All Job Roles") {
       matchesDept = item.department.toLowerCase() === deptFilter.toLowerCase();
     }
 
@@ -783,7 +783,7 @@ export default function LeaveCalculatorView({
       }));
     }
 
-    setSuccessBanner(`Success: Converted all ${daysToConvert.toFixed(1)} excess leave days of ${convertName} to ${hoursCredited.toFixed(1)} accrued hours (FWHA / Gleitzeitkonto) at a rate of 1 day = 8.0 working hours.`);
+    setSuccessBanner(`Success: Converted all ${daysToConvert.toFixed(1)} excess leave days of ${convertName} to ${hoursCredited.toFixed(1)} accrued hours at a rate of 1 day = 8.0 working hours.`);
   };
 
   // Submit new request
@@ -985,7 +985,7 @@ export default function LeaveCalculatorView({
             <Calendar className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[12px] font-medium text-slate-700 uppercase tracking-wider">Total Available Balance</p>
+            <p className="text-[12px] font-medium text-slate-700  tracking-wider">Total Available Balance</p>
             <p className="text-3xl font-medium text-[#15803D] mt-0.5 font-display">{totalCalculatedLeaveBalance.toFixed(1)}</p>
             <p className="text-xs text-slate-700 font-sans mt-0.5">Available days shown</p>
           </div>
@@ -997,7 +997,7 @@ export default function LeaveCalculatorView({
             <Send className="w-5 h-5 -rotate-45 text-[#15803D]" />
           </div>
           <div>
-            <p className="text-[12px] font-medium text-slate-700 uppercase tracking-wider">Approved Requests</p>
+            <p className="text-[12px] font-medium text-slate-700  tracking-wider">Approved Requests</p>
             <p className="text-3xl font-medium text-slate-800 mt-0.5 font-display">{approvedCount}</p>
             <p className="text-xs text-slate-700 font-sans mt-0.5">Assigned requests</p>
           </div>
@@ -1009,7 +1009,7 @@ export default function LeaveCalculatorView({
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-[12px] font-medium text-slate-700 uppercase tracking-wider">Pending Approval</p>
+            <p className="text-[12px] font-medium text-slate-700  tracking-wider">Pending Approval</p>
             <p className="text-3xl font-medium text-amber-600 mt-0.5 font-display">{pendingCount}</p>
             <p className="text-xs text-slate-700 font-sans mt-0.5">Requests needing review</p>
           </div>
@@ -1023,7 +1023,7 @@ export default function LeaveCalculatorView({
             </div>
           </div>
           <div>
-            <p className="text-[12px] font-medium text-slate-700 uppercase tracking-wider">Rejected Requests</p>
+            <p className="text-[12px] font-medium text-slate-700  tracking-wider">Rejected Requests</p>
             <p className="text-3xl font-medium text-red-650 mt-0.5 font-display">{rejectedCount}</p>
             <p className="text-xs text-slate-700 font-sans mt-0.5">Rejected requests</p>
           </div>
@@ -1080,7 +1080,7 @@ export default function LeaveCalculatorView({
             activeSubTab === "balances" ? "text-[#7553FF]" : "text-slate-700 hover:text-slate-650"
           }`}
         >
-          Balances & Leave Settings (Urlaubsübertrag)
+          Balances & Leave Settings 
           {activeSubTab === "balances" && (
             <motion.div
               layoutId="leaveSubTabIndicator"
@@ -1180,7 +1180,7 @@ export default function LeaveCalculatorView({
                   }}
                   className="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl outline-none text-[14px] text-slate-800 font-medium appearance-none cursor-pointer focus:border-[#7553FF]/60 transition-all shadow-3xs"
                 >
-                  <option value="All Departments">All Departments</option>
+                  <option value="All Job Roles">All Job Roles</option>
                   <option value="Sales">Sales</option>
                   <option value="HR">HR</option>
                   <option value="Operation">Operation</option>
@@ -1199,7 +1199,7 @@ export default function LeaveCalculatorView({
                 setSearchQuery("");
                 setStatusFilter("All Status");
                 setTypeFilter("All Types");
-                setDeptFilter("All Departments");
+                setDeptFilter("All Job Roles");
                 setDateRangeFilter("All Date Ranges");
                 setCurrentPage(1);
               }}
@@ -1215,8 +1215,8 @@ export default function LeaveCalculatorView({
             <div className="overflow-x-auto">
               <table className="w-full border-collapse min-w-[1000px]">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-[#FAF9F7]/60 text-[14px] font-medium text-slate-800 uppercase tracking-wider select-none">
-                    <th className="px-5 py-5 text-left font-sans text-[14px] font-medium">Employee / Department</th>
+                  <tr className="border-b border-slate-100 bg-[#FAF9F7]/60 text-[14px] font-medium text-slate-800  tracking-wider select-none">
+                    <th className="px-5 py-5 text-left font-sans text-[14px] font-medium">Employee / Job Role</th>
                     <th className="px-4 py-5 text-left font-sans text-[14px] font-medium">Branch</th>
                     {activeSubTab === "leave" ? (
                       <>
@@ -1265,7 +1265,7 @@ export default function LeaveCalculatorView({
                                   referrerPolicy="no-referrer"
                                 />
                               ) : (
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-[14px] tracking-wide uppercase shrink-0 ${nameColors[record.name] || 'bg-slate-100 text-slate-700'}`}>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium text-[14px] tracking-wide  shrink-0 ${nameColors[record.name] || 'bg-slate-100 text-slate-700'}`}>
                                   {initials}
                                 </div>
                               )}
@@ -1290,24 +1290,24 @@ export default function LeaveCalculatorView({
                               <td className="py-4 px-4 text-left">
                                 {record.leaveType === "Annual Leave" ? (
                                   <span className="inline-flex items-center bg-purple-50 text-purple-700 border border-purple-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide select-none">
-                                    ANNUAL LEAVE
+                                    Annual Leave
                                   </span>
                                 ) : record.leaveType === "Sick Leave" ? (
                                   <span className="inline-flex items-center bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide select-none">
-                                    SICK LEAVE
+                                    Sick Leave
                                   </span>
                                 ) : record.leaveType === "Compensatory Leave" ? (
                                   <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide select-none gap-1">
                                     <Sparkles className="w-3 h-3" />
-                                    COMPENSATORY REST (FWHA)
+                                    Compensatory Rest (FWHA)
                                   </span>
                                 ) : record.leaveType === "Personal Leave" ? (
                                   <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide select-none">
-                                    PERSONAL LEAVE
+                                    Personal Leave
                                   </span>
                                 ) : (
                                   <span className="inline-flex items-center bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide select-none">
-                                    {record.leaveType ? record.leaveType.toUpperCase() : "UNPAID LEAVE"}
+                                    {record.leaveType || "Unpaid Leave"}
                                   </span>
                                 )}
                               </td>
@@ -1336,8 +1336,8 @@ export default function LeaveCalculatorView({
                           ) : (
                             <>
                               <td className="py-4 px-4 text-left">
-                                <span className="inline-flex items-center bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase">
-                                  {record.flextimeType?.toUpperCase() || "FLEXTIME"}
+                                <span className="inline-flex items-center bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide ">
+                                  {record.flextimeType || "Flextime"}
                                 </span>
                               </td>
                               <td className="py-4 px-4 text-left leading-tight">
@@ -1356,15 +1356,15 @@ export default function LeaveCalculatorView({
                           {/* Status Badge */}
                           <td className="py-4 px-4 text-left whitespace-nowrap">
                             {record.status === "Active" || record.status === "Approved" ? (
-                              <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none">
+                              <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide  select-none">
                                 {activeSubTab === "leave" ? "APPROVED" : "ACTIVE"}
                               </span>
                             ) : record.status === "Pending" ? (
-                              <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none animate-pulse">
+                              <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide  select-none animate-pulse">
                                 PENDING
                               </span>
                             ) : (
-                              <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none">
+                              <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide  select-none">
                                 {activeSubTab === "leave" ? "REJECTED" : "ENDED"}
                               </span>
                             )}
@@ -1409,10 +1409,10 @@ export default function LeaveCalculatorView({
                                   </button>
                                 )}
                                 {record.status === "Cancelled" && (
-                                  <span className="inline-flex items-center bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none">Cancelled & Refunded</span>
+                                  <span className="inline-flex items-center bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide  select-none">Cancelled & Refunded</span>
                                 )}
                                 {record.status === "Rejected" && (
-                                  <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none">Rejected</span>
+                                  <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded text-[11px] font-medium tracking-wide  select-none">Rejected</span>
                                 )}
                               </div>
                             ) : (
@@ -1428,7 +1428,7 @@ export default function LeaveCalculatorView({
                                   <>
                                     <div className="fixed inset-0 z-40" onClick={() => setActiveActionMenuId(null)} />
                                     <div className="absolute right-6 top-10 w-44 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1.5 text-left text-[13px] text-slate-750">
-                                      <span className="px-3 py-1.5 text-[10px] font-bold text-slate-700 block uppercase tracking-wider border-b border-b-slate-100 mb-1">
+                                      <span className="px-3 py-1.5 text-[10px] font-bold text-slate-700 block  tracking-wider border-b border-b-slate-100 mb-1">
                                         Change Status
                                       </span>
                                       
@@ -1547,14 +1547,14 @@ export default function LeaveCalculatorView({
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-150 bg-slate-50/70 text-[13px] font-medium text-slate-700 uppercase">
+                  <tr className="border-b border-slate-150 bg-slate-50/70 text-[13px] font-medium text-slate-700 ">
                     <th className="px-4 py-3 text-left font-medium">Employee Name</th>
                     <th className="px-4 py-3 text-left font-medium">Branch</th>
                     <th className="px-4 py-3 text-left font-medium">Current Leave</th>
-                    <th className="px-4 py-3 text-left font-medium">Rollover Leave (VJ Url. üb.)</th>
+                    <th className="px-4 py-3 text-left font-medium">Rollover Leave</th>
                     <th className="px-4 py-3 text-left font-medium">Sick Leave</th>
                     <th className="px-4 py-3 text-left font-medium">Personal Leave</th>
-                    <th className="px-4 py-3 text-left text-emerald-800 bg-emerald-50/30 font-medium">Accrued Hours (FWHA / Gleitzeitkonto)</th>
+                    <th className="px-4 py-3 text-left text-emerald-800 bg-emerald-50/30 font-medium">Accrued Hours</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-[13px] text-slate-800">
@@ -1652,7 +1652,7 @@ export default function LeaveCalculatorView({
                 <div className="bg-purple-50/40 border border-purple-100 p-3 rounded-2xl flex items-start gap-2 text-xs leading-relaxed text-[#5B39E3]">
                   <Award className="w-4 h-4 text-[#7553FF] shrink-0 mt-0.5" />
                   <span>
-                    <strong>German HR Standard:</strong> Rollover leave (VJ Url. üb.) must be consumed first before deducting from the current year's standard annual leave allowance.
+                    <strong>German HR Standard:</strong> Rollover leave must be consumed first before deducting from the current year's standard annual leave allowance.
                   </span>
                 </div>
 
@@ -1819,7 +1819,7 @@ export default function LeaveCalculatorView({
                   
                   {/* Select Staff member */}
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                    <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                       Select Employee
                     </label>
                     <select
@@ -1859,7 +1859,7 @@ export default function LeaveCalculatorView({
 
                   {/* Branch Constraint Dropdown (Compulsory as per PRD Section 2) */}
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                    <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                       Required: Select Registered Branch (Store Branch)
                     </label>
                     <select
@@ -1882,7 +1882,7 @@ export default function LeaveCalculatorView({
                       {/* Leave Categories */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                             Leave Type (Category)
                           </label>
                           <select
@@ -1898,7 +1898,7 @@ export default function LeaveCalculatorView({
                           </select>
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                             Estimated Conversion
                           </label>
                           <div className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[14px] text-slate-700 font-medium font-mono">
@@ -1960,7 +1960,7 @@ export default function LeaveCalculatorView({
                       {/* Date Ranges */}
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5 text-left">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block mb-1">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block mb-1">
                             Start Date
                           </label>
                           <DatePicker
@@ -1971,7 +1971,7 @@ export default function LeaveCalculatorView({
                           />
                         </div>
                         <div className="space-y-1.5 text-left">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block mb-1">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block mb-1">
                             End Date
                           </label>
                           <DatePicker
@@ -1984,7 +1984,7 @@ export default function LeaveCalculatorView({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                        <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                           Reason Details
                         </label>
                         <textarea
@@ -2000,7 +2000,7 @@ export default function LeaveCalculatorView({
                     <>
                       {/* Flextime Setup */}
                       <div className="space-y-1.5">
-                        <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                        <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                           Flextime Arrangement
                         </label>
                         <select
@@ -2024,7 +2024,7 @@ export default function LeaveCalculatorView({
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                        <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                           Arrangement Schedule Details
                         </label>
                         <input
@@ -2038,7 +2038,7 @@ export default function LeaveCalculatorView({
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                             Applied Days
                           </label>
                           <select
@@ -2053,7 +2053,7 @@ export default function LeaveCalculatorView({
                           </select>
                         </div>
                         <div className="space-y-1.5">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block">
                             Validity Period
                           </label>
                           <div className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[14px] text-slate-700 font-medium font-mono">
@@ -2064,7 +2064,7 @@ export default function LeaveCalculatorView({
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5 text-left">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block mb-1">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block mb-1">
                             Start Date
                           </label>
                           <DatePicker
@@ -2075,7 +2075,7 @@ export default function LeaveCalculatorView({
                           />
                         </div>
                         <div className="space-y-1.5 text-left">
-                          <label className="text-[13px] font-medium text-slate-700 uppercase tracking-wide block mb-1">
+                          <label className="text-[13px] font-medium text-slate-700  tracking-wide block mb-1">
                             End Date
                           </label>
                           <DatePicker

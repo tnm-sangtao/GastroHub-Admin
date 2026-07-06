@@ -125,7 +125,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: CommandP
                 {/* Categorized rendering logic */}
                 {Array.from(new Set(filteredCommands.map((c) => c.category))).map((cat) => (
                   <div key={cat} className="space-y-1">
-                    <p className="px-3 pt-2 pb-1 text-[14px] font-semibold text-[#1C1814]/40 tracking-wider uppercase font-display">
+                    <p className="px-3 pt-2 pb-1 text-[14px] font-semibold text-[#1C1814]/40 tracking-wider  font-display">
                       {cat}
                     </p>
                     {filteredCommands

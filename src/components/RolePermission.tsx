@@ -103,6 +103,7 @@ const INITIAL_ROLES: RoleData[] = [
     description: 'Full administrative access and ultimate control over the restaurant branch, including billing, subscription plan tiering, and team roster access.',
     memberCount: 2,
     isSystem: true,
+    dataScope: 'Brand-wide',
     permissionGroups: [
       {
         category: 'Operations',
@@ -151,6 +152,7 @@ const INITIAL_ROLES: RoleData[] = [
     description: 'Operational team supervisor with powers to organize workflows, resolve scheduling conflicts, adjust menus and respond to business reviews.',
     memberCount: 4,
     isSystem: true,
+    dataScope: 'Assigned Stores',
     permissionGroups: [
       {
         category: 'Operations',
@@ -199,6 +201,7 @@ const INITIAL_ROLES: RoleData[] = [
     description: 'Financial auditor with specialized access to payroll ledger outputs, time-clock variables, and branch tax settings.',
     memberCount: 1,
     isSystem: true,
+    dataScope: 'Brand-wide',
     permissionGroups: [
       {
         category: 'Operations',
@@ -207,7 +210,7 @@ const INITIAL_ROLES: RoleData[] = [
           { id: 'hr_shift_write', name: 'Shift scheduling', description: 'Can schedule, modify, assign, and publish crew work hours', enabled: false },
           { id: 'hr_shift_read', name: 'Attendance tracking', description: 'Can view and track week/day attendance and calendars', enabled: true },
           { id: 'hr_payroll_write', name: 'Payroll overrides', description: 'Can process base salaries, modify parameters, and input payroll overrides', enabled: true },
-          { id: 'hr_leave_write', name: 'Leave approvals', description: 'Can review, approve, or reject sick calls, holiday, and compensatory requests', enabled: false }
+          { id: 'hr_leave_write', name: 'Leave approvals', description: 'Can review, approve, or reject sick calls, holiday, and compensatory requests', enabled: true }
         ]
       },
       {
@@ -524,19 +527,19 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead className="bg-[#FAF9F7] border-b border-[#EAE4DC]">
               <tr>
-                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest w-[25%]">
+                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800  tracking-widest w-[25%]">
                   Role Name
                 </th>
-                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest w-[40%]">
+                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800  tracking-widest w-[40%]">
                   Description
                 </th>
-                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest w-[15%]">
+                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800  tracking-widest w-[15%]">
                   Clearance Level
                 </th>
-                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest w-[12%]">
+                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800  tracking-widest w-[12%]">
                   Active Crew
                 </th>
-                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800 uppercase tracking-widest w-[8%] text-right">
+                <th className="py-4 px-5 font-serif text-[14px] font-medium text-slate-800  tracking-widest w-[8%] text-right">
                   Actions
                 </th>
               </tr>
@@ -573,11 +576,11 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                     <td className="py-4 px-5 font-sans text-[14px] font-normal text-slate-700">
                       <div className="flex flex-col gap-1">
                         {r.isSystem ? (
-                          <span className="inline-flex items-center w-fit px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[11px] font-normal uppercase tracking-wider">
+                          <span className="inline-flex items-center w-fit px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[11px] font-normal  tracking-wider">
                             System Core
                           </span>
                         ) : (
-                          <span className="inline-flex items-center w-fit px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-[2px] text-[11px] font-normal uppercase tracking-wider">
+                          <span className="inline-flex items-center w-fit px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-[2px] text-[11px] font-normal  tracking-wider">
                             Bespoke License
                           </span>
                         )}
@@ -692,7 +695,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                   {(() => {
                     const styles = getRoleBadgeStyles(m.role);
                     return (
-                      <span className={`inline-flex items-center px-2 py-0.5 border rounded-[3px] text-[11px] font-medium uppercase tracking-wider font-mono ${styles.classes}`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 border rounded-[3px] text-[11px] font-medium  tracking-wider font-mono ${styles.classes}`}>
                         {m.role}
                       </span>
                     );
@@ -726,12 +729,12 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                       Configure {editingRole.name} Workflows
                     </h3>
                     {editingRole.key === 'owner' ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-[4px] text-[13px] font-normal uppercase tracking-wider">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-[4px] text-[13px] font-normal  tracking-wider">
                         <Lock className="w-[14px] h-[14px]" />
                         <span>Immutable Core</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded-[4px] text-[13px] font-normal uppercase tracking-wider">
+                      <span className="inline-flex items-center px-2.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded-[4px] text-[13px] font-normal  tracking-wider">
                         Editable clearance
                       </span>
                     )}
@@ -832,7 +835,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                       <div key={group.category} className="space-y-3.5">
                         <div className="flex items-center gap-2 border-b border-[#EAE4DC] pb-2 bg-slate-50/55 px-3 py-1.5 rounded-md">
                           <GroupIcon className="w-[16px] h-[16px] text-[#7553FF]" />
-                          <h3 className="text-[14px] font-serif font-medium text-slate-800 uppercase tracking-widest">
+                          <h3 className="text-[14px] font-serif font-medium text-slate-800  tracking-widest">
                             {group.category}
                           </h3>
                         </div>
@@ -871,11 +874,11 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                                 <div className="flex flex-wrap items-center gap-2.5">
                                   <span className="font-bold text-[14px] text-[#1C1814]">{perm.name}</span>
                                   {perm.enabled ? (
-                                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[11px] font-semibold uppercase tracking-wider scale-[0.9] origin-left">
+                                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[11px] font-semibold  tracking-wider scale-[0.9] origin-left">
                                       ACTIVE
                                     </span>
                                   ) : (
-                                    <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-[2px] text-[11px] font-semibold uppercase tracking-wider scale-[0.9] origin-left">
+                                    <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-[2px] text-[11px] font-semibold  tracking-wider scale-[0.9] origin-left">
                                       INACTIVE
                                     </span>
                                   )}
@@ -904,7 +907,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                       <span>Delete Role</span>
                     </button>
                   ) : (
-                    <span className="text-[13px] text-slate-700 font-normal uppercase tracking-wider font-mono">
+                    <span className="text-[13px] text-slate-700 font-normal  tracking-wider font-mono">
                       Secure Clearance Dispatcher
                     </span>
                   )}
@@ -1054,7 +1057,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                   {/* RIGHT COLUMN: Custom Permissions List */}
                   <div className="flex-1 p-6 space-y-6 overflow-y-auto bg-white text-left">
                     <div>
-                      <h4 className="text-[12px] font-bold text-[#1C1814] uppercase tracking-wider border-b border-[#EAE4DC] pb-1.5 mb-3">
+                      <h4 className="text-[12px] font-bold text-[#1C1814]  tracking-wider border-b border-[#EAE4DC] pb-1.5 mb-3">
                         Customized Permissions
                       </h4>
                       <p className="text-[13px] text-slate-700 mb-4 leading-relaxed font-sans">
@@ -1069,7 +1072,7 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                           <div key={group.category} className="space-y-3.5">
                             <div className="flex items-center gap-2 border-b border-slate-100 pb-2 px-3 py-1 bg-slate-50/50 rounded-lg">
                               <GroupIcon className="w-[15px] h-[15px] text-[#7553FF]" />
-                              <h3 className="text-[13px] font-sans font-semibold text-slate-800 uppercase tracking-wider">
+                              <h3 className="text-[13px] font-sans font-semibold text-slate-800  tracking-wider">
                                 {group.category}
                               </h3>
                             </div>
@@ -1103,11 +1106,11 @@ export default function RolePermission({ staff: staffProps }: RolePermissionProp
                                     <div className="flex flex-wrap items-center gap-2">
                                       <span className="font-bold text-[13.5px] text-[#1C1814]">{perm.name}</span>
                                       {perm.enabled ? (
-                                        <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[10px] font-semibold uppercase tracking-wider scale-[0.95] origin-left">
+                                        <span className="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-[2px] text-[10px] font-semibold  tracking-wider scale-[0.95] origin-left">
                                           ACTIVE
                                         </span>
                                       ) : (
-                                        <span className="px-1.5 py-0.5 bg-slate-50 text-slate-700 border border-slate-100 rounded-[2px] text-[10px] font-semibold uppercase tracking-wider scale-[0.95] origin-left">
+                                        <span className="px-1.5 py-0.5 bg-slate-50 text-slate-700 border border-slate-100 rounded-[2px] text-[10px] font-semibold  tracking-wider scale-[0.95] origin-left">
                                           INACTIVE
                                         </span>
                                       )}
