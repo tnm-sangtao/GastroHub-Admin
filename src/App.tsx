@@ -515,7 +515,6 @@ export default function App() {
       
       // Staff & Roles
       'staff-roles',
-      'shift-planner',
       
       // Marketing & Brand Growth (UNLOCKED IN BASIC!)
       'social-post',
@@ -530,6 +529,7 @@ export default function App() {
       'catering-inquiries'
     ];
     if (allowedBasic.includes(tabId)) return 'Basic';
+    if (tabId === 'shift-planner') return 'Gold';
     return 'Diamond';
   }
 
