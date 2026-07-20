@@ -3987,33 +3987,33 @@ export function BookTableView({
           <div className="overflow-x-auto border border-slate-100 rounded-2xl bg-white shadow-3xs">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium text-slate-800  tracking-widest select-none">
-                  <th className="px-5 py-4 text-left font-serif text-[14px] font-medium">
-                    CUSTOMER
+                <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-semibold text-slate-700 select-none">
+                  <th className="px-5 py-4 text-left font-sans text-[14px] font-semibold">
+                    Customer
                   </th>
-                  <th className="px-5 py-4 text-left font-serif text-[14px] font-medium">
-                    PHONE NUMBER
+                  <th className="px-5 py-4 text-left font-sans text-[14px] font-semibold">
+                    Phone Number
                   </th>
-                  <th className="px-5 py-4 text-center font-serif text-[14px] font-medium w-24">
-                    PAX
+                  <th className="px-5 py-4 text-center font-sans text-[14px] font-semibold w-24">
+                    Pax
                   </th>
-                  <th className="px-5 py-4 text-left font-serif text-[14px] font-medium">
-                    STATUS
+                  <th className="px-5 py-4 text-left font-sans text-[14px] font-semibold">
+                    Status
                   </th>
                   <th
-                    className="px-5 py-4 text-left font-serif text-[14px] font-medium cursor-pointer hover:bg-slate-100/50 transition-colors"
+                    className="px-5 py-4 text-left font-sans text-[14px] font-semibold cursor-pointer hover:bg-slate-100/50 transition-colors"
                     onClick={() =>
                       setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
                     }
                   >
-                    <span>DATE / TIME</span>
+                    <span>Date / Time</span>
                   </th>
-                  <th className="px-5 py-4 text-left font-serif text-[14px] font-medium">
-                    NOTES
+                  <th className="px-5 py-4 text-left font-sans text-[14px] font-semibold">
+                    Notes
                   </th>
                   {bookingCategory !== "all" && (
-                    <th className="px-5 py-4 text-center font-serif text-[14px] font-medium w-32">
-                      ACTIONS
+                    <th className="px-5 py-4 text-center font-sans text-[14px] font-semibold w-32">
+                      Actions
                     </th>
                   )}
                 </tr>
@@ -4049,16 +4049,16 @@ export function BookTableView({
                     {/* STATUS BADGES */}
                     <td className="px-5 py-4">
                       {b.status === "CONFIRMED" ? (
-                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
-                          CONFIRMED
+                        <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none">
+                          Confirmed
                         </span>
                       ) : b.status === "PENDING" ? (
-                        <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
-                          PENDING
+                        <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none">
+                          Pending
                         </span>
                       ) : (
-                        <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none ">
-                          CANCELLED
+                        <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded-[2px] text-[14px] font-normal select-none">
+                          Cancelled
                         </span>
                       )}
                     </td>

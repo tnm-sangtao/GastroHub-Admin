@@ -30,7 +30,13 @@ export type TabId =
   | 'role-permission'
   // Coming Soon Tools
   | 'catering-inquiries'
-  | 'payroll';
+  | 'payroll'
+  // SaaS Super Admin tabs
+  | 'saas-overview'
+  | 'saas-brands'
+  | 'saas-plans'
+  | 'saas-billing'
+  | 'saas-roles';
 
 export interface DishItem {
   id: string;

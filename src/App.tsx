@@ -15,7 +15,10 @@ import {
   Search,
   Bell,
   ChevronDown,
+  ChevronsUpDown,
   Globe,
+  Layers,
+  CreditCard,
   PanelLeftClose,
   PanelLeftOpen,
   Store,
@@ -55,6 +58,7 @@ import MenuTranslator from './components/MenuTranslator';
 import AllergenTool from './components/AllergenTool';
 import Settings from './components/Settings';
 import RolePermission from './components/RolePermission';
+import SuperAdminPortal from './components/SuperAdminPortal';
 import UpgradeNeededView from './components/UpgradeNeededView';
 import ProfileSettingsModal from './components/ProfileSettingsModal';
 
@@ -176,6 +180,17 @@ export default function App() {
 
   // Compute simulated profile
   const activeSimulatedUser = (() => {
+    if (activeSimulatedUserId === 'saas-super-admin') {
+      return {
+        id: 'saas-super-admin',
+        name: 'Gastro Hub SaaS Operator',
+        email: 'operator@gastrohub.com',
+        systemAccessLevel: 'SaaS-Super-Admin',
+        systemPermissions: ['Super Admin'],
+        role: 'Super Admin',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop'
+      };
+    }
     if (activeSimulatedUserId === 'super-admin') {
       return {
         id: 'super-admin',
@@ -234,6 +249,12 @@ export default function App() {
   };
 
   const isTabAllowedForSimulatedUser = (tabId: TabId) => {
+    if (['saas-overview', 'saas-brands', 'saas-plans', 'saas-billing', 'saas-roles'].includes(tabId)) {
+      return activeSimulatedUserId === 'saas-super-admin';
+    }
+    if (activeSimulatedUserId === 'saas-super-admin') {
+      return false;
+    }
     if (activeSimulatedUser.systemAccessLevel === 'Admin') return true;
     
     // Default self-service tabs are always visible
@@ -465,7 +486,12 @@ export default function App() {
       'settings': 'sys_brand_edit',
       'role-permission': 'sys_billing_edit',
       'social-account': 'sys_brand_edit',
-      'catering-inquiries': 'always_allowed'
+      'catering-inquiries': 'always_allowed',
+      'saas-overview': 'always_allowed',
+      'saas-brands': 'always_allowed',
+      'saas-plans': 'always_allowed',
+      'saas-billing': 'always_allowed',
+      'saas-roles': 'always_allowed'
     };
 
     const requiredPerm = TAB_PERMISSION_MAPPING[tabId];
@@ -489,6 +515,7 @@ export default function App() {
       
       // Staff & Roles
       'staff-roles',
+      'shift-planner',
       
       // Marketing & Brand Growth (UNLOCKED IN BASIC!)
       'social-post',
@@ -503,7 +530,6 @@ export default function App() {
       'catering-inquiries'
     ];
     if (allowedBasic.includes(tabId)) return 'Basic';
-    if (tabId === 'shift-planner') return 'Gold';
     return 'Diamond';
   }
 
@@ -548,6 +574,15 @@ export default function App() {
       return;
     }
     setActiveTab(tabId);
+  }
+
+  function handleRoleChange(roleId: string) {
+    setActiveSimulatedUserId(roleId);
+    if (roleId === 'saas-super-admin') {
+      setActiveTab('saas-overview');
+    } else {
+      setActiveTab('dashboard');
+    }
   }
 
   // Keyboard shortcut listeners (⌘K to open search, ⌘B to collapse sidebar)
@@ -683,199 +718,156 @@ export default function App() {
             </div>
           </div>
 
-          {/* Plan Selector Widget for Testing */}
-          {!collapsed ? (
-            <div className="mx-3 mt-3.5 p-3 bg-indigo-500/5 border border-slate-200 rounded-xl text-center space-y-2 shrink-0 select-none pb-3" id="sidebar-plan-selector">
-              <div className="flex items-center justify-between text-[11px] font-bold text-[#7553FF]/70 tracking-wider px-0.5">
-                <span>Access Plan</span>
-                <span className="text-[9px] bg-[#7553FF]/15 text-[#7553FF] px-1.5 py-0.5 rounded-md font-mono font-bold">{currentPlan}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-1 bg-white border border-slate-200 p-0.5 rounded-lg text-xs">
-                <button
-                  onClick={() => setCurrentPlan('Basic')}
-                  className={`py-1 text-[11px] font-bold rounded-md transition-all cursor-pointer border-none ${
-                    currentPlan === 'Basic'
-                      ? 'bg-[#7553FF] text-white animate-fadeIn'
-                      : 'text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Basic
-                </button>
-                <button
-                  onClick={() => setCurrentPlan('Gold')}
-                  className={`py-1 text-[11px] font-bold rounded-md transition-all cursor-pointer border-none ${
-                    currentPlan === 'Gold'
-                      ? 'bg-[#7553FF] text-white animate-fadeIn'
-                      : 'text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Gold
-                </button>
-                <button
-                  onClick={() => setCurrentPlan('Diamond')}
-                  className={`py-1 text-[11px] font-bold rounded-md transition-all cursor-pointer border-none ${
-                    currentPlan === 'Diamond'
-                      ? 'bg-[#7553FF] text-white animate-fadeIn'
-                      : 'text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  Diam.
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex justify-center mt-3 shrink-0 select-none" id="sidebar-plan-indicator-collapsed">
-              <button
-                onClick={() => {
-                  const sequence: ('Basic' | 'Gold' | 'Diamond')[] = ['Basic', 'Gold', 'Diamond'];
-                  const nextIndex = (sequence.indexOf(currentPlan) + 1) % 3;
-                  setCurrentPlan(sequence[nextIndex]);
-                }}
-                className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs text-white cursor-pointer border-none bg-[#7553FF] hover:bg-[#623EE2] transition-colors`}
-                title={`Current plan: ${currentPlan}. Click to toggle.`}
-              >
-                {currentPlan === 'Basic' ? 'B' : currentPlan === 'Gold' ? 'G' : 'D'}
-              </button>
-            </div>
-          )}
-
-          {/* Simulated Role Dropdown Selector */}
-          {!collapsed ? (
-            <div className="mx-3 mt-2 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 shrink-0 select-none font-sans" id="sidebar-role-simulator">
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#1C1814]/50 tracking-wider px-0.5">
-                <Users className="w-3.5 h-3.5 text-[#7553FF]" strokeWidth={2.5} />
-                <span>Simulate Role</span>
-              </div>
-              <select
-                value={activeSimulatedUserId}
-                onChange={(e) => {
-                  setActiveSimulatedUserId(e.target.value);
-                  setActiveTab('dashboard');
-                }}
-                className="w-full text-[13px] font-medium bg-white border border-slate-200 rounded-lg p-1.5 text-[#1C1814] focus:outline-none focus:border-[#7553FF] cursor-pointer"
-              >
-                <option value="super-admin">👑 Admin (Brand Owner)</option>
-                <option value="1">💼 Store Manager</option>
-                <option value="2">👥 HR / Accountant</option>
-                <option value="3">🚶 Staff</option>
-              </select>
-            </div>
-          ) : (
-            <div className="flex justify-center mt-2 shrink-0 select-none" id="sidebar-role-indicator-collapsed">
-              <button
-                onClick={() => {
-                  const roles = ['super-admin', '1', '2', '3'];
-                  const nextIdx = (roles.indexOf(activeSimulatedUserId) + 1) % roles.length;
-                  setActiveSimulatedUserId(roles[nextIdx]);
-                  setActiveTab('dashboard');
-                }}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-xs bg-slate-100 hover:bg-slate-200 text-[#1C1814] cursor-pointer border-none"
-                title="Toggle simulated role"
-              >
-                {activeSimulatedUserId === 'super-admin' ? '👑' : activeSimulatedUserId === '1' ? '💼' : activeSimulatedUserId === '2' ? '👥' : '🚶'}
-              </button>
-            </div>
-          )}
-
           {/* C. Middle Navigation List (Grouped) */}
           <nav className="px-2 py-4 space-y-3 flex-1 overflow-y-auto pr-1 select-none scrollbar-thin scrollbar-thumb-slate-200">
-            {/* Direct Dashboard Link */}
-            <div className="space-y-0.5">
-              <button
-                onClick={() => {
-                  handleTabClick('dashboard');
-                  if (isMobileLayout) setIsMobileSidebarOpen(false);
-                }}
-                title={collapsed ? "Dashboard" : undefined}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-[8px] text-left transition-all cursor-pointer relative group ${
-                  collapsed ? 'justify-center' : ''
-                } ${
-                  activeTab === 'dashboard'
-                    ? 'bg-[#7553FF]/10 text-[#7553FF]'
-                    : 'text-[#1C1814]/70 hover:bg-[#FAFAFA]'
-                }`}
-              >
-                {activeTab === 'dashboard' && !collapsed && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#7553FF] rounded-r-full" />
-                )}
-                <Grid className="w-4.5 h-4.5 shrink-0" strokeWidth={activeTab === 'dashboard' ? 2 : 1.75} />
+            {activeSimulatedUserId === 'saas-super-admin' ? (
+              <div className="space-y-1 font-sans">
                 {!collapsed && (
-                  <span className={`text-[14px] leading-[20px] ${activeTab === 'dashboard' ? 'text-[#7553FF] font-medium' : 'text-[#1C1814]/85 font-normal'}`}>
-                    Dashboard
+                  <span className="px-3 text-[11px] font-bold tracking-wider text-[#7553FF] uppercase block mb-3 font-poppins">
+                    SaaS Control Center
                   </span>
                 )}
-              </button>
-            </div>
+                {[
+                  { id: 'saas-overview' as const, label: 'SaaS Overview', icon: TrendingUp },
+                  { id: 'saas-brands' as const, label: 'Brand & Tenants', icon: Globe },
+                  { id: 'saas-plans' as const, label: 'Subscription Plans', icon: Layers },
+                  { id: 'saas-billing' as const, label: 'Billing & Invoicing', icon: CreditCard },
+                  { id: 'saas-roles' as const, label: 'Operator Roles', icon: Shield },
+                ].map((sub) => {
+                  const SubIcon = sub.icon;
+                  const isSelected = activeTab === sub.id;
+                  return (
+                    <button
+                      key={sub.id}
+                      onClick={() => {
+                        handleTabClick(sub.id);
+                        if (isMobileLayout) setIsMobileSidebarOpen(false);
+                      }}
+                      title={collapsed ? sub.label : undefined}
+                      className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-left transition-all relative group cursor-pointer border-none ${
+                        collapsed ? 'justify-center' : ''
+                      } ${
+                        isSelected
+                          ? 'bg-[#7553FF]/10 text-[#7553FF]'
+                          : 'text-[#1C1814]/70 hover:bg-[#FAFAFA]'
+                      }`}
+                    >
+                      {isSelected && !collapsed && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[#7553FF] rounded-r-full" />
+                      )}
+                      <div className="relative flex items-center shrink-0">
+                        <SubIcon className="w-4 h-4 shrink-0" strokeWidth={isSelected ? 2 : 1.75} />
+                      </div>
+                      {!collapsed && (
+                        <span className={`text-[14px] leading-[25px] truncate ${isSelected ? 'text-[#7553FF] font-medium' : 'text-[#1C1814]/85 font-normal'}`}>
+                          {sub.label}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <>
+                {/* Direct Dashboard Link */}
+                <div className="space-y-0.5">
+                  <button
+                    onClick={() => {
+                      handleTabClick('dashboard');
+                      if (isMobileLayout) setIsMobileSidebarOpen(false);
+                    }}
+                    title={collapsed ? "Dashboard" : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-[8px] text-left transition-all cursor-pointer relative group ${
+                      collapsed ? 'justify-center' : ''
+                    } ${
+                      activeTab === 'dashboard'
+                        ? 'bg-[#7553FF]/10 text-[#7553FF]'
+                        : 'text-[#1C1814]/70 hover:bg-[#FAFAFA]'
+                    }`}
+                  >
+                    {activeTab === 'dashboard' && !collapsed && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#7553FF] rounded-r-full" />
+                    )}
+                    <Grid className="w-4.5 h-4.5 shrink-0" strokeWidth={activeTab === 'dashboard' ? 2 : 1.75} />
+                    {!collapsed && (
+                      <span className={`text-[14px] leading-[20px] ${activeTab === 'dashboard' ? 'text-[#7553FF] font-medium' : 'text-[#1C1814]/85 font-normal'}`}>
+                        Dashboard
+                      </span>
+                    )}
+                  </button>
+                </div>
 
-            {/* Grouped sections */}
-            {getFilteredMenuStructure().map((group) => (
-              <div key={group.title} className="space-y-1 pt-1.5">
-                {!collapsed ? (
-                  <span className="px-3 text-[11px] font-bold tracking-wider text-[#1C1814]/40 font-poppins block">
-                    {group.title}
-                  </span>
-                ) : (
-                  <div className="w-8 h-[1px] bg-slate-200 mx-auto my-1" />
-                )}
+                {/* Grouped sections */}
+                {getFilteredMenuStructure().map((group) => (
+                  <div key={group.title} className="space-y-1 pt-1.5">
+                    {!collapsed ? (
+                      <span className="px-3 text-[11px] font-bold tracking-wider text-[#1C1814]/40 font-poppins block">
+                        {group.title}
+                      </span>
+                    ) : (
+                      <div className="w-8 h-[1px] bg-slate-200 mx-auto my-1" />
+                    )}
 
-                <div className="space-y-0.5 font-sans">
-                  {group.submenus.map((sub) => {
-                    const SubIcon = sub.icon;
-                    const isSelected = activeTab === sub.tabId;
-                    const isLocked = isTabLocked(sub.tabId, currentPlan);
-                    const requiredPlan = getRequiredPlan(sub.tabId);
-                    const isComingSoon = sub.tabId === 'catering-inquiries';
-                    return (
-                      <button
-                        key={sub.tabId}
-                        onClick={() => {
-                          handleTabClick(sub.tabId);
-                          if (isMobileLayout) setIsMobileSidebarOpen(false);
-                        }}
-                        title={collapsed ? `${sub.label}${isLocked ? ` (Requires ${requiredPlan})` : ''}` : undefined}
-                        className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-left transition-all relative group cursor-pointer ${
-                          collapsed ? 'justify-center' : ''
-                        } ${
-                          isSelected
-                            ? 'bg-[#7553FF]/10 text-[#7553FF]'
-                            : 'text-[#1C1814]/70 hover:bg-[#FAFAFA]'
-                        }`}
-                      >
-                        {isSelected && !collapsed && (
-                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[#7553FF] rounded-r-full" />
-                        )}
-                        <div className={`relative flex items-center shrink-0 ${(isLocked && !isComingSoon) ? 'opacity-55' : ''}`}>
-                          <SubIcon className="w-4 h-4 shrink-0" strokeWidth={isSelected ? 2 : 1.75} />
-                        </div>
-                        {!collapsed && (
-                          <span className={`text-[14px] leading-[25px] truncate ${isSelected ? 'text-[#7553FF] font-medium' : 'text-[#1C1814]/85 font-normal'} ${(isLocked && !isComingSoon) ? 'opacity-55 font-normal text-[#1C1814]/70' : ''}`}>
-                            {sub.label}
-                          </span>
-                        )}
-                        {!collapsed && (isLocked || isComingSoon) && (
-                          <span 
-                            className={`ml-auto shrink-0 border text-[9px] font-bold tracking-wider px-1 py-0.5 rounded-md leading-none select-none transition-all duration-300 ${
-                              isComingSoon
-                                ? 'bg-slate-50 text-slate-700 border-slate-200'
-                                : requiredPlan === 'Gold'
-                                  ? 'bg-amber-50/70 text-amber-700 border-amber-200/50'
-                                  : 'bg-[#7553FF]/10 text-[#7553FF] border-[#7553FF]/20'
+                    <div className="space-y-0.5 font-sans">
+                      {group.submenus.map((sub) => {
+                        const SubIcon = sub.icon;
+                        const isSelected = activeTab === sub.tabId;
+                        const isLocked = isTabLocked(sub.tabId, currentPlan);
+                        const requiredPlan = getRequiredPlan(sub.tabId);
+                        const isComingSoon = sub.tabId === 'catering-inquiries';
+                        return (
+                          <button
+                            key={sub.tabId}
+                            onClick={() => {
+                              handleTabClick(sub.tabId);
+                              if (isMobileLayout) setIsMobileSidebarOpen(false);
+                            }}
+                            title={collapsed ? `${sub.label}${isLocked ? ` (Requires ${requiredPlan})` : ''}` : undefined}
+                            className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-left transition-all relative group cursor-pointer border-none ${
+                              collapsed ? 'justify-center' : ''
+                            } ${
+                              isSelected
+                                ? 'bg-[#7553FF]/10 text-[#7553FF]'
+                                : 'text-[#1C1814]/70 hover:bg-[#FAFAFA]'
                             }`}
                           >
-                            {isComingSoon ? 'Soon' : requiredPlan.toLowerCase()}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                            {isSelected && !collapsed && (
+                              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-[#7553FF] rounded-r-full" />
+                            )}
+                            <div className={`relative flex items-center shrink-0 ${(isLocked && !isComingSoon) ? 'opacity-55' : ''}`}>
+                              <SubIcon className="w-4 h-4 shrink-0" strokeWidth={isSelected ? 2 : 1.75} />
+                            </div>
+                            {!collapsed && (
+                              <span className={`text-[14px] leading-[25px] truncate ${isSelected ? 'text-[#7553FF] font-medium' : 'text-[#1C1814]/85 font-normal'} ${(isLocked && !isComingSoon) ? 'opacity-55 font-normal text-[#1C1814]/70' : ''}`}>
+                                {sub.label}
+                              </span>
+                            )}
+                            {!collapsed && (isLocked || isComingSoon) && (
+                              <span 
+                                className={`ml-auto shrink-0 border text-[9px] font-bold tracking-wider px-1 py-0.5 rounded-md leading-none select-none transition-all duration-300 ${
+                                  isComingSoon
+                                    ? 'bg-slate-50 text-slate-700 border-slate-200'
+                                    : requiredPlan === 'Gold'
+                                      ? 'bg-amber-50/70 text-amber-700 border-amber-200/50'
+                                      : 'bg-[#7553FF]/10 text-[#7553FF] border-[#7553FF]/20'
+                                }`}
+                              >
+                                {isComingSoon ? 'Soon' : requiredPlan.toLowerCase()}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
           </nav>
         </div>
 
         {/* Bottom Layout Footer Container */}
-        <div className="p-4 border-t border-slate-200 bg-white mt-auto shrink-0">
+        <div className="p-4 border-t border-slate-200 bg-white mt-auto shrink-0 relative">
           {!collapsed ? (
             <>
               {/* Row 1: User Profile & Bell */}
@@ -902,6 +894,7 @@ export default function App() {
                       <p className="text-[14px] font-bold text-[#1C1814] leading-tight truncate font-poppins">{activeSimulatedUser.name}</p>
                       <p className="text-[14px] text-slate-700 leading-none truncate font-poppins mt-0.5">{activeSimulatedUser.role}</p>
                     </div>
+                    <ChevronsUpDown className="w-4 h-4 text-slate-400 hover:text-slate-600 shrink-0 transition-colors" />
                   </div>
                 ) : (
                   <button
@@ -912,69 +905,6 @@ export default function App() {
                     <span>Login</span>
                   </button>
                 )}
-
-                <AnimatePresence>
-                  {isUserPopoverOpen && isLoggedIn && (
-                    <>
-                      {/* Overlay backdrop to capture clicks outside */}
-                      <div 
-                        className="fixed inset-0 z-40 bg-transparent" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setIsUserPopoverOpen(false);
-                        }} 
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute bottom-16 left-0 w-[215px] bg-white border border-slate-200 rounded-[8px] p-3 z-50 text-left font-sans"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="space-y-1">
-                          {/* Profile Settings */}
-                          <button
-                            onClick={() => {
-                              setIsUserPopoverOpen(false);
-                              setIsProfileSettingsOpen(true);
-                              if (isMobileLayout) setIsMobileSidebarOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3.5 px-3.5 py-3 rounded-[8px] hover:bg-[#1C1814]/5 text-left text-[14px] font-sans text-[#1C1814] font-medium transition-all cursor-pointer select-none"
-                          >
-                            <User className="w-5 h-5 text-[#1C1814]/70 shrink-0" strokeWidth={1.8} />
-                            <span className="leading-none">Profile Settings</span>
-                          </button>
-                          {/* Brand setting */}
-                          <button
-                            onClick={() => {
-                              setSettingsSubTab('info');
-                              setActiveTab('settings');
-                              setIsUserPopoverOpen(false);
-                              if (isMobileLayout) setIsMobileSidebarOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3.5 px-3.5 py-3 rounded-[8px] hover:bg-[#1C1814]/5 text-left text-[14px] font-sans text-[#1C1814] font-medium transition-all cursor-pointer select-none"
-                          >
-                            <Store className="w-5 h-5 text-[#1C1814]/70 shrink-0" strokeWidth={1.8} />
-                            <span className="leading-none">Brand setting</span>
-                          </button>
-                          {/* Logout */}
-                          <button
-                            onClick={() => {
-                              setIsUserPopoverOpen(false);
-                              setIsLoggedIn(false);
-                              if (isMobileLayout) setIsMobileSidebarOpen(false);
-                            }}
-                            className="w-full flex items-center gap-3.5 px-3.5 py-3 rounded-[8px] hover:bg-red-50 text-left text-[14px] font-sans text-red-600 font-bold transition-all cursor-pointer select-none"
-                          >
-                            <LogOut className="w-5 h-5 text-red-600 shrink-0" strokeWidth={1.8} />
-                            <span className="leading-none">Logout</span>
-                          </button>
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
 
                 {/* Bell Alert Button - Only visible when logged in */}
                 {isLoggedIn && (
@@ -989,46 +919,6 @@ export default function App() {
                       <Bell className="w-5 h-5" />
                       <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                     </button>
-
-                    <AnimatePresence>
-                      {isNotificationOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 12, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                          className="absolute bottom-12 right-[-140px] w-[320px] bg-white border border-slate-200 rounded-[8px] p-4 z-50 space-y-3 font-poppins text-left"
-                        >
-                          <div className="flex items-center justify-between border-b border-b-slate-200 pb-2">
-                            <h4 className="text-[11px] font-bold text-[#1C1814]/40 tracking-wider font-poppins">
-                              Latest Notifications
-                            </h4>
-                            <span className="w-2 h-2 bg-[#7553FF] rounded-full animate-pulse" />
-                          </div>
-                          <div className="space-y-2 max-h-[240px] overflow-y-auto pr-0.5 scrollbar-thin">
-                            {recentNotifications.map((n) => (
-                              <div
-                                key={n.id}
-                                className="text-left p-2 rounded-[8px] hover:bg-[#FAFAFA] transition-all border border-transparent hover:border-slate-200 flex items-start gap-3"
-                              >
-                                <span
-                                  className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
-                                    n.type === 'alert'
-                                      ? 'bg-amber-500'
-                                      : n.type === 'price'
-                                      ? 'bg-[#7553FF]'
-                                      : 'bg-blue-500'
-                                    }`}
-                                />
-                                <div className="space-y-1 min-w-0">
-                                  <p className="text-[14px] font-bold text-[#1C1814] tracking-tight">{n.title}</p>
-                                  <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-normal">{n.desc}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
                 )}
               </div>
@@ -1063,6 +953,169 @@ export default function App() {
               )}
             </div>
           )}
+
+          {/* Unified User Profile Popover - Always rendered at the absolute bottom coordinates of the relative footer */}
+          <AnimatePresence>
+            {isUserPopoverOpen && isLoggedIn && (
+              <>
+                {/* Overlay backdrop to capture clicks outside */}
+                <div 
+                  className="fixed inset-0 z-40 bg-transparent" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsUserPopoverOpen(false);
+                  }} 
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className={`absolute bottom-16 ${collapsed ? 'left-14' : 'left-4'} w-[240px] bg-white border border-slate-200 rounded-[8px] p-3.5 z-50 text-left font-sans shadow-xl`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="space-y-1">
+                    {/* Profile Settings */}
+                    <button
+                      onClick={() => {
+                        setIsUserPopoverOpen(false);
+                        setIsProfileSettingsOpen(true);
+                        if (isMobileLayout) setIsMobileSidebarOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-2.5 py-2 rounded-[8px] hover:bg-[#1C1814]/5 text-left text-[13px] font-sans text-[#1C1814] font-medium transition-all cursor-pointer select-none border-none bg-transparent"
+                    >
+                      <User className="w-4.5 h-4.5 text-[#1C1814]/70 shrink-0" strokeWidth={1.8} />
+                      <span className="leading-none">Profile Settings</span>
+                    </button>
+                    {/* Brand setting */}
+                    {activeSimulatedUserId !== 'saas-super-admin' && (
+                      <button
+                        onClick={() => {
+                          setSettingsSubTab('info');
+                          setActiveTab('settings');
+                          setIsUserPopoverOpen(false);
+                          if (isMobileLayout) setIsMobileSidebarOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-2.5 py-2 rounded-[8px] hover:bg-[#1C1814]/5 text-left text-[13px] font-sans text-[#1C1814] font-medium transition-all cursor-pointer select-none border-none bg-transparent"
+                      >
+                        <Store className="w-4.5 h-4.5 text-[#1C1814]/70 shrink-0" strokeWidth={1.8} />
+                        <span className="leading-none">Brand setting</span>
+                      </button>
+                    )}
+
+                    {/* Switch Role Simulator Section */}
+                    <div className="border-t border-slate-100 my-2 pt-2 px-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Switch Role</span>
+                      <select
+                        value={activeSimulatedUserId}
+                        onChange={(e) => {
+                          handleRoleChange(e.target.value);
+                        }}
+                        className="w-full text-xs font-semibold bg-slate-50 border border-slate-200 rounded-lg p-1.5 text-slate-800 focus:outline-none focus:border-[#7553FF] cursor-pointer"
+                      >
+                        <option value="saas-super-admin">🛡️ SaaS Super Admin</option>
+                        <option value="super-admin">👑 Admin (Brand Owner)</option>
+                        <option value="1">💼 Store Manager</option>
+                        <option value="2">👥 HR / Accountant</option>
+                        <option value="3">🚶 Staff</option>
+                      </select>
+                    </div>
+
+                    {/* Access Plan Simulator Section (hidden for Super Admin) */}
+                    {activeSimulatedUserId !== 'saas-super-admin' && (
+                      <div className="border-t border-slate-100 my-2 pt-2 px-1">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-sans">Access Plan</span>
+                          <span className="text-[9px] bg-[#7553FF]/10 text-[#7553FF] font-bold px-1.5 py-0.5 rounded leading-none font-sans">{currentPlan}</span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-1 bg-slate-50 border border-slate-200 p-0.5 rounded-lg text-[10px]">
+                          {['Basic', 'Gold', 'Diamond'].map((plan) => (
+                            <button
+                              key={plan}
+                              onClick={() => setCurrentPlan(plan as any)}
+                              className={`py-1 text-[10px] font-semibold rounded-md transition-all cursor-pointer border-none ${
+                                currentPlan === plan
+                                  ? 'bg-[#7553FF] text-white'
+                                  : 'text-slate-600 hover:bg-white bg-transparent'
+                              }`}
+                            >
+                              {plan}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Logout */}
+                    <button
+                      onClick={() => {
+                        setIsUserPopoverOpen(false);
+                        setIsLoggedIn(false);
+                        if (isMobileLayout) setIsMobileSidebarOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-2.5 py-2 rounded-[8px] hover:bg-red-50 text-left text-[13px] font-sans text-red-600 font-bold transition-all cursor-pointer select-none border-none bg-transparent mt-1"
+                    >
+                      <LogOut className="w-4.5 h-4.5 text-red-600 shrink-0" strokeWidth={1.8} />
+                      <span className="leading-none">Logout</span>
+                    </button>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          {/* Unified Notifications Popover - Positioned safely inside the viewport with a transparent backdrop */}
+          <AnimatePresence>
+            {isNotificationOpen && isLoggedIn && (
+              <>
+                {/* Overlay backdrop to capture clicks outside */}
+                <div 
+                  className="fixed inset-0 z-40 bg-transparent" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsNotificationOpen(false);
+                  }} 
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
+                  className={`absolute bottom-16 ${collapsed ? 'left-14' : 'left-4'} w-[320px] bg-white border border-slate-200 rounded-[8px] p-4 z-50 space-y-3 font-poppins text-left shadow-lg`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between border-b border-b-slate-200 pb-2">
+                    <h4 className="text-[11px] font-bold text-[#1C1814]/40 tracking-wider font-poppins">
+                      Latest Notifications
+                    </h4>
+                    <span className="w-2 h-2 bg-[#7553FF] rounded-full animate-pulse" />
+                  </div>
+                  <div className="space-y-2 max-h-[240px] overflow-y-auto pr-0.5 scrollbar-thin">
+                    {recentNotifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className="text-left p-2 rounded-[8px] hover:bg-[#FAFAFA] transition-all border border-transparent hover:border-slate-200 flex items-start gap-3"
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${
+                            n.type === 'alert'
+                              ? 'bg-amber-500'
+                              : n.type === 'price'
+                              ? 'bg-[#7553FF]'
+                              : 'bg-blue-500'
+                          }`}
+                        />
+                        <div className="space-y-1 min-w-0">
+                          <p className="text-[14px] font-bold text-[#1C1814] tracking-tight">{n.title}</p>
+                          <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-normal">{n.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     );
@@ -1137,6 +1190,10 @@ export default function App() {
             className="h-full"
           >
             {(() => {
+              if (activeSimulatedUserId === 'saas-super-admin') {
+                return <SuperAdminPortal activeTab={activeTab} setActiveTab={setActiveTab} />;
+              }
+
               // Check access block for simulated account
               if (!isTabAllowedForSimulatedUser(activeTab)) {
                 return (

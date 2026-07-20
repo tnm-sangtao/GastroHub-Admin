@@ -2242,7 +2242,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                   ) : (
                                     <div className="flex flex-col items-center justify-center gap-0.5">
                                       {gap > 0 && (
-                                        <span className="inline-flex items-center text-rose-700 font-bold text-[11px] bg-rose-100/80 border border-rose-200 px-1.5 py-px rounded-[2px]" id={`gap-badge-morning-${day}`}>
+                                        <span className="inline-flex items-center text-rose-700 font-light text-[11px] bg-rose-100/80 border border-rose-200 px-1.5 py-px rounded-[2px]" id={`gap-badge-morning-${day}`}>
                                           Gap: {gap}
                                         </span>
                                       )}
@@ -2401,7 +2401,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                   ) : (
                                     <div className="flex flex-col items-center justify-center gap-0.5">
                                       {gap > 0 && (
-                                        <span className="inline-flex items-center text-rose-700 font-bold text-[11px] bg-rose-100/80 border border-rose-200 px-1.5 py-px rounded-[2px]" id={`gap-badge-evening-${day}`}>
+                                        <span className="inline-flex items-center text-rose-700 font-light text-[11px] bg-rose-100/80 border border-rose-200 px-1.5 py-px rounded-[2px]" id={`gap-badge-evening-${day}`}>
                                           Gap: {gap}
                                         </span>
                                       )}
@@ -3796,42 +3796,71 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                   <form 
                     onSubmit={(e) => {
                       e.preventDefault();
-                      if (!newUser.name || !newUser.email) return;
-
-                      // 1. Email Uniqueness Constraint
+                      
+                      // 1. Personal Info validation
+                      if (!newUser.name?.trim()) {
+                        alert("Please fill in Full Name under Personal Info.");
+                        setAddStaffActiveTab('personal');
+                        return;
+                      }
+                      if (!newUser.email?.trim()) {
+                        alert("Please fill in Email under Personal Info.");
+                        setAddStaffActiveTab('personal');
+                        return;
+                      }
                       const emailVal = newUser.email.trim();
+                      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                      if (!emailRegex.test(emailVal)) {
+                        alert("Please enter a valid Email address under Personal Info.");
+                        setAddStaffActiveTab('personal');
+                        return;
+                      }
                       if (staff.some(s => s.email.toLowerCase() === emailVal.toLowerCase())) {
                         alert(`Email "${emailVal}" already exists in the system. Please enter a different email.`);
+                        setAddStaffActiveTab('personal');
                         return;
                       }
 
-                      // 2. Date of Birth 18+ restriction
-                      if (newUser.dob) {
-                        const parts = newUser.dob.split('-');
-                        if (parts.length === 3) {
-                          const y = Number(parts[0]);
-                          const m = Number(parts[1]);
-                          const d = Number(parts[2]);
-                          if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
-                            const today = new Date();
-                            let age = today.getFullYear() - y;
-                            const monthDiff = (today.getMonth() + 1) - m;
-                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < d)) {
-                              age--;
-                            }
-                            if (age < 18) {
-                              alert("Error: Invalid date of birth. Staff members must be at least 18 years old.");
-                              return;
-                            }
-                          }
-                        }
+                      // Date of Birth 18+ restriction
+                      if (newUser.dob && isUnder18(newUser.dob)) {
+                        alert("Error: Invalid date of birth. Staff members must be at least 18 years old.");
+                        setAddStaffActiveTab('personal');
+                        return;
                       }
 
-                      // 3. German statutory minimum leave validation check
+                      // 2. Job & Employment validation
+                      if (!newUser.role) {
+                        alert("Please select a Job Role under Job & Contract.");
+                        setAddStaffActiveTab('employment');
+                        return;
+                      }
+                      if (!newUser.startDate) {
+                        alert("Please select a Start Date under Job & Contract.");
+                        setAddStaffActiveTab('employment');
+                        return;
+                      }
+                      if (!newUser.assignedStores || newUser.assignedStores.length === 0) {
+                        alert("Please select at least one Assigned Store under Job & Contract.");
+                        setAddStaffActiveTab('employment');
+                        return;
+                      }
+                      if (!newUser.hourlyRate || Number(newUser.hourlyRate) <= 0) {
+                        alert("Please enter a valid Salary Amount greater than 0.");
+                        setAddStaffActiveTab('employment');
+                        return;
+                      }
+                      if (!newUser.effectiveFrom) {
+                        alert("Please select an Effective Date under Job & Contract.");
+                        setAddStaffActiveTab('employment');
+                        return;
+                      }
+
+                      // German statutory minimum leave validation check
                       const workingDays = newUser.workingDaysPerWeek || 5;
                       const minLeave = workingDays * 4;
                       if (newUser.annualLeaveEntitlement < minLeave) {
                         alert(`Error: Annual Leave Entitlement cannot be less than the German statutory minimum of ${minLeave} days (${workingDays} working days/week * 4).`);
+                        setAddStaffActiveTab('employment');
                         return;
                       }
                       
@@ -4724,7 +4753,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                 setAddStaffActiveTab(stepKeys[activeIdx - 1] as any);
                               }
                             }}
-                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-semibold text-xs rounded-xl transition-all border-none cursor-pointer flex items-center gap-1.5"
+                            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-medium text-[14px] rounded-xl transition-all border-none cursor-pointer flex items-center gap-1.5"
                           >
                             <ChevronLeft className="w-3.5 h-3.5" />
                             Back
@@ -4736,7 +4765,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         <button 
                           type="button"
                           onClick={() => setIsAddingUser(false)}
-                          className="px-4 py-2 hover:bg-slate-50 text-slate-500 hover:text-slate-700 font-semibold text-xs rounded-xl transition-all border-none cursor-pointer"
+                          className="px-4 py-2 hover:bg-slate-50 text-slate-700 font-medium text-[14px] rounded-xl transition-all border-none cursor-pointer"
                         >
                           Cancel
                         </button>
@@ -4745,19 +4774,76 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                           <button 
                             type="button"
                             onClick={() => {
-                              // Standard step validation
+                              // Comprehensive step validation
                               if (addStaffActiveTab === 'personal') {
-                                if (!newUser.name) {
+                                if (!newUser.name?.trim()) {
                                   alert("Please fill in Full Name.");
                                   return;
                                 }
-                                if (!newUser.email) {
+                                if (!newUser.email?.trim()) {
                                   alert("Please fill in Email.");
                                   return;
                                 }
                                 const emailVal = newUser.email.trim();
+                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                if (!emailRegex.test(emailVal)) {
+                                  alert("Please enter a valid Email address.");
+                                  return;
+                                }
                                 if (staff.some(s => s.email.toLowerCase() === emailVal.toLowerCase())) {
-                                  alert(`Email "${emailVal}" already exists in the system.`);
+                                  alert(`Email "${emailVal}" already exists in the system. Please enter a different email.`);
+                                  return;
+                                }
+                                if (newUser.dob && isUnder18(newUser.dob)) {
+                                  alert("Error: Invalid date of birth. Staff members must be at least 18 years old.");
+                                  return;
+                                }
+                              }
+                              
+                              if (addStaffActiveTab === 'login') {
+                                if (!newUser.email?.trim()) {
+                                  alert("Please fill in Email under Access & Login.");
+                                  return;
+                                }
+                                const emailVal = newUser.email.trim();
+                                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                                if (!emailRegex.test(emailVal)) {
+                                  alert("Please enter a valid Email address.");
+                                  return;
+                                }
+                                if (staff.some(s => s.email.toLowerCase() === emailVal.toLowerCase())) {
+                                  alert(`Email "${emailVal}" already exists in the system. Please enter a different email.`);
+                                  return;
+                                }
+                              }
+
+                              if (addStaffActiveTab === 'employment') {
+                                if (!newUser.role) {
+                                  alert("Please select a Job Role.");
+                                  return;
+                                }
+                                if (!newUser.startDate) {
+                                  alert("Please select a Start Date.");
+                                  return;
+                                }
+                                if (!newUser.assignedStores || newUser.assignedStores.length === 0) {
+                                  alert("Please select at least one Assigned Store.");
+                                  return;
+                                }
+                                if (!newUser.hourlyRate || Number(newUser.hourlyRate) <= 0) {
+                                  alert("Please enter a valid Salary Amount greater than 0.");
+                                  return;
+                                }
+                                if (!newUser.effectiveFrom) {
+                                  alert("Please select an Effective Date.");
+                                  return;
+                                }
+                                
+                                // German statutory minimum leave validation check
+                                const workingDays = newUser.workingDaysPerWeek || 5;
+                                const minLeave = workingDays * 4;
+                                if (newUser.annualLeaveEntitlement < minLeave) {
+                                  alert(`Error: Annual Leave Entitlement cannot be less than the German statutory minimum of ${minLeave} days (${workingDays} working days/week * 4).`);
                                   return;
                                 }
                               }
@@ -4768,7 +4854,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                                 setAddStaffActiveTab(stepKeys[activeIdx + 1] as any);
                               }
                             }}
-                            className="px-5 py-2 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white font-semibold text-xs rounded-xl transition-all border-none cursor-pointer flex items-center gap-1.5 shadow-xs"
+                            className="px-5 py-2 bg-[#7553FF] hover:bg-[#623EE2] active:scale-95 text-white font-medium text-[14px] rounded-xl transition-all border-none cursor-pointer flex items-center gap-1.5 shadow-md shadow-[#7553FF]/35"
                           >
                             Continue
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -4776,7 +4862,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         ) : (
                           <button 
                             type="submit"
-                            className="px-5 py-2 bg-[#7553FF] hover:bg-[#623EE2] active:scale-95 text-white font-bold text-xs rounded-xl shadow-md hover:shadow-lg transition-all border-none cursor-pointer flex items-center gap-1.5"
+                            className="px-5 py-2 bg-[#7553FF] hover:bg-[#623EE2] active:scale-95 text-white font-semibold text-[14px] rounded-xl shadow-md hover:shadow-lg transition-all border-none cursor-pointer flex items-center gap-1.5"
                           >
                             <Save className="w-3.5 h-3.5" />
                             Save Staff

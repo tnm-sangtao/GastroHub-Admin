@@ -1,6 +1,6 @@
 {
   "name": "Remix: GastroHub - 25/06/2026",
-  "description": "Nền tảng SaaS cao cấp dành cho quản lý và vận hành nhà hàng F\u0026B chuyên nghiệp.",
+  "description": "Nền tảng SaaS cao cấp dành cho quản lý nhà hàng F&B cùng Cổng điều phối vận hành hệ thống SaaS Super Admin.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

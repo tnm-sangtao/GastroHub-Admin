@@ -31,7 +31,11 @@ import {
   AlertCircle,
   FileText,
   DollarSign,
-  Info
+  Info,
+  ArrowLeft,
+  ChevronRight,
+  Download,
+  TrendingUp
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import RolePermission from './RolePermission';
@@ -40,21 +44,21 @@ import { SocialAccountView } from './ExtraViews';
 const planDetails = {
   Basic: {
     name: 'GastroHub Basic Plan',
-    badge: 'BASIC',
+    badge: 'Basic',
     price: '$49.00/mo',
     badgeClass: 'bg-white/10 text-white border border-white/25 shadow-xs',
     badgeStyle: { color: '#ffffff', backgroundColor: 'rgba(255, 255, 255, 0.15)', borderColor: 'rgba(255, 255, 255, 0.25)' }
   },
   Gold: {
     name: 'GastroHub Gold Plan',
-    badge: 'GOLD',
+    badge: 'Gold',
     price: '$99.00/mo',
     badgeClass: 'bg-emerald-500/25 text-emerald-200 border border-emerald-400/35 shadow-xs',
     badgeStyle: { color: '#a7f3d0', backgroundColor: 'rgba(16, 185, 129, 0.25)', borderColor: 'rgba(52, 211, 153, 0.35)' }
   },
   Diamond: {
     name: 'GastroHub Diamond Plan',
-    badge: 'DIAMOND',
+    badge: 'Diamond',
     price: '$199.00/mo',
     badgeClass: 'bg-indigo-500/30 text-indigo-200 border border-indigo-400/35 shadow-xs',
     badgeStyle: { color: '#c7d2fe', backgroundColor: 'rgba(99, 102, 241, 0.3)', borderColor: 'rgba(129, 140, 248, 0.35)' }
@@ -134,6 +138,7 @@ export default function Settings({
   const [activeSubTab, setActiveSubTab] = useState<'brand_info' | 'store_management' | 'notification' | 'system_access' | 'hr_payroll'>(
     'brand_info'
   );
+  const [showBillingScreen, setShowBillingScreen] = useState(false);
   
   const [localToast, setLocalToast] = useState<{ message: string; type: 'success' | 'info' | 'redirect' } | null>(null);
   const [subscribingPlan, setSubscribingPlan] = useState<'Basic' | 'Gold' | 'Diamond' | null>(null);
@@ -165,13 +170,13 @@ export default function Settings({
       };
     } else if (targetRank < currentRank) {
       return {
-        text: 'DOWNGRADE',
+        text: 'Downgrade',
         isDisabled: false,
         className: 'bg-[#FFF1F2] hover:bg-[#FFE4E6] text-[#E11D48] border border-[#FEE2E2] hover:border-[#FCA5A5]'
       };
     } else {
       return {
-        text: 'UPGRADE',
+        text: 'Upgrade',
         isDisabled: false,
         className: 'bg-[#7553FF] hover:bg-[#623EE2] text-white border-none shadow-xs'
       };
@@ -697,7 +702,358 @@ export default function Settings({
   };
 
   return (
-    <div className="space-y-8 max-w-[1280px] mx-auto pb-16 font-sans">
+    <>
+      {showBillingScreen ? (
+        <div className="space-y-8 max-w-[1280px] mx-auto pb-16 font-sans text-left">
+          {/* Global Local Toast */}
+          <AnimatePresence>
+            {localToast && (
+              <motion.div
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                data-no-intercept="true"
+                className="fixed bottom-6 right-6 z-[99999] flex items-center gap-3.5 bg-slate-900 border border-white/10 text-white px-5 py-4 rounded-2xl shadow-2xl text-[14px] font-sans"
+              >
+                {localToast.type === 'redirect' ? (
+                  <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                    <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
+                  </div>
+                ) : localToast.type === 'success' ? (
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-3.5 h-3.5" />
+                  </div>
+                ) : (
+                  <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                    <Zap className="w-3.5 h-3.5" />
+                  </div>
+                )}
+                <span className="font-medium text-white">{localToast.message}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Back link */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowBillingScreen(false)}
+              className="flex items-center gap-1.5 text-xs font-bold text-[#7553FF] hover:text-[#623EE2] bg-transparent border-none cursor-pointer p-0 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Settings</span>
+            </button>
+          </div>
+
+          {/* Title and description */}
+          <div className="space-y-1">
+            <h1 className="text-[28px] font-bold text-[#1C1814] tracking-tight">
+              Manage plan & billing
+            </h1>
+            <p className="text-[14px] text-slate-500 font-normal">
+              View your current plan, update payment details and manage your subscription.
+            </p>
+          </div>
+
+          {/* Top Grid: Current Plan & Usage */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Card 1: Current Plan */}
+            <div className="bg-white border border-[#EAE4DC] p-6 rounded-2xl shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[300px]">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-normal text-slate-700 font-sans">Current Plan</span>
+                  <span className="bg-emerald-50 text-emerald-700 text-[14px] font-normal px-2 py-0.5 rounded-[2px] border border-emerald-100 select-none">
+                    Active
+                  </span>
+                </div>
+
+                {/* Grid content to let 3D SVG float on the right */}
+                <div className="flex justify-between items-start mt-4">
+                  <div className="space-y-4 max-w-[65%]">
+                    <h3 className="text-[26px] font-bold text-[#7553FF] leading-tight">
+                      {planDetails[currentPlan].name}
+                    </h3>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-bold text-[#1C1814]">
+                        {billingInterval === 'annual'
+                          ? currentPlan === 'Basic' ? '$39' : currentPlan === 'Gold' ? '$79' : '$159'
+                          : currentPlan === 'Basic' ? '$49' : currentPlan === 'Gold' ? '$99' : '$199'
+                        }
+                      </span>
+                      <span className="text-sm text-slate-500 font-normal">/ month</span>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                      Next billing date: July 10, 2026 {billingInterval === 'annual' && '(Billed annually)'}
+                    </p>
+
+                    <ul className="space-y-2 pt-2">
+                      {planFeatures[currentPlan].map((feature, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-slate-600 leading-normal">
+                          <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* 3D-styled SVG Document Illustration */}
+                  <div className="relative w-36 h-36 shrink-0 select-none hidden sm:block">
+                    <svg className="w-full h-full" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      {/* Shadow underneath */}
+                      <ellipse cx="60" cy="105" rx="35" ry="6" fill="#7553FF" fillOpacity="0.06" />
+                      {/* Main Document Body */}
+                      <g filter="url(#dropShadow)">
+                        <rect x="35" y="15" width="54" height="74" rx="10" fill="white" stroke="#7553FF" strokeWidth="1.5" />
+                        <rect x="32" y="18" width="54" height="74" rx="10" fill="url(#gradSheet)" />
+                      </g>
+                      {/* Clipboard/Lines in document */}
+                      <rect x="44" y="32" width="22" height="4" rx="2" fill="#7553FF" fillOpacity="0.8" />
+                      <rect x="44" y="42" width="30" height="4" rx="2" fill="#7553FF" fillOpacity="0.5" />
+                      <rect x="44" y="52" width="16" height="4" rx="2" fill="#7553FF" fillOpacity="0.5" />
+                      <rect x="44" y="62" width="26" height="4" rx="2" fill="#7553FF" fillOpacity="0.2" />
+
+                      {/* Ribbon or Badge Attachment */}
+                      <g transform="translate(68, 62)">
+                        {/* Shield background */}
+                        <circle cx="16" cy="16" r="16" fill="url(#gradBadge)" />
+                        {/* Inner Star */}
+                        <path d="M16 9L18.15 13.35L22.95 14.05L19.48 17.43L20.3 22.21L16 19.95L11.7 22.21L12.52 17.43L9.05 14.05L13.85 13.35L16 9Z" fill="white" />
+                      </g>
+
+                      <defs>
+                        <filter id="dropShadow" x="25" y="12" width="70" height="90" filterUnits="userSpaceOnUse">
+                          <feDropShadow dx="2" dy="5" stdDeviation="4" floodColor="#7553FF" floodOpacity="0.12" />
+                        </filter>
+                        <linearGradient id="gradSheet" x1="32" y1="18" x2="86" y2="92" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%" stopColor="#FFFFFF" />
+                          <stop offset="100%" stopColor="#F5F2FF" />
+                        </linearGradient>
+                        <linearGradient id="gradBadge" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                          <stop offset="0%" stopColor="#9075FF" />
+                          <stop offset="100%" stopColor="#5B39FF" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsPricingModalOpen(true);
+                  }}
+                  className="px-5 py-2.5 bg-violet-50 hover:bg-violet-100 text-[#7553FF] border border-violet-100 hover:border-violet-200 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>Change plan</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Card 2: Usage This Month */}
+            <div className="bg-white border border-[#EAE4DC] p-6 rounded-2xl shadow-sm flex flex-col justify-between min-h-[300px]">
+              <div>
+                <span className="text-[14px] font-normal text-slate-700 font-sans block">Usage This Month</span>
+                
+                <div className="space-y-4 mt-5">
+                  {/* AI image generations */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center text-[#7553FF]">
+                      <Image className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                        <span>AI image generations</span>
+                        <span className="font-mono text-slate-600">120 / 500</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[#7553FF] h-full rounded-full" style={{ width: '24%' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Menu translations */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center text-[#7553FF]">
+                      <Globe className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                        <span>Menu translations</span>
+                        <span className="font-mono text-slate-600">35 / 200</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[#7553FF] h-full rounded-full" style={{ width: '17.5%' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Auto posts */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center text-[#7553FF]">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                        <span>Auto posts</span>
+                        <span className="font-mono text-slate-600">12 / 50</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[#7553FF] h-full rounded-full" style={{ width: '24%' }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SEO snapshots */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-violet-50 border border-violet-100 flex items-center justify-center text-[#7553FF]">
+                      <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                        <span>SEO snapshots</span>
+                        <span className="font-mono text-slate-600">8 / 20</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-[#7553FF] h-full rounded-full" style={{ width: '40%' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div 
+                onClick={() => triggerLocalToast("Showing granular usage dashboards...", "info")}
+                className="border-t border-slate-100 pt-3 mt-4 flex items-center justify-between text-xs font-bold text-[#7553FF] hover:underline cursor-pointer"
+              >
+                <span>View full usage</span>
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Billing & Payment */}
+          <div className="bg-white border border-[#EAE4DC] p-6 rounded-2xl shadow-sm text-left space-y-6">
+            <div className="space-y-1">
+              <span className="text-[14px] font-normal text-slate-700 font-sans block">Billing & Payment</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-2">
+                {/* Logo / Brand row */}
+                <div className="flex items-center gap-3">
+                  {/* Paddle Styled Brand */}
+                  <svg viewBox="0 0 118 40" className="h-6 w-auto text-slate-800 shrink-0" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                    {/* Sparkle */}
+                    <path d="M 12,9 C 12,14.5 17.5,19 23,19 C 17.5,19 12,23.5 12,29 C 12,23.5 6.5,19 1,19 C 6.5,19 12,14.5 12,9 Z" fill="currentColor" stroke="none" />
+                    {/* p */}
+                    <path d="M 20,10 V 38" />
+                    <path d="M 20,19 a 8.5,8.5 0 1,1 17,0 a 8.5,8.5 0 1,1 -17,0" />
+                    {/* a */}
+                    <path d="M 37.5,19 a 8.5,8.5 0 1,1 17,0 a 8.5,8.5 0 1,1 -17,0" />
+                    <path d="M 54.5,10 V 28" />
+                    {/* d */}
+                    <path d="M 55,19 a 8.5,8.5 0 1,1 17,0 a 8.5,8.5 0 1,1 -17,0" />
+                    <path d="M 72,2 V 28" />
+                    {/* d */}
+                    <path d="M 72.5,19 a 8.5,8.5 0 1,1 17,0 a 8.5,8.5 0 1,1 -17,0" />
+                    <path d="M 89.5,2 V 28" />
+                    {/* l */}
+                    <path d="M 96.5,2 V 28" />
+                    {/* e */}
+                    <path d="M 99,19 H 116" />
+                    <path d="M 116,19 A 8.5,8.5 0 1,0 113.5,24.5" />
+                  </svg>
+                  <span className="bg-emerald-50 text-emerald-700 text-[14px] font-normal px-2 py-0.5 rounded-[2px] border border-emerald-100 flex items-center gap-1 select-none">
+                    <Check className="w-3.5 h-3.5" />
+                    Active
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 font-normal">All payments are securely processed by Paddle.</p>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerLocalToast("Opening secure update form...", "info");
+                  }}
+                  className="px-4 py-2 bg-violet-50/50 hover:bg-violet-50 text-[#7553FF] border border-violet-200 hover:border-violet-300 text-xs font-bold rounded-lg transition-all cursor-pointer"
+                >
+                  Update payment method
+                </button>
+              </div>
+            </div>
+
+            <div className="h-px bg-slate-100" />
+
+            {/* Billing history table */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-slate-800">Billing history</h4>
+                <button
+                  type="button"
+                  onClick={() => triggerLocalToast("Retrieving complete invoice list...", "info")}
+                  className="text-xs font-bold text-[#7553FF] hover:underline bg-transparent border-none cursor-pointer"
+                >
+                  View all invoices
+                </button>
+              </div>
+
+              <div className="overflow-x-auto border border-slate-100 rounded-xl">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="bg-slate-50/50 border-b border-slate-100">
+                      <th className="px-4 py-3 text-[14px] font-normal text-slate-700 tracking-wider">Date</th>
+                      <th className="px-4 py-3 text-[14px] font-normal text-slate-700 tracking-wider">Description</th>
+                      <th className="px-4 py-3 text-[14px] font-normal text-slate-700 tracking-wider">Amount</th>
+                      <th className="px-4 py-3 text-[14px] font-normal text-slate-700 tracking-wider">Status</th>
+                      <th className="px-4 py-3 text-[14px] font-normal text-slate-700 tracking-wider">Invoice</th>
+                      <th className="px-4 py-3 text-[14px] font-normal text-slate-700 tracking-wider text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-xs">
+                    {[
+                      { date: '25 Jun 2025', desc: 'Subscription – Monthly', period: 'Jul 2025', amt: '€29.00', status: 'Paid', inv: 'INV-2025-06-25' },
+                      { date: '25 May 2025', desc: 'Subscription – Monthly', period: 'Jun 2025', amt: '€29.00', status: 'Paid', inv: 'INV-2025-05-25' },
+                      { date: '25 Apr 2025', desc: 'Subscription – Monthly', period: 'May 2025', amt: '€29.00', status: 'Paid', inv: 'INV-2025-04-25' },
+                      { date: '25 Mar 2025', desc: 'Subscription – Monthly', period: 'Apr 2025', amt: '€29.00', status: 'Paid', inv: 'INV-2025-03-25' },
+                    ].map((row, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-4 py-3.5 text-slate-800 font-medium whitespace-nowrap">{row.date}</td>
+                        <td className="px-4 py-3.5 text-slate-600 whitespace-nowrap">
+                          <span>{row.desc}</span>
+                          <span className="bg-slate-100 text-slate-600 text-[10px] px-1.5 py-0.5 rounded-sm font-semibold ml-2 font-mono">
+                            {row.period}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 text-slate-800 font-bold font-mono whitespace-nowrap">{row.amt}</td>
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          <span className="bg-emerald-50 text-emerald-700 text-[14px] px-2 py-0.5 rounded-[2px] border border-emerald-100 font-normal select-none">
+                            {row.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3.5 text-slate-500 font-mono whitespace-nowrap">{row.inv}</td>
+                        <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => triggerLocalToast(`Downloading invoice ${row.inv}...`, "success")}
+                            className="text-[#7553FF] hover:text-[#623EE2] bg-transparent border-none cursor-pointer inline-flex items-center justify-center p-1"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-8 max-w-[1280px] mx-auto pb-16 font-sans">
       
       {/* Global Local Toast */}
       <AnimatePresence>
@@ -848,7 +1204,7 @@ export default function Settings({
                       <div id="current-plan-title" className="text-xl md:text-2xl font-bold text-white tracking-tight leading-none m-0" style={{ color: '#ffffff', fontWeight: 700 }} >
                         {planDetails[currentPlan].name}
                       </div>
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider leading-none shrink-0 ${planDetails[currentPlan].badgeClass}`} style={{ ...planDetails[currentPlan].badgeStyle, color: '#ffffff', borderColor: 'rgba(255, 255, 255, 0.4)' }}>
+                      <span className={`px-2.5 py-1 rounded-[2px] text-[14px] font-normal leading-none shrink-0 ${planDetails[currentPlan].badgeClass}`} style={{ ...planDetails[currentPlan].badgeStyle, color: '#ffffff', borderColor: 'rgba(255, 255, 255, 0.4)' }}>
                         {planDetails[currentPlan].badge}
                       </span>
                     </div>
@@ -863,10 +1219,10 @@ export default function Settings({
 
                 <button
                   type="button"
-                  onClick={() => setIsPricingModalOpen(true)}
+                  onClick={() => setShowBillingScreen(true)}
                   className="px-6 py-2.5 bg-white hover:bg-slate-100 active:bg-slate-200 text-[#1C1814] font-bold text-sm rounded-xl transition-all shadow-md cursor-pointer flex items-center gap-1.5 h-11 border-none shrink-0 self-start md:self-auto relative z-10 font-sans"
                 >
-                  <span>CHANGE PLAN</span>
+                  <span>Manage Plan & Billing </span>
                   <ExternalLink 
                     className="w-4 h-4" 
                     style={{ 
@@ -2250,6 +2606,8 @@ export default function Settings({
           )}
 
       </div>
+    </div>
+  )}
 
       {/* PRICING PACKAGES MODAL (POPUP) */}
       <AnimatePresence>
@@ -2325,7 +2683,7 @@ export default function Settings({
                       }`}
                     >
                       <span>Annual</span>
-                      <span className="px-2 py-0.5 text-[10px] font-bold text-emerald-800 bg-emerald-100/80 tracking-wide rounded-full font-sans">
+                      <span className="px-2 py-0.5 text-[14px] font-normal text-emerald-800 bg-emerald-100/80 tracking-wide rounded-[2px] font-sans">
                         Save 20%
                       </span>
                     </button>
@@ -2349,13 +2707,13 @@ export default function Settings({
                         isCurrent ? 'border-[#7553FF] ring-2 ring-[#7553FF]/15 shadow-sm' : 'border-slate-100 shadow-3xs'
                       }`}>
                         {isCurrent && (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[12px] font-bold tracking-wider rounded-full font-mono">
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[14px] font-normal tracking-wider rounded-[2px] font-sans">
                             Active
                           </span>
                         )}
                         <div className="space-y-4">
                           <div className="text-left space-y-1">
-                            <span className="text-[12px] text-slate-700 font-bold block tracking-widest font-mono">Starter</span>
+                            <span className="text-[14px] text-slate-700 font-normal block tracking-widest font-sans">Starter</span>
                             <h4 className="text-[16px] font-bold text-slate-800">Basic Plan</h4>
                           </div>
 
@@ -2364,7 +2722,7 @@ export default function Settings({
                               <span className="text-3xl font-bold tracking-tight text-slate-950">{activePrice}</span>
                               <span className="text-[14px] font-medium text-slate-700 font-sans">/mo</span>
                             </div>
-                            <span className="text-[12px] text-slate-700 mt-0.5 font-normal font-sans">
+                            <span className="text-[14px] text-slate-700 mt-0.5 font-normal font-sans">
                               {subLabel}
                             </span>
                           </div>
@@ -2372,7 +2730,7 @@ export default function Settings({
                           <div className="h-px bg-slate-100" />
 
                           <div className="space-y-2">
-                            <span className="text-[12px] font-bold text-slate-700 tracking-wider block font-mono">Included Features:</span>
+                            <span className="text-[14px] font-bold text-slate-700 tracking-wider block font-sans">Included Features:</span>
                             <ul className="space-y-2">
                               {modalPlanDetails.Basic.map((benefit, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 text-slate-700 leading-normal font-normal text-[14px]">
@@ -2413,13 +2771,13 @@ export default function Settings({
                         isCurrent ? 'border-[#7553FF] ring-2 ring-[#7553FF]/15 shadow-sm' : 'border-slate-100 shadow-3xs'
                       }`}>
                         {isCurrent && (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[12px] font-bold tracking-wider rounded-full font-mono">
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-[#7553FF] text-white text-[14px] font-normal tracking-wider rounded-[2px] font-sans">
                             Active
                           </span>
                         )}
                         <div className="space-y-4">
                           <div className="text-left space-y-1">
-                            <span className="text-[12px] text-slate-700 font-bold block tracking-widest font-mono">Team Power</span>
+                            <span className="text-[14px] text-slate-700 font-normal block tracking-widest font-sans">Team Power</span>
                             <h4 className="text-[16px] font-bold text-slate-800 font-sans">Gold Plan</h4>
                           </div>
 
@@ -2428,7 +2786,7 @@ export default function Settings({
                               <span className="text-3xl font-bold tracking-tight text-slate-950 font-sans">{activePrice}</span>
                               <span className="text-[14px] font-medium text-slate-700 font-sans">/mo</span>
                             </div>
-                            <span className="text-[12px] text-slate-700 mt-0.5 font-normal font-sans">
+                            <span className="text-[14px] text-slate-700 mt-0.5 font-normal font-sans">
                               {subLabel}
                             </span>
                           </div>
@@ -2436,7 +2794,7 @@ export default function Settings({
                           <div className="h-px bg-slate-100" />
 
                           <div className="space-y-2">
-                            <span className="text-[12px] font-bold text-slate-700 tracking-wider block font-mono">Included Features:</span>
+                            <span className="text-[14px] font-bold text-slate-700 tracking-wider block font-sans">Included Features:</span>
                             <ul className="space-y-2">
                               {modalPlanDetails.Gold.map((benefit, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 text-slate-700 leading-normal font-normal text-[14px]">
@@ -2477,18 +2835,18 @@ export default function Settings({
                         isCurrent ? 'border-indigo-600 ring-2 ring-indigo-600/15 shadow-md' : 'border-slate-200 shadow-xs'
                       }`}>
                         {isCurrent ? (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-indigo-600 text-white text-[12px] font-bold tracking-wider rounded-full font-mono">
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-indigo-600 text-white text-[14px] font-normal tracking-wider rounded-[2px] font-sans">
                             Active
                           </span>
                         ) : (
-                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-gradient-to-r from-[#7553FF] to-indigo-600 text-white text-[11px] font-bold tracking-wider rounded-full flex items-center gap-1">
+                          <span className="absolute -top-3 right-5 px-2.5 py-0.5 bg-gradient-to-r from-[#7553FF] to-indigo-600 text-white text-[14px] font-normal tracking-wider rounded-[2px] flex items-center gap-1">
                             <Sparkles className="w-2.5 h-2.5 fill-white" />
                             <span>Premium</span>
                           </span>
                         )}
                         <div className="space-y-4">
                           <div className="text-left space-y-1">
-                            <span className="text-[12px] text-indigo-600 font-bold block tracking-widest font-mono">Enterprise Elite</span>
+                            <span className="text-[14px] text-indigo-600 font-normal block tracking-widest font-sans">Enterprise Elite</span>
                             <h4 className="text-[16px] font-bold text-[#7553FF] font-sans">Diamond Plan</h4>
                           </div>
 
@@ -2497,7 +2855,7 @@ export default function Settings({
                               <span className="text-3xl font-bold tracking-tight text-indigo-600 font-sans">{activePrice}</span>
                               <span className="text-[14px] font-medium text-slate-700 font-sans">/mo</span>
                             </div>
-                            <span className="text-[12px] text-indigo-600 mt-0.5 font-normal font-sans">
+                            <span className="text-[14px] text-indigo-600 mt-0.5 font-normal font-sans">
                               {subLabel}
                             </span>
                           </div>
@@ -2505,7 +2863,7 @@ export default function Settings({
                           <div className="h-px bg-slate-100" />
 
                           <div className="space-y-2">
-                            <span className="text-[12px] font-bold text-[#7553FF] tracking-wider block font-mono">Included Features:</span>
+                            <span className="text-[14px] font-bold text-[#7553FF] tracking-wider block font-sans">Included Features:</span>
                             <ul className="space-y-2">
                               {modalPlanDetails.Diamond.map((benefit, idx) => (
                                 <li key={idx} className="flex items-start gap-1.5 text-slate-700 leading-normal font-normal text-[14px]">
@@ -2544,6 +2902,6 @@ export default function Settings({
           </div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
 }
