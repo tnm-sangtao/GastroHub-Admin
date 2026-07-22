@@ -567,12 +567,88 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
 
   // Settings Modal states
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showAddShiftTypeForm, setShowAddShiftTypeForm] = useState(false);
+  const [editingShiftTypeId, setEditingShiftTypeId] = useState<string | null>(null);
+  const [shiftFormName, setShiftFormName] = useState('');
+  const [shiftFormStartTime, setShiftFormStartTime] = useState('08:00');
+  const [shiftFormEndTime, setShiftFormEndTime] = useState('16:00');
+  const [shiftFormMinStaff, setShiftFormMinStaff] = useState(2);
+  const [shiftFormMaxStaff, setShiftFormMaxStaff] = useState(5);
+  const [shiftFormJobRoles, setShiftFormJobRoles] = useState<string[]>(['Shift Supervisor', 'Kitchen Staff', 'Waiter / Waitress', 'Cashier']);
+
   const [shiftTypes, setShiftTypes] = useState([
-    { id: 'st-1', name: 'Morning', time: '07:00 - 15:00', minStaff: 3, maxStaff: 6 },
-    { id: 'st-2', name: 'Afternoon', time: '11:00 - 19:00', minStaff: 3, maxStaff: 6 },
-    { id: 'st-3', name: 'Evening', time: '15:00 - 23:00', minStaff: 3, maxStaff: 6 },
-    { id: 'st-4', name: 'Late Night', time: '19:00 - 03:00 (+1)', minStaff: 2, maxStaff: 4 },
+    { id: 'st-1', name: 'Morning', time: '07:00 - 15:00', minStaff: 3, maxStaff: 6, jobRoles: ['Shift Supervisor', 'Kitchen Staff', 'Waiter / Waitress', 'Cashier'] },
+    { id: 'st-2', name: 'Afternoon', time: '11:00 - 19:00', minStaff: 3, maxStaff: 6, jobRoles: ['Shift Supervisor', 'Kitchen Staff', 'Waiter / Waitress', 'Cashier'] },
+    { id: 'st-3', name: 'Evening', time: '15:00 - 23:00', minStaff: 3, maxStaff: 6, jobRoles: ['Shift Supervisor', 'Bar', 'Waiter / Waitress', 'Cashier'] },
+    { id: 'st-4', name: 'Late Night', time: '19:00 - 03:00 (+1)', minStaff: 2, maxStaff: 4, jobRoles: ['Shift Supervisor', 'Bar', 'Kitchen Staff'] },
   ]);
+
+  const handleOpenAddShiftType = () => {
+    setEditingShiftTypeId(null);
+    setShiftFormName('');
+    setShiftFormStartTime('08:00');
+    setShiftFormEndTime('16:00');
+    setShiftFormMinStaff(2);
+    setShiftFormMaxStaff(5);
+    setShiftFormJobRoles(['Shift Supervisor', 'Kitchen Staff', 'Waiter / Waitress', 'Cashier']);
+    setShowAddShiftTypeForm(true);
+  };
+
+  const handleEditShiftType = (st: { id: string; name: string; time: string; minStaff: number; maxStaff: number; jobRoles?: string[] }) => {
+    setEditingShiftTypeId(st.id);
+    setShiftFormName(st.name);
+    const timeParts = st.time.split(' - ');
+    if (timeParts.length === 2) {
+      setShiftFormStartTime(timeParts[0].trim());
+      setShiftFormEndTime(timeParts[1].trim());
+    } else {
+      setShiftFormStartTime(st.time);
+      setShiftFormEndTime('');
+    }
+    setShiftFormMinStaff(st.minStaff);
+    setShiftFormMaxStaff(st.maxStaff);
+    setShiftFormJobRoles(st.jobRoles || ['Shift Supervisor', 'Kitchen Staff', 'Waiter / Waitress', 'Cashier']);
+    setShowAddShiftTypeForm(true);
+  };
+
+  const handleSaveShiftType = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!shiftFormName.trim()) return;
+
+    const timeString = shiftFormEndTime.trim() ? `${shiftFormStartTime.trim()} - ${shiftFormEndTime.trim()}` : shiftFormStartTime.trim();
+
+    if (editingShiftTypeId) {
+      setShiftTypes(prev =>
+        prev.map(item =>
+          item.id === editingShiftTypeId
+            ? {
+                ...item,
+                name: shiftFormName.trim(),
+                time: timeString,
+                minStaff: Number(shiftFormMinStaff) || 1,
+                maxStaff: Number(shiftFormMaxStaff) || 1,
+                jobRoles: shiftFormJobRoles
+              }
+            : item
+        )
+      );
+    } else {
+      setShiftTypes(prev => [
+        ...prev,
+        {
+          id: `st-${Date.now()}`,
+          name: shiftFormName.trim(),
+          time: timeString,
+          minStaff: Number(shiftFormMinStaff) || 1,
+          maxStaff: Number(shiftFormMaxStaff) || 1,
+          jobRoles: shiftFormJobRoles
+        }
+      ]);
+    }
+
+    setShowAddShiftTypeForm(false);
+    setEditingShiftTypeId(null);
+  };
 
   const [weeklyDaysOff, setWeeklyDaysOff] = useState([
     { id: 'wd-1', day: 'Sunday', isOff: true },
@@ -584,11 +660,187 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
     { id: 'wd-7', day: 'Saturday', isOff: false }
   ]);
 
+  const [showAddWeeklyOffForm, setShowAddWeeklyOffForm] = useState(false);
+  const [editingWeeklyOffId, setEditingWeeklyOffId] = useState<string | null>(null);
+  const [weeklyOffDay, setWeeklyOffDay] = useState('Sunday');
+  const [weeklyOffIsOff, setWeeklyOffIsOff] = useState(true);
+
+  const handleOpenAddWeeklyOff = () => {
+    setEditingWeeklyOffId(null);
+    setWeeklyOffDay('Sunday');
+    setWeeklyOffIsOff(true);
+    setShowAddWeeklyOffForm(true);
+  };
+
+  const handleEditWeeklyOff = (wd: { id: string; day: string; isOff: boolean }) => {
+    setEditingWeeklyOffId(wd.id);
+    setWeeklyOffDay(wd.day);
+    setWeeklyOffIsOff(wd.isOff);
+    setShowAddWeeklyOffForm(true);
+  };
+
+  const handleSaveWeeklyOff = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!weeklyOffDay.trim()) return;
+
+    if (editingWeeklyOffId) {
+      setWeeklyDaysOff(prev =>
+        prev.map(item =>
+          item.id === editingWeeklyOffId
+            ? { ...item, day: weeklyOffDay.trim(), isOff: weeklyOffIsOff }
+            : item
+        )
+      );
+    } else {
+      setWeeklyDaysOff(prev => [
+        ...prev,
+        { id: `wd-${Date.now()}`, day: weeklyOffDay.trim(), isOff: weeklyOffIsOff }
+      ]);
+    }
+    setShowAddWeeklyOffForm(false);
+    setEditingWeeklyOffId(null);
+  };
+
   const [flexibleDaysOff, setFlexibleDaysOff] = useState([
     { id: 'fd-1', date: 'May 20, 2026 (Tue)', reason: 'Company retreat' },
     { id: 'fd-2', date: 'Jun 17, 2026 (Wed)', reason: 'Public holiday' },
     { id: 'fd-3', date: 'Dec 25, 2026 (Fri)', reason: 'Christmas Day' }
   ]);
+
+  const [showAddFlexOffForm, setShowAddFlexOffForm] = useState(false);
+  const [editingFlexOffId, setEditingFlexOffId] = useState<string | null>(null);
+  const [flexOffDate, setFlexOffDate] = useState('');
+  const [flexOffReason, setFlexOffReason] = useState('');
+
+  const parseDisplayDateToIso = (displayString: string) => {
+    if (!displayString) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(displayString)) return displayString;
+    try {
+      const cleanStr = displayString.replace(/\s*\([A-Za-z]+\)/, '');
+      const d = new Date(cleanStr);
+      if (!isNaN(d.getTime())) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+      }
+    } catch {}
+    return '';
+  };
+
+  const formatDateForDisplay = (isoString: string) => {
+    if (!isoString) return '';
+    if (isoString.includes('(') && isoString.includes(')')) return isoString;
+    try {
+      const d = new Date(isoString + 'T00:00:00');
+      if (isNaN(d.getTime())) return isoString;
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} (${days[d.getDay()]})`;
+    } catch {
+      return isoString;
+    }
+  };
+
+  const handleOpenAddFlexOff = () => {
+    setEditingFlexOffId(null);
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    setFlexOffDate(`${yyyy}-${mm}-${dd}`);
+    setFlexOffReason('');
+    setShowAddFlexOffForm(true);
+  };
+
+  const handleEditFlexOff = (fd: { id: string; date: string; reason: string }) => {
+    setEditingFlexOffId(fd.id);
+    const isoDate = parseDisplayDateToIso(fd.date);
+    setFlexOffDate(isoDate || fd.date);
+    setFlexOffReason(fd.reason || '');
+    setShowAddFlexOffForm(true);
+  };
+
+  const handleSaveFlexOff = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!flexOffDate.trim()) return;
+
+    const formattedDate = formatDateForDisplay(flexOffDate.trim());
+
+    if (editingFlexOffId) {
+      setFlexibleDaysOff(prev =>
+        prev.map(item =>
+          item.id === editingFlexOffId
+            ? { ...item, date: formattedDate, reason: flexOffReason.trim() }
+            : item
+        )
+      );
+    } else {
+      setFlexibleDaysOff(prev => [
+        ...prev,
+        { id: `fd-${Date.now()}`, date: formattedDate, reason: flexOffReason.trim() }
+      ]);
+    }
+    setShowAddFlexOffForm(false);
+    setEditingFlexOffId(null);
+  };
+
+  const [showAddRoleSettingsForm, setShowAddRoleSettingsForm] = useState(false);
+  const [editingRoleSettingsId, setEditingRoleSettingsId] = useState<string | null>(null);
+  const [roleFormName, setRoleFormName] = useState('');
+  const [roleFormDescription, setRoleFormDescription] = useState('');
+  const [roleFormStatus, setRoleFormStatus] = useState<'Active' | 'Inactive'>('Active');
+
+  const handleOpenAddRoleSettings = () => {
+    setEditingRoleSettingsId(null);
+    setRoleFormName('');
+    setRoleFormDescription('');
+    setRoleFormStatus('Active');
+    setShowAddRoleSettingsForm(true);
+  };
+
+  const handleEditRoleSettings = (r: { id: string; name: string; description?: string; status?: 'Active' | 'Inactive' }) => {
+    setEditingRoleSettingsId(r.id);
+    setRoleFormName(r.name);
+    setRoleFormDescription(r.description || '');
+    setRoleFormStatus(r.status || 'Active');
+    setShowAddRoleSettingsForm(true);
+  };
+
+  const handleSaveRoleSettings = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!roleFormName.trim()) return;
+
+    if (editingRoleSettingsId) {
+      setRoles(prev =>
+        prev.map(item =>
+          item.id === editingRoleSettingsId
+            ? {
+                ...item,
+                name: roleFormName.trim(),
+                description: roleFormDescription.trim(),
+                status: roleFormStatus,
+                lastUpdated: 'Just now'
+              }
+            : item
+        )
+      );
+    } else {
+      setRoles(prev => [
+        ...prev,
+        {
+          id: `r-${Date.now()}`,
+          name: roleFormName.trim(),
+          description: roleFormDescription.trim(),
+          users: 0,
+          status: roleFormStatus,
+          lastUpdated: 'Just now'
+        }
+      ]);
+    }
+    setShowAddRoleSettingsForm(false);
+    setEditingRoleSettingsId(null);
+  };
 
 
   // Global settings local state
@@ -7816,41 +8068,161 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       <p className="text-[14px] text-slate-700 font-sans">Create, edit, and manage shift types used in your schedule.</p>
                     </div>
                     <button 
-                      onClick={() => {
-                        const name = prompt("Enter Shift Name (e.g. Weekend Special):");
-                        if (!name) return;
-                        const time = prompt("Enter Time interval (e.g. 12:00 - 18:00):", "12:00 - 18:00");
-                        if (!time) return;
-                        const minS = parseInt(prompt("Enter Min Staff count:", "2") || "2", 10);
-                        const maxS = parseInt(prompt("Enter Max Staff count:", "5") || "5", 10);
-                        
-                        setShiftTypes(prev => [
-                          ...prev,
-                          {
-                            id: `st-${Date.now()}`,
-                            name,
-                            time,
-                            minStaff: minS,
-                            maxStaff: maxS
-                          }
-                        ]);
-                      }}
-                      className="px-3 py-1.5 border border-[#7553FF]/60 hover:bg-[#7553FF]/5 text-[#7553FF] font-bold text-[14px] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer bg-white"
+                      onClick={handleOpenAddShiftType}
+                      className="px-3 py-1.5 border border-[#7553FF]/60 hover:bg-[#7553FF]/5 text-[#7553FF] font-medium text-[14px] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer bg-white shadow-3xs"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add Shift Type</span>
                     </button>
                   </div>
 
+                  {/* Inline Form to Add / Edit Shift Type */}
+                  {showAddShiftTypeForm && (
+                    <form onSubmit={handleSaveShiftType} className="bg-slate-50/90 border border-[#7553FF]/30 p-4 rounded-xl space-y-3 shadow-3xs transition-all">
+                      <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
+                        <h5 className="text-[14px] font-bold text-slate-800">
+                          {editingShiftTypeId ? "Edit Shift Type" : "Add New Shift Type"}
+                        </h5>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddShiftTypeForm(false)}
+                          className="text-slate-400 hover:text-slate-600 p-1 border-none bg-transparent cursor-pointer rounded-md hover:bg-slate-200/50 transition-all"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+                        <div className="md:col-span-2">
+                          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                            Shift Name
+                          </label>
+                          <input
+                            type="text"
+                            value={shiftFormName}
+                            onChange={(e) => setShiftFormName(e.target.value)}
+                            placeholder="e.g. Weekend Special"
+                            required
+                            className="w-full h-9 px-3 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                            Start Time
+                          </label>
+                          <input
+                            type="text"
+                            value={shiftFormStartTime}
+                            onChange={(e) => setShiftFormStartTime(e.target.value)}
+                            placeholder="08:00"
+                            required
+                            className="w-full h-9 px-3 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                            End Time
+                          </label>
+                          <input
+                            type="text"
+                            value={shiftFormEndTime}
+                            onChange={(e) => setShiftFormEndTime(e.target.value)}
+                            placeholder="16:00"
+                            className="w-full h-9 px-3 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                              Min Staff
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={shiftFormMinStaff}
+                              onChange={(e) => setShiftFormMinStaff(parseInt(e.target.value || '1', 10))}
+                              className="w-full h-9 px-2 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                              Max Staff
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={shiftFormMaxStaff}
+                              onChange={(e) => setShiftFormMaxStaff(parseInt(e.target.value || '1', 10))}
+                              className="w-full h-9 px-2 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Job Roles Selector for Shift */}
+                      <div>
+                        <label className="block text-[12px] font-medium text-slate-700 mb-1.5">
+                          Configured Job Roles in Shift
+                        </label>
+                        <div className="flex flex-wrap gap-1.5 p-2 bg-white border border-[#EAE4DC] rounded-lg min-h-[42px] items-center">
+                          {['Shift Supervisor', 'Cashier', 'Kitchen Staff', 'Waiter / Waitress', 'Bar', 'Accountant', 'HR', 'Sales', 'Operation'].map(roleName => {
+                            const isSelected = shiftFormJobRoles.includes(roleName);
+                            return (
+                              <button
+                                key={roleName}
+                                type="button"
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setShiftFormJobRoles(prev => prev.filter(r => r !== roleName));
+                                  } else {
+                                    setShiftFormJobRoles(prev => [...prev, roleName]);
+                                  }
+                                }}
+                                className={`px-2.5 py-1 text-[12px] font-medium rounded-md border transition-all cursor-pointer flex items-center gap-1 ${
+                                  isSelected
+                                    ? 'bg-[#7553FF]/10 text-[#7553FF] border-[#7553FF]/40 font-semibold shadow-2xs'
+                                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                                }`}
+                              >
+                                {isSelected && <Check className="w-3.5 h-3.5 text-[#7553FF]" />}
+                                <span>{roleName}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddShiftTypeForm(false)}
+                          className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-medium text-[13px] rounded-lg transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-1.5 bg-[#7553FF] hover:bg-[#623EE2] text-white font-medium text-[13px] rounded-lg transition-all cursor-pointer border-none shadow-3xs"
+                        >
+                          {editingShiftTypeId ? "Save Changes" : "Create Shift Type"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
                   {/* Shift Types Table */}
                   <div className="overflow-hidden border border-[#EAE4DC] rounded-lg">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800  tracking-widest leading-normal">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800 tracking-widest leading-normal">
                           <th className="px-4 py-3 text-left font-semibold font-serif">Shift Name</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Time</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Default Min. Staff</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Default Max. Staff</th>
+                          <th className="px-4 py-3 text-left font-semibold font-serif">Configured Job Roles</th>
                           <th className="px-4 py-3 text-right font-semibold pr-6 font-serif">Actions</th>
                         </tr>
                       </thead>
@@ -7861,16 +8233,19 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             <td className="px-4 py-3 font-mono text-slate-700">{st.time}</td>
                             <td className="px-4 py-3 font-medium">{st.minStaff}</td>
                             <td className="px-4 py-3 font-medium">{st.maxStaff}</td>
+                            <td className="px-4 py-3">
+                              <div className="flex flex-wrap gap-1 max-w-xs">
+                                {(st.jobRoles && st.jobRoles.length > 0 ? st.jobRoles : ['Shift Supervisor', 'Kitchen Staff', 'Waiter / Waitress', 'Cashier']).map((r, idx) => (
+                                  <span key={idx} className="px-2 py-0.5 bg-purple-50 text-[#7553FF] border border-[#7553FF]/20 rounded-md text-[11px] font-medium">
+                                    {r}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
                             <td className="px-4 py-3 text-right pr-6">
                               <div className="flex items-center justify-end gap-1.5">
                                 <button 
-                                  onClick={() => {
-                                    const newName = prompt("Edit Shift Name:", st.name);
-                                    if (!newName) return;
-                                    const newTime = prompt("Edit Time range:", st.time);
-                                    if (!newTime) return;
-                                    setShiftTypes(prev => prev.map(item => item.id === st.id ? { ...item, name: newName, time: newTime } : item));
-                                  }}
+                                  onClick={() => handleEditShiftType(st)}
                                   className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-slate-800 transition-all cursor-pointer bg-transparent"
                                   title="Edit Shift Type"
                                 >
@@ -7906,23 +8281,98 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       <p className="text-[14px] text-slate-700 font-sans">Set default weekly days off for the entire team.</p>
                     </div>
                     <button 
-                      onClick={() => {
-                        const day = prompt("Enter Week Day Name (e.g. Sunday):");
-                        if (!day) return;
-                        setWeeklyDaysOff(prev => [...prev, { id: `wd-${Date.now()}`, day, isOff: true }]);
-                      }}
-                      className="px-3 py-1.5 border border-[#7553FF]/60 hover:bg-[#7553FF]/5 text-[#7553FF] font-bold text-[14px] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer bg-white"
+                      onClick={handleOpenAddWeeklyOff}
+                      className="px-3 py-1.5 border border-[#7553FF]/60 hover:bg-[#7553FF]/5 text-[#7553FF] font-medium text-[14px] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer bg-white shadow-3xs"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add Weekly Day Off</span>
                     </button>
                   </div>
 
+                  {/* Inline Form to Add / Edit Weekly Day Off */}
+                  {showAddWeeklyOffForm && (
+                    <form onSubmit={handleSaveWeeklyOff} className="bg-slate-50/90 border border-[#7553FF]/30 p-4 rounded-xl space-y-3 shadow-3xs transition-all">
+                      <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
+                        <h5 className="text-[14px] font-bold text-slate-800">
+                          {editingWeeklyOffId ? "Edit Weekly Day Off" : "Add Weekly Day Off"}
+                        </h5>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddWeeklyOffForm(false)}
+                          className="text-slate-400 hover:text-slate-600 p-1 border-none bg-transparent cursor-pointer rounded-md hover:bg-slate-200/50 transition-all"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                            Day of the Week
+                          </label>
+                          <select
+                            value={weeklyOffDay}
+                            onChange={(e) => setWeeklyOffDay(e.target.value)}
+                            className="w-full h-9 px-3 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all cursor-pointer"
+                          >
+                            <option value="Sunday">Sunday</option>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                            Status
+                          </label>
+                          <div className="flex items-center gap-3 h-9 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => setWeeklyOffIsOff(!weeklyOffIsOff)}
+                              className={`w-9 h-5 rounded-full flex items-center p-0.5 transition-all outline-none border-none cursor-pointer ${
+                                weeklyOffIsOff ? 'bg-emerald-500' : 'bg-slate-200'
+                              }`}
+                            >
+                              <div
+                                className={`bg-white w-4 h-4 rounded-full shadow-xs transform transition-all ${
+                                  weeklyOffIsOff ? 'translate-x-4' : 'translate-x-0'
+                                }`}
+                              />
+                            </button>
+                            <span className={`text-[14px] font-medium ${weeklyOffIsOff ? 'text-emerald-600' : 'text-slate-700'}`}>
+                              {weeklyOffIsOff ? 'Day off' : 'Working day'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddWeeklyOffForm(false)}
+                          className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-medium text-[13px] rounded-lg transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-1.5 bg-[#7553FF] hover:bg-[#623EE2] text-white font-medium text-[13px] rounded-lg transition-all cursor-pointer border-none shadow-3xs"
+                        >
+                          {editingWeeklyOffId ? "Save Changes" : "Save Day Off"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
                   {/* Recurring table */}
                   <div className="overflow-hidden border border-[#EAE4DC] rounded-lg">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800  tracking-widest leading-normal">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800 tracking-widest leading-normal">
                           <th className="px-4 py-3 text-left font-semibold font-serif">Day</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Status</th>
                           <th className="px-4 py-3 text-right font-semibold pr-6 font-serif">Actions</th>
@@ -7957,12 +8407,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             <td className="px-4 py-3 text-right pr-6">
                               <div className="flex items-center justify-end gap-1.5">
                                 <button 
-                                  onClick={() => {
-                                    const rename = prompt("Rename day off:", wd.day);
-                                    if (rename) {
-                                      setWeeklyDaysOff(prev => prev.map(item => item.id === wd.id ? { ...item, day: rename } : item));
-                                    }
-                                  }}
+                                  onClick={() => handleEditWeeklyOff(wd)}
                                   className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-slate-800 transition-all cursor-pointer bg-transparent"
                                   title="Edit day off"
                                 >
@@ -7998,31 +8443,81 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       <p className="text-[14px] text-slate-700 font-sans">Add specific dates when the entire team is off.</p>
                     </div>
                     <button 
-                      onClick={() => {
-                        const date = prompt("Enter Date (e.g. May 20, 2026 (Tue)):");
-                        if (!date) return;
-                        const reason = prompt("Enter Reason (optional):", "Public holiday");
-                        setFlexibleDaysOff(prev => [
-                          ...prev,
-                          {
-                            id: `fd-${Date.now()}`,
-                            date,
-                            reason: reason || ''
-                          }
-                        ]);
-                      }}
-                      className="px-3 py-1.5 border border-[#7553FF]/60 hover:bg-[#7553FF]/5 text-[#7553FF] font-bold text-[14px] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer bg-white"
+                      onClick={handleOpenAddFlexOff}
+                      className="px-3 py-1.5 border border-[#7553FF]/60 hover:bg-[#7553FF]/5 text-[#7553FF] font-medium text-[14px] rounded-lg transition-all flex items-center gap-1.5 cursor-pointer bg-white shadow-3xs"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Add One-off Day Off</span>
                     </button>
                   </div>
 
+                  {/* Inline Form to Add / Edit Flexible Day Off */}
+                  {showAddFlexOffForm && (
+                    <form onSubmit={handleSaveFlexOff} className="bg-slate-50/90 border border-[#7553FF]/30 p-4 rounded-xl space-y-3 shadow-3xs transition-all">
+                      <div className="flex items-center justify-between border-b border-slate-200/70 pb-2">
+                        <h5 className="text-[14px] font-bold text-slate-800">
+                          {editingFlexOffId ? "Edit One-off Day Off" : "Add One-off Day Off"}
+                        </h5>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddFlexOffForm(false)}
+                          className="text-slate-400 hover:text-slate-600 p-1 border-none bg-transparent cursor-pointer rounded-md hover:bg-slate-200/50 transition-all"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                            Date
+                          </label>
+                          <input
+                            type="date"
+                            value={flexOffDate}
+                            onChange={(e) => setFlexOffDate(e.target.value)}
+                            required
+                            className="w-full h-9 px-3 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all cursor-pointer"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+                            Reason (optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={flexOffReason}
+                            onChange={(e) => setFlexOffReason(e.target.value)}
+                            placeholder="e.g. Public holiday or Team event"
+                            className="w-full h-9 px-3 bg-white border border-[#EAE4DC] rounded-lg text-slate-800 text-[14px] font-medium outline-none focus:border-[#7553FF] transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddFlexOffForm(false)}
+                          className="px-3 py-1.5 border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-medium text-[13px] rounded-lg transition-all cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-1.5 bg-[#7553FF] hover:bg-[#623EE2] text-white font-medium text-[13px] rounded-lg transition-all cursor-pointer border-none shadow-3xs"
+                        >
+                          {editingFlexOffId ? "Save Changes" : "Create Day Off"}
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
                   {/* Flexible table */}
                   <div className="overflow-hidden border border-[#EAE4DC] rounded-lg">
                     <table className="w-full border-collapse bg-white">
                       <thead>
-                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800  tracking-widest leading-normal">
+                        <tr className="border-b border-slate-100 bg-slate-50/50 text-[14px] font-medium font-serif text-slate-800 tracking-widest leading-normal">
                           <th className="px-4 py-3 text-left font-semibold font-serif">Date</th>
                           <th className="px-4 py-3 text-left font-semibold font-serif">Reason (optional)</th>
                           <th className="px-4 py-3 text-right font-semibold pr-6 font-serif">Actions</th>
@@ -8036,12 +8531,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                             <td className="px-4 py-3 text-right pr-6">
                               <div className="flex items-center justify-end gap-1.5">
                                 <button 
-                                  onClick={() => {
-                                    const editDate = prompt("Edit Date:", fd.date);
-                                    if (!editDate) return;
-                                    const editReason = prompt("Edit Reason:", fd.reason);
-                                    setFlexibleDaysOff(prev => prev.map(item => item.id === fd.id ? { ...item, date: editDate, reason: editReason || '' } : item));
-                                  }}
+                                  onClick={() => handleEditFlexOff(fd)}
                                   className="p-1.5 border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-slate-800 transition-all cursor-pointer bg-transparent"
                                   title="Edit flexible day off"
                                 >
@@ -8068,6 +8558,8 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                     <span>These one-off days will override the weekly settings. No shifts will be scheduled on these dates.</span>
                   </div>
                 </div>
+
+
 
               </div>
 

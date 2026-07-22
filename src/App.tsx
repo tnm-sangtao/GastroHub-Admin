@@ -43,7 +43,8 @@ import {
   LogIn,
   Lock,
   Menu,
-  X
+  X,
+  Umbrella
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -61,6 +62,7 @@ import RolePermission from './components/RolePermission';
 import SuperAdminPortal from './components/SuperAdminPortal';
 import UpgradeNeededView from './components/UpgradeNeededView';
 import ProfileSettingsModal from './components/ProfileSettingsModal';
+import StaffPortal from './components/StaffPortal';
 
 // Imported modular views matching the new menu table architecture
 import CheckinView from './components/Checkin';
@@ -232,6 +234,18 @@ export default function App() {
 
   // Filter menu groups dynamically depending on current simulation account's permissions
   const getFilteredMenuStructure = () => {
+    if (activeSimulatedUser.systemAccessLevel === 'Employee' && !activeSimulatedUser.systemPermissions?.includes('Store Manager') && !activeSimulatedUser.systemPermissions?.includes('Accountant')) {
+      return [
+        {
+          title: 'Staff Portal',
+          submenus: [
+            { label: 'Personal Roster', tabId: 'shift-planner' as TabId, icon: Calendar },
+            { label: 'Request Leave', tabId: 'leave-calculator' as TabId, icon: Umbrella },
+            { label: 'My Payslips', tabId: 'payroll' as TabId, icon: DollarSign }
+          ]
+        }
+      ];
+    }
     if (activeSimulatedUser.systemAccessLevel === 'Admin') {
       return menuStructure;
     }
@@ -256,6 +270,11 @@ export default function App() {
       return false;
     }
     if (activeSimulatedUser.systemAccessLevel === 'Admin') return true;
+    
+    // Employee/Staff-only restriction (fully block access to all manager/admin tabs)
+    if (activeSimulatedUser.systemAccessLevel === 'Employee' && !activeSimulatedUser.systemPermissions?.includes('Store Manager') && !activeSimulatedUser.systemPermissions?.includes('Accountant')) {
+      return ['shift-planner', 'leave-calculator', 'payroll'].includes(tabId);
+    }
     
     // Default self-service tabs are always visible
     if (['dashboard', 'catering-inquiries'].includes(tabId)) {
@@ -580,6 +599,8 @@ export default function App() {
     setActiveSimulatedUserId(roleId);
     if (roleId === 'saas-super-admin') {
       setActiveTab('saas-overview');
+    } else if (roleId === '3') {
+      setActiveTab('shift-planner');
     } else {
       setActiveTab('dashboard');
     }
@@ -1179,7 +1200,7 @@ export default function App() {
       </AnimatePresence>
 
       {/* RIGHT MAIN VIEW CONTENT PANEL */}
-      <main className="flex-1 min-w-0 overflow-y-auto h-screen p-6 relative">
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen p-6 md:p-8 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -1221,9 +1242,20 @@ export default function App() {
               }
 
               const isLocked = isTabLocked(activeTab, currentPlan) && activeTab !== 'book-table';
+              const isEmployeePortal = activeSimulatedUser.systemAccessLevel === 'Employee' && !activeSimulatedUser.systemPermissions?.includes('Store Manager') && !activeSimulatedUser.systemPermissions?.includes('Accountant');
               const renderedComponent = (
                 <>
-                  {activeTab === 'dashboard' && (
+                  {isEmployeePortal ? (
+                    <StaffPortal
+                      simulatedUser={activeSimulatedUser}
+                      staff={staff}
+                      setStaff={setStaff}
+                      activeTab={activeTab}
+                      setActiveTab={setActiveTab}
+                    />
+                  ) : (
+                    <>
+                      {activeTab === 'dashboard' && (
                     <Dashboard 
                       onNavigate={handleTabClick} 
                       isLoggedIn={isLoggedIn} 
@@ -1294,6 +1326,8 @@ export default function App() {
                     />
                   )}
                   {activeTab === 'catering-inquiries' && <CateringInquiriesView />}
+                    </>
+                  )}
                 </>
               );
 
@@ -1369,6 +1403,29 @@ export default function App() {
               <form 
                 onSubmit={(e) => {
                   e.preventDefault();
+                  const target = e.currentTarget as HTMLFormElement;
+                  const emailInput = target.elements.namedItem('email') as HTMLInputElement;
+                  const email = (emailInput?.value || '').trim().toLowerCase();
+
+                  // Map email to simulated accounts
+                  if (email.includes('le.chi') || email.includes('chi')) {
+                    setActiveSimulatedUserId('3');
+                    setActiveTab('shift-planner');
+                  } else if (email.includes('nguyen.an') || email.includes('an')) {
+                    setActiveSimulatedUserId('1');
+                    setActiveTab('dashboard');
+                  } else if (email.includes('tran.binh') || email.includes('binh')) {
+                    setActiveSimulatedUserId('2');
+                    setActiveTab('dashboard');
+                  } else if (email.includes('admin') || email.includes('operator')) {
+                    setActiveSimulatedUserId('super-admin');
+                    setActiveTab('dashboard');
+                  } else {
+                    // Default to staff
+                    setActiveSimulatedUserId('3');
+                    setActiveTab('shift-planner');
+                  }
+
                   setIsLoggedIn(true);
                   setIsLoginModalOpen(false);
                 }}
@@ -1380,6 +1437,8 @@ export default function App() {
                   </label>
                   <input
                     type="email"
+                    name="email"
+                    id="login-email"
                     placeholder="email@gastrohub.com"
                     defaultValue="admin@gastrohub.com"
                     required
@@ -1393,6 +1452,7 @@ export default function App() {
                   </label>
                   <input
                     type="password"
+                    name="password"
                     placeholder="••••••••"
                     defaultValue="••••••••"
                     required
@@ -1407,6 +1467,39 @@ export default function App() {
                   >
                     <span>Log In</span>
                   </button>
+                </div>
+
+                {/* Quick login / Demo credentials divider */}
+                <div className="border-t border-slate-100 my-4 pt-4">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2.5 text-center">
+                    Quick Demo Logins
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveSimulatedUserId('super-admin');
+                        setActiveTab('dashboard');
+                        setIsLoggedIn(true);
+                        setIsLoginModalOpen(false);
+                      }}
+                      className="px-3 py-2 bg-[#7553FF]/10 hover:bg-[#7553FF]/15 text-[#7553FF] text-[12px] font-bold rounded-lg transition-colors cursor-pointer border-none"
+                    >
+                      👑 Admin / Owner
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveSimulatedUserId('3');
+                        setActiveTab('shift-planner');
+                        setIsLoggedIn(true);
+                        setIsLoginModalOpen(false);
+                      }}
+                      className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 text-[12px] font-bold rounded-lg transition-colors cursor-pointer border-none border border-rose-200/45"
+                    >
+                      🚶 Employee (Le Chi)
+                    </button>
+                  </div>
                 </div>
 
                 {/* Subtext info */}
