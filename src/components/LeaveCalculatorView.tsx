@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Umbrella,
   Activity,
@@ -353,7 +353,14 @@ export default function LeaveCalculatorView({
   ]);
 
   // Leave Requests dataset incorporating branch and compensatory hourly data
-  const [leaveRequestsList, setLeaveRequestsList] = useState<any[]>([
+  const [leaveRequestsList, setLeaveRequestsList] = useState<any[]>(() => {
+    const cached = localStorage.getItem("gastro_leave_requests_shared");
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return [
     {
       id: "leave-rec-1",
       name: "Le Chi",
@@ -456,7 +463,12 @@ export default function LeaveCalculatorView({
       createdOn: "May 25, 2024",
       createdTime: "01:25 PM",
     }
-  ]);
+  ];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("gastro_leave_requests_shared", JSON.stringify(leaveRequestsList));
+  }, [leaveRequestsList]);
 
   // New request form states
   const [newReqName, setNewReqName] = useState("Le Chi");

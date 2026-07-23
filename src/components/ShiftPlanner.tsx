@@ -4080,6 +4080,13 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         return;
                       }
 
+                      // Access & Login validation
+                      if (!newUser.password?.trim()) {
+                        alert("Please fill in Password under Access & Login.");
+                        setAddStaffActiveTab('login');
+                        return;
+                      }
+
                       // 2. Job & Employment validation
                       if (!newUser.role) {
                         alert("Please select a Job Role under Job & Contract.");
@@ -4277,7 +4284,7 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                         {/* Interactive Step Banner */}
                         <div className="mb-4 bg-slate-50/80 rounded-xl p-3 border border-slate-100/70 flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-[#7553FF] bg-[#7553FF]/10 px-2.5 py-1 rounded-md uppercase font-mono tracking-wider">
+                            <span className="text-[11px] font-semibold text-[#7553FF] bg-[#7553FF]/10 px-2.5 py-1 rounded-md font-sans">
                               Step {['personal', 'login', 'employment', 'tax'].indexOf(addStaffActiveTab) + 1} of 4
                             </span>
                             <span className="text-xs font-bold text-slate-600">
@@ -4478,9 +4485,10 @@ export default function ShiftPlanner({ initialSubTab = 'schedule', staff: propsS
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[12px] font-semibold text-slate-600 block">Password</label>
+                        <label className="text-[12px] font-semibold text-slate-600 block">Password <span className="text-red-500">*</span></label>
                         <input 
                           type="password" 
+                          required
                           value={newUser.password || ''}
                           onChange={(e) => setNewUser({...newUser, password: e.target.value})}
                           placeholder="Enter password"

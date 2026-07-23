@@ -14,7 +14,8 @@ import {
   MapPin,
   Briefcase,
   TrendingUp,
-  FileText
+  FileText,
+  Globe
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -24,6 +25,8 @@ interface StaffPortalProps {
   setStaff: React.Dispatch<React.SetStateAction<any[]>>;
   activeTab: string; // 'shift-planner' | 'leave-calculator' | 'payroll'
   setActiveTab: (tab: any) => void;
+  currentLanguage?: 'EN' | 'VI' | 'DE';
+  setCurrentLanguage?: (lang: 'EN' | 'VI' | 'DE') => void;
 }
 
 export default function StaffPortal({
@@ -31,8 +34,42 @@ export default function StaffPortal({
   staff,
   setStaff,
   activeTab,
-  setActiveTab
+  setActiveTab,
+  currentLanguage,
+  setCurrentLanguage
 }: StaffPortalProps) {
+  // Synchronized language state defaulting to English
+  const [lang, setLang] = useState<'EN' | 'VI' | 'DE'>(() => {
+    return currentLanguage || (localStorage.getItem("gastro_language") as 'EN' | 'VI' | 'DE') || "EN";
+  });
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (currentLanguage && currentLanguage !== lang) {
+      setLang(currentLanguage);
+    }
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    const handleLangChange = () => {
+      const stored = localStorage.getItem("gastro_language") as 'EN' | 'VI' | 'DE';
+      if (stored && stored !== lang) {
+        setLang(stored);
+      }
+    };
+    window.addEventListener("gastro_language_change", handleLangChange);
+    return () => window.removeEventListener("gastro_language_change", handleLangChange);
+  }, [lang]);
+
+  const handleLanguageSelect = (selectedLang: 'EN' | 'VI' | 'DE') => {
+    setLang(selectedLang);
+    localStorage.setItem("gastro_language", selectedLang);
+    window.dispatchEvent(new Event("gastro_language_change"));
+    if (setCurrentLanguage) {
+      setCurrentLanguage(selectedLang);
+    }
+    setIsLangDropdownOpen(false);
+  };
   // Localized state for the logged-in employee profile
   const employeeName = simulatedUser?.name || "Le Chi";
   const currentEmployee = staff.find(
@@ -191,6 +228,41 @@ export default function StaffPortal({
   const [reason, setReason] = useState("");
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Cancel Leave Request States
+  const [selectedLeaveForCancel, setSelectedLeaveForCancel] = useState<any | null>(null);
+  const [cancelReasonInput, setCancelReasonInput] = useState("");
+  const [cancelSuccessBanner, setCancelSuccessBanner] = useState<string | null>(null);
+
+  const handleInitiateCancel = (req: any) => {
+    setSelectedLeaveForCancel(req);
+    setCancelReasonInput("");
+  };
+
+  const handleConfirmCancelLeave = () => {
+    if (!selectedLeaveForCancel) return;
+
+    setLeaveRequests(prev =>
+      prev.map(l =>
+        l.id === selectedLeaveForCancel.id
+          ? {
+              ...l,
+              status: "Cancelled",
+              cancelledOn: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+              cancelReason: cancelReasonInput.trim() || undefined
+            }
+          : l
+      )
+    );
+
+    setCancelSuccessBanner(`Leave request for ${selectedLeaveForCancel.leaveType} (${selectedLeaveForCancel.dateRange}) has been successfully cancelled.`);
+    setSelectedLeaveForCancel(null);
+    setCancelReasonInput("");
+
+    setTimeout(() => {
+      setCancelSuccessBanner(null);
+    }, 5000);
+  };
 
   // Computed leave balances from currentEmployee
   const annualLeaveBalance = currentEmployee?.annualLeaveEntitlement ?? 18.5;
@@ -387,9 +459,9 @@ Report Generated Securely: ${new Date().toLocaleString()}
 
   // Sub-tabs list corresponding to activeTab from sidebar
   const tabs = [
-    { id: "shift-planner", label: "Personal Roster", icon: Calendar, Vietnamese: "Lịch trực" },
-    { id: "leave-calculator", label: "Request Leave & Balances", icon: Umbrella, Vietnamese: "Nghỉ phép" },
-    { id: "payroll", label: "My Payslips", icon: DollarSign, Vietnamese: "Phiếu lương" }
+    { id: "shift-planner", label: lang === "VI" ? "Lịch làm việc" : lang === "DE" ? "Persönlicher Dienstplan" : "Personal Roster", icon: Calendar },
+    { id: "leave-calculator", label: lang === "VI" ? "Đăng ký nghỉ phép & Số dư" : lang === "DE" ? "Urlaubsantrag & Salden" : "Request Leave & Balances", icon: Umbrella },
+    { id: "payroll", label: lang === "VI" ? "Phiếu lương" : lang === "DE" ? "Meine Gehaltsabrechnungen" : "My Payslips", icon: DollarSign }
   ];
 
   return (
@@ -410,10 +482,10 @@ Report Generated Securely: ${new Date().toLocaleString()}
             </div>
             <div>
               <span className="text-[11px] font-bold text-[#7553FF] bg-[#7553FF]/10 px-2.5 py-1 rounded-full uppercase tracking-wider font-poppins">
-                Staff Portal — Employee Self-Service
+                {lang === "VI" ? "Cổng Nhân Viên — Tự Phục Vụ" : lang === "DE" ? "Mitarbeiterportal — Self-Service" : "Staff Portal — Employee Self-Service"}
               </span>
               <h1 className="text-2xl font-bold font-poppins text-slate-900 mt-1">
-                Welcome back, {currentEmployee?.name}!
+                {lang === "VI" ? `Chào mừng trở lại, ${currentEmployee?.name}!` : lang === "DE" ? `Willkommen zurück, ${currentEmployee?.name}!` : `Welcome back, ${currentEmployee?.name}!`}
               </h1>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-slate-700">
                 <span className="flex items-center gap-1">
@@ -422,32 +494,78 @@ Report Generated Securely: ${new Date().toLocaleString()}
                 </span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                  Branch: {currentEmployee?.branch || "HN 1"}
+                  {lang === "VI" ? "Chi nhánh" : lang === "DE" ? "Filiale" : "Branch"}: {currentEmployee?.branch || "HN 1"}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  {currentEmployee?.status || "Full-time"} Contract
+                  {currentEmployee?.status || "Full-time"} {lang === "VI" ? "Hợp đồng" : lang === "DE" ? "Vertrag" : "Contract"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Quick Stats Block with exact requested leave and Gleitzeitkonto balances */}
+          {/* Quick Stats & Synchronized Language Switcher Block */}
           <div className="flex items-center gap-3">
-            <div className="bg-[#FAF9F7] border border-[#EAE4DC] p-3 px-4 rounded-xl text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-slate-700 tracking-wider block">Leave Left</span>
-              <span className="text-xl font-bold text-[#7553FF] font-poppins">
-                {totalLeaveDays.toFixed(1)} <span className="text-xs text-slate-700 font-normal">days</span>
-              </span>
-              <span className="text-[9px] text-slate-700 block mt-0.5 font-light">({oldAnnualLeave.toFixed(0)}d old rollover)</span>
+            {/* Synchronized Language Switcher */}
+            <div className="relative">
+              <button
+                onClick={() => setIsLangDropdownOpen(prev => !prev)}
+                className="bg-[#FAF9F7] hover:bg-slate-100/80 border border-[#EAE4DC] p-2.5 px-3 rounded-xl flex items-center gap-2 cursor-pointer transition-all shadow-3xs"
+                title="Change Language"
+              >
+                <span className="text-base">{lang === "EN" ? "🇺🇸" : lang === "VI" ? "🇻🇳" : "🇩🇪"}</span>
+                <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">{lang}</span>
+                <Globe className="w-3.5 h-3.5 text-slate-500" />
+              </button>
+
+              <AnimatePresence>
+                {isLangDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 5 }}
+                    className="absolute right-0 top-full mt-1.5 w-36 bg-white border border-[#EAE4DC] rounded-xl p-1 shadow-lg z-50 text-left font-sans"
+                  >
+                    {[
+                      { code: "EN", flag: "🇺🇸", label: "English" },
+                      { code: "VI", flag: "🇻🇳", label: "Tiếng Việt" },
+                      { code: "DE", flag: "🇩🇪", label: "Deutsch" }
+                    ].map(item => (
+                      <button
+                        key={item.code}
+                        onClick={() => handleLanguageSelect(item.code as 'EN' | 'VI' | 'DE')}
+                        className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer border-none transition-all ${
+                          lang === item.code
+                            ? "bg-[#7553FF]/10 text-[#7553FF]"
+                            : "text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        <span className="text-sm">{item.flag}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
+
             <div className="bg-[#FAF9F7] border border-[#EAE4DC] p-3 px-4 rounded-xl text-center min-w-[110px]">
-              <span className="text-[10px] uppercase font-bold text-slate-700 tracking-wider block">Gleitzeitkonto</span>
+              <span className="text-[10px] uppercase font-bold text-slate-700 tracking-wider block">
+                {lang === "VI" ? "Phép Còn Lại" : lang === "DE" ? "Resturlaub" : "Leave Left"}
+              </span>
+              <span className="text-xl font-bold text-[#7553FF] font-poppins">
+                {totalLeaveDays.toFixed(1)} <span className="text-xs text-slate-700 font-normal">{lang === "VI" ? "ngày" : lang === "DE" ? "Tage" : "days"}</span>
+              </span>
+              <span className="text-[9px] text-slate-700 block mt-0.5 font-light">({oldAnnualLeave.toFixed(0)}d {lang === "VI" ? "phép cũ" : lang === "DE" ? "Alturlaub" : "old rollover"})</span>
+            </div>
+
+            <div className="bg-[#FAF9F7] border border-[#EAE4DC] p-3 px-4 rounded-xl text-center min-w-[110px]">
+              <span className="text-[10px] uppercase font-bold text-slate-700 tracking-wider block">Flextime account</span>
               <span className="text-xl font-bold text-slate-900 font-poppins">
                 {flextimeHours >= 0 ? `+${flextimeHours.toFixed(1)}` : flextimeHours.toFixed(1)}{" "}
-                <span className="text-xs text-slate-700 font-normal">hrs</span>
+                <span className="text-xs text-slate-700 font-normal">{lang === "VI" ? "giờ" : lang === "DE" ? "Std" : "hrs"}</span>
               </span>
-              <span className="text-[9px] text-emerald-700 block mt-0.5 font-light">Accumulated hours</span>
+              <span className="text-[9px] text-emerald-700 block mt-0.5 font-light">{lang === "VI" ? "Tích lũy giờ làm" : lang === "DE" ? "Akkumulierte Std" : "Accumulated hours"}</span>
             </div>
           </div>
         </div>
@@ -680,13 +798,36 @@ Report Generated Securely: ${new Date().toLocaleString()}
             </div>
 
             {/* Right Hand: Personal Leave Requests History */}
-            <div className="lg:col-span-2 bg-white border border-[#EAE4DC] p-6 rounded-2xl shadow-3xs">
+            <div className="lg:col-span-2 bg-white border border-[#EAE4DC] p-6 rounded-2xl shadow-3xs relative">
               <h2 className="text-lg font-bold text-slate-900 font-poppins mb-4 pb-2 border-b border-slate-100 flex items-center justify-between">
                 <span>My Leave Application History</span>
                 <span className="text-[14px] font-medium bg-[#FAF9F7] text-slate-700 py-1 px-3 rounded-lg border border-[#EAE4DC]">
                   {leaveRequests.filter(l => l.name.toLowerCase() === employeeName.toLowerCase()).length} requests
                 </span>
               </h2>
+
+              {/* Notification Banner after cancellation */}
+              <AnimatePresence>
+                {cancelSuccessBanner && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-medium flex items-center justify-between shadow-2xs"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <span>{cancelSuccessBanner}</span>
+                    </div>
+                    <button
+                      onClick={() => setCancelSuccessBanner(null)}
+                      className="text-emerald-500 hover:text-emerald-700 p-0.5 border-none bg-transparent cursor-pointer"
+                    >
+                      <XCircle className="w-4 h-4" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -696,7 +837,8 @@ Report Generated Securely: ${new Date().toLocaleString()}
                       <th className="py-3 px-3">Date Range</th>
                       <th className="py-3 px-3 text-center">Days</th>
                       <th className="py-3 px-3">Reason</th>
-                      <th className="py-3 px-3 text-right">Status</th>
+                      <th className="py-3 px-3 text-center">Status</th>
+                      <th className="py-3 px-3 text-right pr-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-[14px]">
@@ -721,28 +863,48 @@ Report Generated Securely: ${new Date().toLocaleString()}
                           <td className="py-3.5 px-3 text-center font-mono font-bold text-[#7553FF]">
                             {l.days}
                           </td>
-                          <td className="py-3.5 px-3 max-w-[200px] truncate" title={l.reason}>
+                          <td className="py-3.5 px-3 max-w-[180px] truncate" title={l.reason}>
                             <span className="text-slate-600 font-normal">{l.reason}</span>
                           </td>
-                          <td className="py-3.5 px-3 text-right">
-                            <span
-                              className={`inline-block px-2 py-0.5 text-xs font-normal rounded-[2px] select-none ${
-                                l.status === "Approved" || l.status === "Active"
-                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                                  : l.status === "Rejected" || l.status === "Cancelled"
-                                    ? "bg-rose-50 text-rose-700 border border-rose-100"
-                                    : "bg-amber-50 text-amber-700 border border-amber-100"
-                              }`}
-                            >
-                              {l.status}
-                            </span>
+                          <td className="py-3.5 px-3 text-center">
+                            {l.status === "Approved" || l.status === "Active" ? (
+                              <span className="inline-flex items-center bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none">
+                                APPROVED
+                              </span>
+                            ) : l.status === "Pending" ? (
+                              <span className="inline-flex items-center bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none animate-pulse">
+                                PENDING
+                              </span>
+                            ) : l.status === "Cancelled" ? (
+                              <span className="inline-flex items-center bg-slate-100 text-slate-600 border border-slate-200 px-2.5 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none">
+                                CANCELLED
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-0.5 rounded text-[11px] font-medium tracking-wide uppercase select-none">
+                                REJECTED
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-3 text-right pr-4">
+                            {l.status === "Pending" || l.status === "Approved" ? (
+                              <button
+                                onClick={() => handleInitiateCancel(l)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50/80 hover:bg-rose-100 border border-rose-200/80 rounded-lg transition-all cursor-pointer shadow-3xs"
+                                title="Cancel this leave request"
+                              >
+                                <XCircle className="w-3.5 h-3.5" />
+                                <span>Cancel</span>
+                              </button>
+                            ) : (
+                              <span className="text-xs text-slate-400 font-normal italic">No action</span>
+                            )}
                           </td>
                         </tr>
                       ))}
 
                     {leaveRequests.filter(l => l.name.toLowerCase() === employeeName.toLowerCase()).length === 0 && (
                       <tr>
-                        <td colSpan={5} className="py-12 text-center text-slate-500 italic font-normal">
+                        <td colSpan={6} className="py-12 text-center text-slate-500 italic font-normal">
                           No previous leave requests submitted yet. Use the form on the left to apply.
                         </td>
                       </tr>
@@ -750,6 +912,65 @@ Report Generated Securely: ${new Date().toLocaleString()}
                   </tbody>
                 </table>
               </div>
+
+              {/* Confirmation Modal Dialog for Cancelling Leave Request */}
+              <AnimatePresence>
+                {selectedLeaveForCancel && (
+                  <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="bg-white rounded-2xl border border-slate-200 shadow-xl max-w-md w-full p-6 space-y-4 text-left"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl shrink-0">
+                          <AlertCircle className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className="text-base font-bold text-slate-900 font-poppins">
+                            Cancel Leave Request?
+                          </h3>
+                          <p className="text-xs text-slate-600 leading-relaxed">
+                            Are you sure you want to cancel your <span className="font-semibold text-slate-800">{selectedLeaveForCancel.leaveType}</span> request for <span className="font-semibold text-slate-800">{selectedLeaveForCancel.dateRange}</span>?
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-medium text-slate-700 block">
+                          Reason for cancellation (optional)
+                        </label>
+                        <input
+                          type="text"
+                          value={cancelReasonInput}
+                          onChange={(e) => setCancelReasonInput(e.target.value)}
+                          placeholder="e.g., Plans changed, schedule updated..."
+                          className="w-full px-3 py-2 bg-white border border-[#EAE4DC] rounded-xl text-slate-800 outline-none text-xs focus:border-[#7553FF]"
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedLeaveForCancel(null)}
+                          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all cursor-pointer border-none"
+                        >
+                          Keep Request
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleConfirmCancelLeave}
+                          className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer border-none shadow-3xs flex items-center gap-1.5"
+                        >
+                          <XCircle className="w-4 h-4" />
+                          <span>Confirm Cancel</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         )}
@@ -809,13 +1030,13 @@ Report Generated Securely: ${new Date().toLocaleString()}
                         </td>
                         <td className="py-3.5">
                           <span
-                            className={`inline-block px-2 py-0.5 text-xs font-normal rounded-[2px] select-none ${
+                            className={`inline-flex items-center px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase rounded select-none ${
                               payslip.status === "Paid" || payslip.status === "Approved" || payslip.status === "Active"
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                                 : payslip.status === "Rejected" || payslip.status === "Cancelled"
-                                  ? "bg-rose-50 text-rose-700 border border-rose-100"
+                                  ? "bg-rose-50 text-rose-700 border border-rose-200"
                                   : payslip.status === "Pending" || payslip.status === "Draft"
-                                    ? "bg-amber-50 text-amber-700 border border-amber-100"
+                                    ? "bg-amber-50 text-amber-700 border border-amber-200 animate-pulse"
                                     : "bg-slate-50 text-slate-700 border border-slate-200"
                             }`}
                           >

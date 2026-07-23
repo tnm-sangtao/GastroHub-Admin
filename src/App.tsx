@@ -568,8 +568,26 @@ export default function App() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [currentStore, setCurrentStore] = useState('GastroHub - Trang Tien');
   const [isStoreDropdownOpen, setIsStoreDropdownOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'EN' | 'VI' | 'DE'>('EN');
+  const [currentLanguage, setCurrentLanguage] = useState<'EN' | 'VI' | 'DE'>(() => {
+    return (localStorage.getItem('gastro_language') as 'EN' | 'VI' | 'DE') || 'EN';
+  });
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('gastro_language', currentLanguage);
+    window.dispatchEvent(new Event('gastro_language_change'));
+  }, [currentLanguage]);
+
+  useEffect(() => {
+    const handleLangChange = () => {
+      const stored = localStorage.getItem('gastro_language') as 'EN' | 'VI' | 'DE';
+      if (stored && stored !== currentLanguage) {
+        setCurrentLanguage(stored);
+      }
+    };
+    window.addEventListener('gastro_language_change', handleLangChange);
+    return () => window.removeEventListener('gastro_language_change', handleLangChange);
+  }, [currentLanguage]);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isUserPopoverOpen, setIsUserPopoverOpen] = useState(false);
   const [isProfileSettingsOpen, setIsProfileSettingsOpen] = useState(false);
@@ -1252,6 +1270,8 @@ export default function App() {
                       setStaff={setStaff}
                       activeTab={activeTab}
                       setActiveTab={setActiveTab}
+                      currentLanguage={currentLanguage}
+                      setCurrentLanguage={setCurrentLanguage}
                     />
                   ) : (
                     <>
