@@ -477,6 +477,9 @@ export default function Settings({
   const [enableTipDistribution, setEnableTipDistribution] = useState(() => {
     return localStorage.getItem('gastro_enable_tip_distribution') !== 'false';
   });
+  const [tipDistributionMethod, setTipDistributionMethod] = useState<'Weight-based' | 'Percentage-based'>(() => {
+    return (localStorage.getItem('gastro_tip_distribution_method') as 'Weight-based' | 'Percentage-based') || 'Weight-based';
+  });
   const [tipWeightKitchen, setTipWeightKitchen] = useState(() => {
     return localStorage.getItem('gastro_tip_weight_kitchen') || '0.8';
   });
@@ -485,6 +488,15 @@ export default function Settings({
   });
   const [tipWeightBar, setTipWeightBar] = useState(() => {
     return localStorage.getItem('gastro_tip_weight_bar') || '0.9';
+  });
+  const [tipPctKitchen, setTipPctKitchen] = useState(() => {
+    return localStorage.getItem('gastro_tip_pct_kitchen') || '30';
+  });
+  const [tipPctService, setTipPctService] = useState(() => {
+    return localStorage.getItem('gastro_tip_pct_service') || '50';
+  });
+  const [tipPctBar, setTipPctBar] = useState(() => {
+    return localStorage.getItem('gastro_tip_pct_bar') || '20';
   });
 
   const [allowVacationRollover, setAllowVacationRollover] = useState(() => {
@@ -675,9 +687,13 @@ export default function Settings({
     localStorage.setItem('gastro_holiday_premium_rate', holidayPremiumRate);
 
     localStorage.setItem('gastro_enable_tip_distribution', enableTipDistribution ? 'true' : 'false');
+    localStorage.setItem('gastro_tip_distribution_method', tipDistributionMethod);
     localStorage.setItem('gastro_tip_weight_kitchen', tipWeightKitchen);
     localStorage.setItem('gastro_tip_weight_service', tipWeightService);
     localStorage.setItem('gastro_tip_weight_bar', tipWeightBar);
+    localStorage.setItem('gastro_tip_pct_kitchen', tipPctKitchen);
+    localStorage.setItem('gastro_tip_pct_service', tipPctService);
+    localStorage.setItem('gastro_tip_pct_bar', tipPctBar);
 
     localStorage.setItem('gastro_allow_vacation_rollover', allowVacationRollover);
     localStorage.setItem('gastro_vacation_rollover_expiry_date', vacationRolloverExpiryDate);
@@ -2392,42 +2408,137 @@ export default function Settings({
                     </label>
 
                     {enableTipDistribution && (
-                      <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] text-slate-500 block tracking-wider">Kitchen Tip Weight</label>
-                          <input 
-                            type="number" 
-                            step="0.1"
-                            value={tipWeightKitchen} 
-                            onChange={(e) => setTipWeightKitchen(e.target.value)}
-                            className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-mono w-full" 
-                          />
-                          <span className="text-[10px] text-slate-400">Default Kitchen weight: 0.8</span>
+                      <div className="space-y-4 pt-1 font-sans">
+                        {/* Distribution Method Selection Dropdown */}
+                        <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-100/80 space-y-2">
+                          <label className="text-xs font-bold text-slate-800 block tracking-wide">
+                            Distribution Method<span className="text-rose-500">*</span>
+                          </label>
+                          <div className="relative max-w-md">
+                            <select
+                              value={tipDistributionMethod}
+                              onChange={(e) => setTipDistributionMethod(e.target.value as 'Weight-based' | 'Percentage-based')}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20 cursor-pointer shadow-3xs"
+                            >
+                              <option value="Weight-based">Weight-based</option>
+                              <option value="Percentage-based">Percentage-based</option>
+                            </select>
+                          </div>
+                          <span className="text-[11px] text-slate-500 block">
+                            {tipDistributionMethod === 'Weight-based'
+                              ? 'Calculates tip allocation based on worked hours multiplied by department-specific weight quotients.'
+                              : 'Allocates fixed percentage portions of the overall tip pool to each department.'}
+                          </span>
                         </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] text-slate-500 block tracking-wider">Service Tip Weight</label>
-                          <input 
-                            type="number" 
-                            step="0.1"
-                            value={tipWeightService} 
-                            onChange={(e) => setTipWeightService(e.target.value)}
-                            className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-mono w-full" 
-                          />
-                          <span className="text-[10px] text-slate-400">Default Service weight: 1.0</span>
-                        </div>
+                        {/* Weight-based Inputs */}
+                        {tipDistributionMethod === 'Weight-based' ? (
+                          <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-100/80 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] text-slate-500 font-bold block tracking-wider uppercase">Kitchen Tip Weight</label>
+                              <input 
+                                type="number" 
+                                step="0.1"
+                                value={tipWeightKitchen} 
+                                onChange={(e) => setTipWeightKitchen(e.target.value)}
+                                className="bg-white border border-slate-200 rounded-lg p-2 text-xs font-mono w-full focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20" 
+                              />
+                              <span className="text-[10px] text-slate-400">Default Kitchen weight: 0.8</span>
+                            </div>
 
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] text-slate-500 block tracking-wider">Bar Tip Weight</label>
-                          <input 
-                            type="number" 
-                            step="0.1"
-                            value={tipWeightBar} 
-                            onChange={(e) => setTipWeightBar(e.target.value)}
-                            className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-mono w-full" 
-                          />
-                          <span className="text-[10px] text-slate-400">Default Bar weight: 0.9</span>
-                        </div>
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] text-slate-500 font-bold block tracking-wider uppercase">Service Tip Weight</label>
+                              <input 
+                                type="number" 
+                                step="0.1"
+                                value={tipWeightService} 
+                                onChange={(e) => setTipWeightService(e.target.value)}
+                                className="bg-white border border-slate-200 rounded-lg p-2 text-xs font-mono w-full focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20" 
+                              />
+                              <span className="text-[10px] text-slate-400">Default Service weight: 1.0</span>
+                            </div>
+
+                            <div className="space-y-1.5">
+                              <label className="text-[10px] text-slate-500 font-bold block tracking-wider uppercase">Bar Tip Weight</label>
+                              <input 
+                                type="number" 
+                                step="0.1"
+                                value={tipWeightBar} 
+                                onChange={(e) => setTipWeightBar(e.target.value)}
+                                className="bg-white border border-slate-200 rounded-lg p-2 text-xs font-mono w-full focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20" 
+                              />
+                              <span className="text-[10px] text-slate-400">Default Bar weight: 0.9</span>
+                            </div>
+                          </div>
+                        ) : (
+                          /* Percentage-based Inputs */
+                          <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-100/80 space-y-3 text-xs">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] text-slate-500 font-bold block tracking-wider uppercase">Kitchen Tip Share (%)</label>
+                                <div className="relative">
+                                  <input 
+                                    type="number" 
+                                    step="1"
+                                    min="0"
+                                    max="100"
+                                    value={tipPctKitchen} 
+                                    onChange={(e) => setTipPctKitchen(e.target.value)}
+                                    className="bg-white border border-slate-200 rounded-lg p-2 pr-7 text-xs font-mono w-full focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20" 
+                                  />
+                                  <span className="absolute right-3 top-2 text-slate-400 font-mono text-xs">%</span>
+                                </div>
+                                <span className="text-[10px] text-slate-400">Default Kitchen share: 30%</span>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] text-slate-500 font-bold block tracking-wider uppercase">Service Tip Share (%)</label>
+                                <div className="relative">
+                                  <input 
+                                    type="number" 
+                                    step="1"
+                                    min="0"
+                                    max="100"
+                                    value={tipPctService} 
+                                    onChange={(e) => setTipPctService(e.target.value)}
+                                    className="bg-white border border-slate-200 rounded-lg p-2 pr-7 text-xs font-mono w-full focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20" 
+                                  />
+                                  <span className="absolute right-3 top-2 text-slate-400 font-mono text-xs">%</span>
+                                </div>
+                                <span className="text-[10px] text-slate-400">Default Service share: 50%</span>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] text-slate-500 font-bold block tracking-wider uppercase">Bar Tip Share (%)</label>
+                                <div className="relative">
+                                  <input 
+                                    type="number" 
+                                    step="1"
+                                    min="0"
+                                    max="100"
+                                    value={tipPctBar} 
+                                    onChange={(e) => setTipPctBar(e.target.value)}
+                                    className="bg-white border border-slate-200 rounded-lg p-2 pr-7 text-xs font-mono w-full focus:outline-none focus:border-[#7553FF] focus:ring-2 focus:ring-[#7553FF]/20" 
+                                  />
+                                  <span className="absolute right-3 top-2 text-slate-400 font-mono text-xs">%</span>
+                                </div>
+                                <span className="text-[10px] text-slate-400">Default Bar share: 20%</span>
+                              </div>
+                            </div>
+
+                            <div className="pt-2 flex items-center justify-between text-[11px] border-t border-slate-200/60 mt-1">
+                              <span className="font-semibold text-slate-600">Total Department Allocation:</span>
+                              <span className={`font-mono font-bold ${
+                                (parseFloat(tipPctKitchen) || 0) + (parseFloat(tipPctService) || 0) + (parseFloat(tipPctBar) || 0) === 100
+                                  ? 'text-emerald-600'
+                                  : 'text-amber-600'
+                              }`}>
+                                {(parseFloat(tipPctKitchen) || 0) + (parseFloat(tipPctService) || 0) + (parseFloat(tipPctBar) || 0)}%
+                                {(parseFloat(tipPctKitchen) || 0) + (parseFloat(tipPctService) || 0) + (parseFloat(tipPctBar) || 0) !== 100 && ' (Recommended: 100%)'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -2501,8 +2612,8 @@ export default function Settings({
                         onChange={(e) => setExportTemplate(e.target.value)}
                         className="w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-[14px]"
                       >
-                        <option value="DATEV (Đức)">DATEV Lodas / LuG (Germany)</option>
-                        <option value="BMD (Áo)">BMD Payroll format (Austria)</option>
+                        <option value="DATEV">DATEV Lodas / LuG (Germany)</option>
+                        <option value="BMD">BMD Payroll format (Austria)</option>
                         <option value="Lexoffice">Lexoffice direct sync (API)</option>
                         <option value="Standard CSV">Standard Unified Payroll CSV ledger</option>
                       </select>

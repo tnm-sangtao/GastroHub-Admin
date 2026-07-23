@@ -284,6 +284,18 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
   const [tipWeightBar] = useState<number>(() => {
     return parseFloat(localStorage.getItem('gastro_tip_weight_bar') || '0.9');
   });
+  const [tipDistributionMethod] = useState<'Weight-based' | 'Percentage-based'>(() => {
+    return (localStorage.getItem('gastro_tip_distribution_method') as 'Weight-based' | 'Percentage-based') || 'Weight-based';
+  });
+  const [tipPctKitchen] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_tip_pct_kitchen') || '30');
+  });
+  const [tipPctService] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_tip_pct_service') || '50');
+  });
+  const [tipPctBar] = useState<number>(() => {
+    return parseFloat(localStorage.getItem('gastro_tip_pct_bar') || '20');
+  });
 
   // Wage accounting codes
   const [codeBaseSalary] = useState<string>(() => {
@@ -481,25 +493,59 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
       .reduce((sum, e) => sum + e.tips, 0);
 
     const unlockedEmps = employees.filter(e => !e.tipsLocked);
-    const totalUnlockedWeightedHours = unlockedEmps.reduce(
-      (sum, e) => sum + (e.actualHours * getWeight(e.department)),
-      0
-    );
-
     const remainingPool = Math.max(0, targetPool - lockedSum);
 
-    const updated = employees.map(e => {
-      if (e.tipsLocked) return e;
-      if (totalUnlockedWeightedHours === 0) {
-        return { ...e, tips: 0 };
-      }
-      const myWeightedHours = e.actualHours * getWeight(e.department);
-      const calculatedTips = parseFloat(((myWeightedHours / totalUnlockedWeightedHours) * remainingPool).toFixed(2));
-      return { ...e, tips: calculatedTips };
-    });
+    if (tipDistributionMethod === 'Percentage-based') {
+      const deptPcts: Record<string, number> = {
+        'Service': tipPctService,
+        'Kitchen': tipPctKitchen,
+        'Bar': tipPctBar,
+        'Office': 0,
+        'Management': 0
+      };
 
-    setEmployees(updated);
-    addLog('Recalculate Tips', `Recalculated tip pool (€${targetPool.toFixed(2)}) across employees. Locked tips: €${lockedSum.toFixed(2)}.`);
+      const deptUnlockedHours: Record<string, number> = {};
+      unlockedEmps.forEach(e => {
+        const d = e.department || 'Service';
+        deptUnlockedHours[d] = (deptUnlockedHours[d] || 0) + e.actualHours;
+      });
+
+      const activePctSum = Object.keys(deptUnlockedHours).reduce((sum, d) => {
+        return sum + (deptUnlockedHours[d] > 0 ? (deptPcts[d] || 0) : 0);
+      }, 0) || 100;
+
+      const updated = employees.map(e => {
+        if (e.tipsLocked) return e;
+        const d = e.department || 'Service';
+        const dHours = deptUnlockedHours[d] || 0;
+        if (dHours === 0) return { ...e, tips: 0 };
+        const dPct = deptPcts[d] || 0;
+        const dPool = remainingPool * (dPct / activePctSum);
+        const myTips = parseFloat(((e.actualHours / dHours) * dPool).toFixed(2));
+        return { ...e, tips: myTips };
+      });
+
+      setEmployees(updated);
+      addLog('Recalculate Tips', `Recalculated tip pool (€${targetPool.toFixed(2)}) using Percentage-based allocation. Locked tips: €${lockedSum.toFixed(2)}.`);
+    } else {
+      const totalUnlockedWeightedHours = unlockedEmps.reduce(
+        (sum, e) => sum + (e.actualHours * getWeight(e.department)),
+        0
+      );
+
+      const updated = employees.map(e => {
+        if (e.tipsLocked) return e;
+        if (totalUnlockedWeightedHours === 0) {
+          return { ...e, tips: 0 };
+        }
+        const myWeightedHours = e.actualHours * getWeight(e.department);
+        const calculatedTips = parseFloat(((myWeightedHours / totalUnlockedWeightedHours) * remainingPool).toFixed(2));
+        return { ...e, tips: calculatedTips };
+      });
+
+      setEmployees(updated);
+      addLog('Recalculate Tips', `Recalculated tip pool (€${targetPool.toFixed(2)}) using Weight-based allocation. Locked tips: €${lockedSum.toFixed(2)}.`);
+    }
   };
 
   // Handle single employee calculation
@@ -1229,13 +1275,23 @@ export default function Payroll({ staff = [], setStaff, simulatedUser }: Payroll
                   className="w-full h-10 bg-[#7553FF] hover:bg-[#623EE2] text-white text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-1.5 border-none cursor-pointer select-none"
                 >
                   <RefreshCw className="w-4 h-4" />
-                  <span>Distribute by Weighted Hours</span>
+                  <span>
+                    {tipDistributionMethod === 'Percentage-based'
+                      ? 'Distribute by Department Percentages'
+                      : 'Distribute by Weighted Hours'}
+                  </span>
                 </button>
               </div>
 
               <div className="text-sm text-slate-700 border-l border-[#EAE4DC] pl-4 py-1">
-                <span className="font-semibold block mb-0.5 text-slate-800">Weighted allocation rules:</span>
-                Service: <span className="font-mono font-medium">1.0</span> | Kitchen: <span className="font-mono font-medium">0.8</span> | Bar: <span className="font-mono font-medium">0.9</span> | Office/Other: <span className="font-mono font-medium">0.5</span>. Manual edits below trigger <strong>Lock</strong> mode.
+                <span className="font-semibold block mb-0.5 text-slate-800">
+                  {tipDistributionMethod === 'Percentage-based' ? 'Percentage allocation rules:' : 'Weighted allocation rules:'}
+                </span>
+                {tipDistributionMethod === 'Percentage-based' ? (
+                  <>Service: <span className="font-mono font-medium">{tipPctService}%</span> | Kitchen: <span className="font-mono font-medium">{tipPctKitchen}%</span> | Bar: <span className="font-mono font-medium">{tipPctBar}%</span></>
+                ) : (
+                  <>Service: <span className="font-mono font-medium">{tipWeightService}</span> | Kitchen: <span className="font-mono font-medium">{tipWeightKitchen}</span> | Bar: <span className="font-mono font-medium">{tipWeightBar}</span> | Office/Other: <span className="font-mono font-medium">0.5</span></>
+                )}. Manual edits below trigger <strong>Lock</strong> mode.
               </div>
             </div>
           </div>
